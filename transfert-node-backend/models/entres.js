@@ -7,6 +7,19 @@ const Entre = sequelize.define('Entre', {
     autoIncrement: true,
     primaryKey: true,
   },
+  partenaireId: {
+    type: DataTypes.INTEGER,
+    allowNull: false, // Ou true si facultatif
+  },
+  deviseId: {
+    type: DataTypes.INTEGER,
+    allowNull: false, // Ou true si facultatif
+  },
+  date_creation: {
+    type: DataTypes.DATE,
+    allowNull: false,
+    defaultValue: DataTypes.NOW, // Définit la date et l'heure actuelles par défaut
+  },
   code: {
     type: DataTypes.STRING,
     allowNull: false,
@@ -29,7 +42,7 @@ const Entre = sequelize.define('Entre', {
     defaultValue: 'NON COMPLET', // Définir une valeur par défaut
   },
   status: {
-    type: DataTypes.ENUM('NON PAYEE', 'PAYEE', 'ANNULEE'),
+    type: DataTypes.ENUM('NON PAYEE', 'PAYEE','CREDIT', 'ANNULEE'),
     allowNull: false,
     defaultValue: 'NON PAYEE', // Définir une valeur par défaut
   },

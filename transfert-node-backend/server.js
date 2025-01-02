@@ -4,6 +4,14 @@ const bodyParser = require('body-parser');
 const mysql = require('mysql2');
 const dbConfig = require('./config/dbConfig');
 const sequelize = require('./models/sequelize');
+const Entre = require('./models/entres');
+const Devise = require('./models/devises');
+const Echange = require('./models/echanger');
+const Partenaire = require('./models/partenaires');
+const Rembourser = require('./models/rembourser');
+const Sortie = require('./models/sorties');
+const Utilisateur = require('./models/utilisateurs');
+
 
 // Créer une instance d'Express
 const server = express();
@@ -14,7 +22,7 @@ server.use(bodyParser.json());
 sequelize
   .sync({ force: true }) // Force recréera les tables à chaque exécution
   .then(() => {
-    console.log('Tables créées avec succès');
+    console.log('Tables créées avec succès jjj');
   })
   .catch((error) => {
     console.error('Erreur lors de la création des tables :', error);

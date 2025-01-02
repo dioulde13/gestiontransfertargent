@@ -6,5 +6,4 @@ const dbConfig = {
   password: 'mysql@123',
   database: 'transfert',
 };
-
 module.exports = dbConfig;

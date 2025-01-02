@@ -1,19 +1,24 @@
 const { DataTypes } = require('sequelize');
 const sequelize = require('./sequelize');
 
-const Rembourser = sequelize.define('Rembourser', {
+const Echange = sequelize.define('Echange', {
   id: {
     type: DataTypes.INTEGER,
     autoIncrement: true,
     primaryKey: true,
   },
-  partenaireId: {
+  deviseId: {
     type: DataTypes.INTEGER,
     allowNull: false, // Ou true si facultatif
   },
   montant: {
     type: DataTypes.INTEGER,
     allowNull: false, // Ajout de la contrainte pour montant
+  },
+  type: {
+    type: DataTypes.ENUM('ACHAT', 'VENTE'),
+    allowNull: false,
+    defaultValue: 'ACHAT', // Définir une valeur par défaut
   },
   date_creation: {
     type: DataTypes.DATE,
@@ -22,4 +27,4 @@ const Rembourser = sequelize.define('Rembourser', {
   },
 });
 
-module.exports = Rembourser;
+module.exports = Echange;
