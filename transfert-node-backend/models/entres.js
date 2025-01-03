@@ -7,6 +7,10 @@ const Entre = sequelize.define('Entre', {
     autoIncrement: true,
     primaryKey: true,
   },
+  utilisateurId: {
+    type: DataTypes.INTEGER,
+    allowNull: false, // Ou true si facultatif
+  },
   partenaireId: {
     type: DataTypes.INTEGER,
     allowNull: false, // Ou true si facultatif

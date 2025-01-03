@@ -7,6 +7,10 @@ const Devise = sequelize.define('Devise', {
     autoIncrement: true,
     primaryKey: true, // Un seul champ peut être la clé primaire
   },
+  utilisateurId: {
+    type: DataTypes.INTEGER,
+    allowNull: false, // Ou true si facultatif
+  },
   date_creation: {
     type: DataTypes.DATE,
     allowNull: false,

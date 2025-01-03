@@ -7,6 +7,10 @@ const Echange = sequelize.define('Echange', {
     autoIncrement: true,
     primaryKey: true,
   },
+  utilisateurId: {
+    type: DataTypes.INTEGER,
+    allowNull: false, // Ou true si facultatif
+  },
   deviseId: {
     type: DataTypes.INTEGER,
     allowNull: false, // Ou true si facultatif

@@ -7,6 +7,10 @@ const Partenaire = sequelize.define('Partenaire', {
     autoIncrement: true,
     primaryKey: true,
   },
+  utilisateurId: {
+    type: DataTypes.INTEGER,
+    allowNull: false, // Ou true si facultatif
+  },
   date_creation: {
     type: DataTypes.DATE,
     allowNull: false,

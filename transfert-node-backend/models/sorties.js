@@ -7,6 +7,14 @@ const Sortie = sequelize.define('Sortie', {
     autoIncrement: true,
     primaryKey: true,
   },
+  utilisateurId: {
+    type: DataTypes.INTEGER,
+    allowNull: false, // Ou true si facultatif
+  },
+  partenaireId: {
+    type: DataTypes.INTEGER,
+    allowNull: false, // Ou true si facultatif
+  },
   deviseId: {
     type: DataTypes.INTEGER,
     allowNull: false, // Ou true si facultatif
