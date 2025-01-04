@@ -112,7 +112,8 @@ const ajouterEntre = async (req, res) => {
       }
     }
 
-    // Créer une nouvelle entrée
+    if(devise.paysArriver === partenaire.pays){
+       // Créer une nouvelle entrée
     const entre = await Entre.create({
       utilisateurId,
       partenaireId,
@@ -141,6 +142,10 @@ const ajouterEntre = async (req, res) => {
       entre,
       montant_preter: partenaire.montant_preter, // Inclure le montant préter dans la réponse
     });
+    } else{
+      res.status(400).json({ message: 'Le pays de destination ne correspond pas au pays du partenaire.' });
+    }
+  
   } catch (error) {
     console.error('Erreur lors de l\'ajout de l\'entrée :', error);
     res.status(500).json({ message: 'Erreur interne du serveur.' });

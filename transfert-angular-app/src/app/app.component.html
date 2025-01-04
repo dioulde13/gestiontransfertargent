@@ -16,6 +16,7 @@
           <th>Telephone Recev</th> 
           <th>Montant GNF</th> 
           <th>prix GNF</th> 
+          <th>Partenaire</th> 
           <th>Payement status</th> 
           <th>Status</th> 
           </tr>
@@ -32,6 +33,7 @@
           <td>{{ result.telephone_receveur }}</td> 
           <td>{{ result.montant_gnf +" GNF"}}</td> 
           <td>{{result.prix_1+" "+result.signe_2+" -> "+ result.prix_2+ " GNF" }}</td> 
+          <td>{{result.Partenaire.prenom+" "+result.Partenaire.nom }}</td> 
           <td>{{ result.payement_type }}</td> 
           <td>{{ result.status }}</td> 
         </tr>
