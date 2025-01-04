@@ -1,5 +1,6 @@
 const { DataTypes } = require('sequelize');
 const sequelize = require('./sequelize');
+const Utilisateur = require('./utilisateurs'); // Assurez-vous d'importer le modèle Utilisateur
 
 const Partenaire = sequelize.define('Partenaire', {
   id: {
@@ -9,12 +10,12 @@ const Partenaire = sequelize.define('Partenaire', {
   },
   utilisateurId: {
     type: DataTypes.INTEGER,
-    allowNull: false, // Ou true si facultatif
+    allowNull: false,
   },
   date_creation: {
     type: DataTypes.DATE,
     allowNull: false,
-    defaultValue: DataTypes.NOW, // Définit la date et l'heure actuelles par défaut
+    defaultValue: DataTypes.NOW,
   },
   nom: {
     type: DataTypes.STRING,
@@ -24,11 +25,18 @@ const Partenaire = sequelize.define('Partenaire', {
     type: DataTypes.STRING,
     allowNull: false,
   },
-  montant_preter: {
-    type: DataTypes.INTEGER, // Champ normal sans auto-incrément
+  pays: {
+    type: DataTypes.STRING,
     allowNull: false,
-    defaultValue: 0, // Vous pouvez définir une valeur par défaut si nécessaire
+  },
+  montant_preter: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+    defaultValue: 0,
   },
 });
+
+// Définir l'association : Un partenaire appartient à un utilisateur
+Partenaire.belongsTo(Utilisateur, { foreignKey: 'utilisateurId' });
 
 module.exports = Partenaire;

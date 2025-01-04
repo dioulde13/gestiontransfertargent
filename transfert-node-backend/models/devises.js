@@ -1,5 +1,7 @@
 const { DataTypes } = require('sequelize');
 const sequelize = require('./sequelize');
+const Utilisateur = require('./utilisateurs'); 
+
 
 const Devise = sequelize.define('Devise', {
   id: {
@@ -32,10 +34,17 @@ const Devise = sequelize.define('Devise', {
     type: DataTypes.STRING,
     allowNull: false,
   },
-  prix: {
+  prix_1: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+  },
+  prix_2: {
     type: DataTypes.INTEGER,
     allowNull: false,
   },
 });
+
+// Définir l'association : Une Entree appartient à un 
+Devise.belongsTo(Utilisateur, { foreignKey: 'utilisateurId' });
 
 module.exports = Devise;

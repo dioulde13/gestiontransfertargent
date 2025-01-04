@@ -1,5 +1,10 @@
 const { DataTypes } = require('sequelize');
 const sequelize = require('./sequelize');
+const Utilisateur = require('./utilisateurs'); 
+const Partenaire = require('./partenaires'); 
+const Devise = require('./devises'); 
+
+
 
 const Entre = sequelize.define('Entre', {
   id: {
@@ -24,6 +29,15 @@ const Entre = sequelize.define('Entre', {
     allowNull: false,
     defaultValue: DataTypes.NOW, // Définit la date et l'heure actuelles par défaut
   },
+  pays_exp: {
+    type: DataTypes.STRING,
+    allowNull: false,
+    defaultValue: "Guinée",
+  },
+  pays_dest: {
+    type: DataTypes.STRING,
+    allowNull: false,
+  },
   code: {
     type: DataTypes.STRING,
     allowNull: false,
@@ -40,6 +54,31 @@ const Entre = sequelize.define('Entre', {
     type: DataTypes.STRING,
     allowNull: false,
   },
+  montant_gnf: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+    defaultValue: 0,
+  },
+  prix_1: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+    defaultValue: 0,
+  },
+  prix_2: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+    defaultValue: 0,
+  },
+  signe_1: {
+    type: DataTypes.STRING,
+    allowNull: false,
+    defaultValue: 0,
+  },
+  signe_2: {
+    type: DataTypes.STRING,
+    allowNull: false,
+    defaultValue: 0,
+  },
   payement_type: {
     type: DataTypes.ENUM('COMPLET', 'NON COMPLET'),
     allowNull: false,
@@ -51,5 +90,12 @@ const Entre = sequelize.define('Entre', {
     defaultValue: 'NON PAYEE', // Définir une valeur par défaut
   },
 });
+
+// Définir l'association : Une Entree appartient à un 
+Entre.belongsTo(Utilisateur, { foreignKey: 'utilisateurId' });
+// Définir l'association : Une Entree appartient à un 
+Entre.belongsTo(Partenaire, { foreignKey: 'partenaireId' });
+// Définir l'association : Une Entree appartient à un 
+Entre.belongsTo(Devise, { foreignKey: 'deviseId' });
 
 module.exports = Entre;
