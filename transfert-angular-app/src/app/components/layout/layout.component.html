@@ -1,0 +1,104 @@
+<!-- app.component.html -->
+<div class="flex flex-col h-screen">
+    <!-- Main Layout -->
+    <div class="flex h-full">
+
+        <!-- Sidebar (visible sur les écrans moyens et grands) -->
+        <aside
+            class="bg-white w-64 p-4 flex-shrink-0 transition-transform transform lg:translate-x-0 z-50 fixed lg:relative top-0 left-0 bottom-0 lg:block h-full"
+            [class.-translate-x-full]="!isSidebarOpen">
+            <!-- Sidebar Header (Visible uniquement sur mobile) -->
+            <div class="flex justify-between lg:hidden">
+                <button (click)="closeSideBar()">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
+                        stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M4 6h16M4 12h16M4 18h16" />
+                    </svg>
+                </button>
+            </div>
+
+            <!-- Sidebar Navigation -->
+            <div>
+                <!-- Logo et séparateur -->
+                <div class="text-gray-100 text-xl">
+                    <div class="p-2.5 mt-1 flex items-center">
+                        <!-- Logo -->
+                        <img src="https://img.freepik.com/vecteurs-premium/symboles-identite-ecole-universite-insignes-logo-vecteur-vecteur-conception-du-logo-enseignement-universitaire_1112812-2705.jpg?semt=ais_hybrid"
+                            alt="Logo" class="h-14  w-40 mr-3">
+                    </div>
+                </div>
+
+                <!-- Menus -->
+                <a routerLink="/dashboard">
+                    <div class="p-2.5 mt-3 flex items-center rounded-md px-4 duration-300 cursor-pointer hover:bg-blue-600 text-white"
+                        [ngClass]="{'bg-blue-600': activeMenu === 'home'}" (click)="selectMenu('home')">
+                        <i class="bi bi-house-door-fill"
+                            [ngStyle]="{'color': activeMenu === 'home' ? 'white' : '#0E3E7E'}"></i>
+                        <span class="text-[15px] ml-4 font-bold"
+                            [ngStyle]="{'color': activeMenu === 'home' ? 'white' : '#0E3E7E'}">
+                            Tableau de bord
+                        </span>
+                    </div>
+                </a>
+                <a routerLink="/transanction">
+                    <div class="p-2.5 mt-3 flex items-center rounded-md px-4 duration-300 cursor-pointer hover:bg-blue-600 text-white"
+                        [ngClass]="{'bg-blue-600': activeMenu === 'transaction'}" (click)="selectMenu('transaction')">
+                        <i class="bi bi-coin"
+                            [ngStyle]="{'color': activeMenu === 'transaction' ? 'white' : '#0E3E7E'}"></i>
+                        <span class="text-[15px] ml-4 font-bold"
+                            [ngStyle]="{'color': activeMenu === 'transaction' ? 'white' : '#0E3E7E'}">
+                            Liste des entres
+                        </span>
+                    </div>
+                </a>
+
+                <div class="p-2.5 mt-3 flex items-center rounded-md px-4 duration-300 cursor-pointer hover:bg-blue-600 text-white"
+                    [ngClass]="{'bg-blue-600': activeMenu === 'payment'}" (click)="selectMenu('payment')">
+                    <i class="bi bi-credit-card"
+                        [ngStyle]="{'color': activeMenu === 'payment' ? 'white' : '#0E3E7E'}"></i>
+                    <span class="text-[15px] ml-4 font-bold"
+                        [ngStyle]="{'color': activeMenu === 'payment' ? 'white' : '#0E3E7E'}">
+                        Liste des sorties
+                    </span>
+                </div>
+
+                <div class="p-2.5 mt-3 flex items-center rounded-md px-4 duration-300 cursor-pointer hover:bg-blue-600 text-white"
+                    [ngClass]="{'bg-blue-600': activeMenu === 'school-management'}"
+                    (click)="selectMenu('school-management')">
+                    <i class="bi bi-person-lines-fill"
+                        [ngStyle]="{'color': activeMenu === 'school-management' ? 'white' : '#0E3E7E'}"></i>
+                    <span class="text-[15px] ml-4 font-bold"
+                        [ngStyle]="{'color': activeMenu === 'school-management' ? 'white' : '#0E3E7E'}">
+                        Gestion Ecole
+                    </span>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="flex-1 bg-gray-100">
+            <!-- Header -->
+            <header class="text-white p-4 flex items-center justify-between">
+                <div class="flex">
+                    <div class="text-lg font-bold text-blue-900">Tableau de bord</div>
+                    <button class="lg:hidden" (click)="toggleSidebar()">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
+                            stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M4 6h16M4 12h16M4 18h16" />
+                        </svg>
+                    </button>
+                </div>
+                <button>
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
+                        stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M16 17l4 4m0 0l4-4m-4 4V3M3 13l4 4m0 0l4-4m-4 4V3" />
+                    </svg>
+                </button>
+            </header>
+            <router-outlet></router-outlet>
+        </main>
+    </div>
+</div>
