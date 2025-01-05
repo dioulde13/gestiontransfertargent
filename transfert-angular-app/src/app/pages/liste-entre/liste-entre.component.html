@@ -1,1 +1,54 @@
-<p>liste-entre works!</p>
+<div class="container mx-auto p-4 font-sans">
+  <h1 class="text-center text-2xl font-bold text-gray-800 mb-6">Liste des résultats</h1>
+
+  <!-- Vérification si des résultats sont présents -->
+  <div *ngIf="allresultat.length > 0; else noResults">
+    <table class="w-full border-collapse table-auto">
+      <thead>
+        <tr class="bg-gray-200 text-left text-sm font-semibold">
+          <!-- En-têtes du tableau -->
+          <th class="border px-4 py-2">Id</th>
+          <th class="border px-4 py-2">Pays exp</th>
+          <th class="border px-4 py-2">Pays dest</th>
+          <th class="border px-4 py-2">Code</th>
+          <th class="border px-4 py-2">Expéditeur</th>
+          <th class="border px-4 py-2">Receveur</th>
+          <th class="border px-4 py-2">Téléphone Recev</th>
+          <th class="border px-4 py-2">Montant GNF</th>
+          <th class="border px-4 py-2">Prix GNF</th>
+          <th class="border px-4 py-2">Partenaire</th>
+          <th class="border px-4 py-2">Paiement Status</th>
+          <th class="border px-4 py-2">Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        <!-- Boucle pour afficher chaque élément du tableau allresultat -->
+        <tr 
+          *ngFor="let result of allresultat; let i = index"
+          class="hover:bg-gray-100 even:bg-gray-50">
+          <td class="border px-4 py-2">{{ i + 1 }}</td>
+          <td class="border px-4 py-2">{{ result.pays_exp }}</td>
+          <td class="border px-4 py-2">{{ result.pays_dest }}</td>
+          <td class="border px-4 py-2">{{ result.code }}</td>
+          <td class="border px-4 py-2">{{ result.expediteur }}</td>
+          <td class="border px-4 py-2">{{ result.receveur }}</td>
+          <td class="border px-4 py-2">{{ result.telephone_receveur }}</td>
+          <td class="border px-4 py-2">{{ result.montant_gnf + " GNF" }}</td>
+          <td class="border px-4 py-2">
+            {{ result.prix_1 + " " + result.signe_2 + " -> " + result.prix_2 + " GNF" }}
+          </td>
+          <td class="border px-4 py-2">
+            {{ result.Partenaire.prenom + " " + result.Partenaire.nom }}
+          </td>
+          <td class="border px-4 py-2">{{ result.payement_type }}</td>
+          <td class="border px-4 py-2">{{ result.status }}</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Si aucun résultat n'est trouvé -->
+  <ng-template #noResults>
+    <p class="text-center text-gray-600 mt-4">Aucun résultat trouvé.</p>
+  </ng-template>
+</div>

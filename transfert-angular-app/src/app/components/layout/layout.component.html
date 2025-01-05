@@ -41,38 +41,28 @@
                         </span>
                     </div>
                 </a>
-                <a routerLink="/transanction">
+                <a routerLink="/entre">
                     <div class="p-2.5 mt-3 flex items-center rounded-md px-4 duration-300 cursor-pointer hover:bg-blue-600 text-white"
-                        [ngClass]="{'bg-blue-600': activeMenu === 'transaction'}" (click)="selectMenu('transaction')">
+                        [ngClass]="{'bg-blue-600': activeMenu === 'entre'}" (click)="selectMenu('entre')">
                         <i class="bi bi-coin"
-                            [ngStyle]="{'color': activeMenu === 'transaction' ? 'white' : '#0E3E7E'}"></i>
+                            [ngStyle]="{'color': activeMenu === 'entre' ? 'white' : '#0E3E7E'}"></i>
                         <span class="text-[15px] ml-4 font-bold"
-                            [ngStyle]="{'color': activeMenu === 'transaction' ? 'white' : '#0E3E7E'}">
+                            [ngStyle]="{'color': activeMenu === 'entre' ? 'white' : '#0E3E7E'}">
                             Liste des entres
                         </span>
                     </div>
                 </a>
-
+                <a routerLink="/sortie">
                 <div class="p-2.5 mt-3 flex items-center rounded-md px-4 duration-300 cursor-pointer hover:bg-blue-600 text-white"
-                    [ngClass]="{'bg-blue-600': activeMenu === 'payment'}" (click)="selectMenu('payment')">
+                    [ngClass]="{'bg-blue-600': activeMenu === 'sortie'}" (click)="selectMenu('sortie')">
                     <i class="bi bi-credit-card"
-                        [ngStyle]="{'color': activeMenu === 'payment' ? 'white' : '#0E3E7E'}"></i>
+                        [ngStyle]="{'color': activeMenu === 'sortie' ? 'white' : '#0E3E7E'}"></i>
                     <span class="text-[15px] ml-4 font-bold"
-                        [ngStyle]="{'color': activeMenu === 'payment' ? 'white' : '#0E3E7E'}">
+                        [ngStyle]="{'color': activeMenu === 'sortie' ? 'white' : '#0E3E7E'}">
                         Liste des sorties
                     </span>
                 </div>
-
-                <div class="p-2.5 mt-3 flex items-center rounded-md px-4 duration-300 cursor-pointer hover:bg-blue-600 text-white"
-                    [ngClass]="{'bg-blue-600': activeMenu === 'school-management'}"
-                    (click)="selectMenu('school-management')">
-                    <i class="bi bi-person-lines-fill"
-                        [ngStyle]="{'color': activeMenu === 'school-management' ? 'white' : '#0E3E7E'}"></i>
-                    <span class="text-[15px] ml-4 font-bold"
-                        [ngStyle]="{'color': activeMenu === 'school-management' ? 'white' : '#0E3E7E'}">
-                        Gestion Ecole
-                    </span>
-                </div>
+            </a>
             </div>
         </aside>
 
