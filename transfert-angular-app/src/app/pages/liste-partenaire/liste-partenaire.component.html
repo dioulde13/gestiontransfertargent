@@ -1,1 +1,37 @@
-<p>liste-partenaire works!</p>
+<div class="container mx-auto p-4 font-sans">
+    <h1 class="text-2xl font-bold text-gray-800 mb-6">Liste des partenaires</h1>
+  
+    <!-- Vérification si des résultats sont présents -->
+    <div *ngIf="allresultat.length > 0; else noResults">
+      <table class="w-full border-collapse table-auto">
+        <thead>
+          <tr class="bg-gray-200 text-left text-sm font-semibold">
+            <!-- En-têtes du tableau -->
+            <th class="border px-4 py-2">Id</th>
+            <th class="border px-4 py-2">Nom</th>
+            <th class="border px-4 py-2">Prenom</th>
+            <th class="border px-4 py-2">Pays</th>
+            <th class="border px-4 py-2">Montant</th>
+          </tr>
+        </thead>
+        <tbody>
+          <!-- Boucle pour afficher chaque élément du tableau allresultat -->
+          <tr 
+            *ngFor="let result of allresultat; let i = index"
+            class="hover:bg-gray-100 even:bg-gray-50">
+            <td class="border px-4 py-2">{{ i + 1 }}</td>
+            <td class="border px-4 py-2">{{ result.nom }}</td>
+            <td class="border px-4 py-2">{{ result.prenom }}</td>
+            <td class="border px-4 py-2">{{ result.pays }}</td>
+            <td class="border px-4 py-2">{{ result.montant_preter }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  
+    <!-- Si aucun résultat n'est trouvé -->
+    <ng-template #noResults>
+      <p class="text-center text-gray-600 mt-4">Aucun résultat trouvé.</p>
+    </ng-template>
+  </div>
+  

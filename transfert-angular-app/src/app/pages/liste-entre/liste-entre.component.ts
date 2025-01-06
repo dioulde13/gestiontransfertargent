@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ApiService } from '../../api.service';
+import { EntreServiceService } from '../../services/entre/entre-service.service';
 
 @Component({
   selector: 'app-liste-entre',
@@ -13,12 +13,12 @@ export class ListeEntreComponent implements OnInit{
   allresultat: any[] = [];
 
   // Injection du service ApiService
-  constructor(private apiService: ApiService) {}
+  constructor(private entreService: EntreServiceService) {}
 
   // Méthode d'initialisation
   ngOnInit(): void {
     // Appel à l'API et gestion des réponses
-    this.apiService.getAllEntree().subscribe({
+    this.entreService.getAllEntree().subscribe({
       next: (response) => {
         // Vérification du succès de la réponse
           this.allresultat = response; // Assurez-vous que 'data' existe dans la réponse

@@ -63,6 +63,28 @@
                     </span>
                 </div>
             </a>
+            <a routerLink="/partenaire">
+                <div class="p-2.5 mt-3 flex items-center rounded-md px-4 duration-300 cursor-pointer hover:bg-blue-600 text-white"
+                    [ngClass]="{'bg-blue-600': activeMenu === 'partenaire'}" (click)="selectMenu('partenaire')">
+                    <i class="bi bi-credit-card"
+                        [ngStyle]="{'color': activeMenu === 'partenaire' ? 'white' : '#0E3E7E'}"></i>
+                    <span class="text-[15px] ml-4 font-bold"
+                        [ngStyle]="{'color': activeMenu === 'partenaire' ? 'white' : '#0E3E7E'}">
+                        Liste des partenaires
+                    </span>
+                </div>
+            </a>
+            <a routerLink="/devise">
+                <div class="p-2.5 mt-3 flex items-center rounded-md px-4 duration-300 cursor-pointer hover:bg-blue-600 text-white"
+                    [ngClass]="{'bg-blue-600': activeMenu === 'devise'}" (click)="selectMenu('devise')">
+                    <i class="bi bi-credit-card"
+                        [ngStyle]="{'color': activeMenu === 'devise' ? 'white' : '#0E3E7E'}"></i>
+                    <span class="text-[15px] ml-4 font-bold"
+                        [ngStyle]="{'color': activeMenu === 'devise' ? 'white' : '#0E3E7E'}">
+                        Liste des devises
+                    </span>
+                </div>
+            </a>
             </div>
         </aside>
 

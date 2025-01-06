@@ -95,7 +95,7 @@ const ajouterEntre = async (req, res) => {
     const PaysDest = devise.paysArriver;
 
     // Calcul du montant_preter
-    const montant_due = (montant_gnf / Prix2) * Prix1;
+    const montant_due = montant_gnf;
 
     // Générer le code automatiquement
     const lastEntry = await Entre.findOne({
