@@ -16,4 +16,8 @@ export class PartenaireServiceService {
      getAllPartenaire(): Observable<any> {
       return this.http.get(`${this.apiUrl}/api/partenaires/liste`);
     }
+     // Méthode pour ajouter un partenaire
+  ajouterPartenaire(partenaireData: any): Observable<any> {
+    return this.http.post(`${this.apiUrl}/api/partenaires/create`, partenaireData);
+  }
 }

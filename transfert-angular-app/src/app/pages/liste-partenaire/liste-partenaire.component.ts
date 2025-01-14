@@ -1,34 +1,66 @@
 import { Component, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { CommonModule } from '@angular/common';  // Remplacer BrowserModule par CommonModule
 import { PartenaireServiceService } from '../../services/partenaire/partenaire-service.service';
+import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { ReactiveFormsModule } from '@angular/forms'; // Import du module des formulaires réactifs
 
 @Component({
   selector: 'app-liste-partenaire',
-  imports: [CommonModule],
+  imports: [CommonModule, ReactiveFormsModule],  // Enlever BrowserModule
   templateUrl: './liste-partenaire.component.html',
-  styleUrl: './liste-partenaire.component.css'
+  styleUrls: ['./liste-partenaire.component.css']  // Correction de 'styleUrl' en 'styleUrls'
 })
-export class ListePartenaireComponent implements OnInit{
-// Tableau pour stocker les résultats
+export class ListePartenaireComponent implements OnInit {
+  // Tableau pour stocker les résultats
   allresultat: any[] = [];
 
-  // Injection du service ApiService
-  constructor(private partenaire: PartenaireServiceService) {}
+  partenaireForm!: FormGroup;
 
-  // Méthode d'initialisation
+  constructor(
+    private fb: FormBuilder,
+    private partenaireService: PartenaireServiceService
+  ) {}
+
   ngOnInit(): void {
+    // Initialisation du formulaire avec les validations
+    this.partenaireForm = this.fb.group({
+      utilisateurId: ['', Validators.required],
+      nom: ['', Validators.required],
+      prenom: ['', Validators.required],
+      pays: ['', Validators.required],
+      montant_preter: [0, [Validators.required, Validators.min(0)]],
+    });
+
     // Appel à l'API et gestion des réponses
-    this.partenaire.getAllPartenaire().subscribe({
+    this.partenaireService.getAllPartenaire().subscribe({
       next: (response) => {
-        // Vérification du succès de la réponse
-          this.allresultat = response; // Assurez-vous que 'data' existe dans la réponse
-          console.log(this.allresultat);
+        this.allresultat = response;
+        console.log(this.allresultat);
       },
       error: (error) => {
-        // Gestion des erreurs lors de l'appel à l'API
         console.error('Erreur lors de la récupération des données', error);
       },
     });
   }
 
+  onSubmit() {
+    if (this.partenaireForm.valid) {
+      const formData = this.partenaireForm.value;
+
+      // Appeler le service pour ajouter le partenaire
+      this.partenaireService.ajouterPartenaire(formData).subscribe(
+        response => {
+          console.log('Partenaire ajouté avec succès:', response);
+          alert('Partenaire ajouté avec succès!');
+          this.partenaireForm.reset(); // Réinitialiser le formulaire après ajout
+        },
+        error => {
+          console.error('Erreur lors de l\'ajout du partenaire:', error);
+          alert('Erreur lors de l\'ajout du partenaire.');
+        }
+      );
+    } else {
+      alert('Veuillez remplir tous les champs obligatoires.');
+    }
+  }
 }

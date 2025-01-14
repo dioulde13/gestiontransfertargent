@@ -1,5 +1,7 @@
 const { DataTypes } = require('sequelize');
 const sequelize = require('./sequelize');
+const Utilisateur = require('./utilisateurs'); 
+const Partenaire = require('./partenaires'); 
 
 const Rembourser = sequelize.define('Rembourser', {
   id: {
@@ -25,5 +27,10 @@ const Rembourser = sequelize.define('Rembourser', {
     defaultValue: DataTypes.NOW, // Définit la date et l'heure actuelles par défaut
   },
 });
+
+// Définir l'association : Une Entree appartient à un 
+Rembourser.belongsTo(Utilisateur, { foreignKey: 'utilisateurId' });
+// Définir l'association : Une Entree appartient à un 
+Rembourser.belongsTo(Partenaire, { foreignKey: 'partenaireId' });
 
 module.exports = Rembourser;

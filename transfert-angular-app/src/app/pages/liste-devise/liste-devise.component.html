@@ -1,12 +1,10 @@
-<div class="container mx-auto p-4 font-sans">
+<!-- <div class="container mx-auto p-4 font-sans">
     <h1 class="text-2xl font-bold text-gray-800 mb-6">Liste des devises</h1>
   
-    <!-- Vérification si des résultats sont présents -->
     <div *ngIf="allresultat.length > 0; else noResults">
       <table class="w-full border-collapse table-auto">
         <thead>
           <tr class="bg-gray-200 text-left text-sm font-semibold">
-            <!-- En-têtes du tableau -->
             <th class="border px-4 py-2">Id</th>
             <th class="border px-4 py-2">Pays depart</th>
             <th class="border px-4 py-2">Pays arriver</th>
@@ -15,7 +13,6 @@
           </tr>
         </thead>
         <tbody>
-          <!-- Boucle pour afficher chaque élément du tableau allresultat -->
           <tr 
             *ngFor="let result of allresultat; let i = index"
             class="hover:bg-gray-100 even:bg-gray-50">
@@ -29,9 +26,160 @@
       </table>
     </div>
   
-    <!-- Si aucun résultat n'est trouvé -->
     <ng-template #noResults>
       <p class="text-center text-gray-600 mt-4">Aucun résultat trouvé.</p>
     </ng-template>
   </div>
-  
+   -->
+
+   <div class="content-page">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-lg-12">
+                <div class="card car-transparent">
+                    <div class="card-body p-0">
+                        <div class="profile-image position-relative">
+                            <img src="/assets/images/top-header.png" class="img-fluid rounded w-100"
+                                alt="profile-image">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row m-sm-0 ">
+
+            <div class="col-lg-12 card-profile">
+
+                <div class="card card-block card-stretch card-height">
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <div class="col-lg-12">
+                                <div class="card">
+                                    <div class="card-body">
+                                        <div
+                                            class="d-flex flex-wrap align-items-center justify-content-between breadcrumb-content">
+                                            <h5>Liste des Parents</h5>
+                                            <div
+                                                class="d-flex flex-wrap align-items-center justify-content-between">
+
+
+                                                <div class="pl-3 btn-new border-left">
+                                                    <a href="#" class="btn btn-primary"
+                                                        data-target="#new-project-modal"
+                                                        data-toggle="modal">Ajouter nouveau</a>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <table id="example" class="table data-table table-striped table-flush"
+                                style="width:100%">
+
+                                <thead>
+                                    <tr class="text-muted">
+                                        <th>#ID</th>
+                                        <th>Nom</th>
+                                        <th>Prénom</th>
+                                        <th>Adresse</th>
+                                        <th>Téléphone</th>
+                                        <th>E-mail</th>
+                                        <th>Date</th>
+                                        <th>Menu</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td class="text-center">0003</td>
+                                        <td class="text-center">Camara</td>
+                                        <td class="text-center"> Seydina </td>
+                                        <td class="text-center">KIPE</td>
+                                        <td class="text-center">+224 666 55 44 44</td>
+                                        <td class="text-center">exempleexemple.com</td>
+                                        <td class="text-center">10/10/2022</td>
+                                        <td class="text-center"><a
+                                                class="btn btn-success btn-round btn-icon mx-1" role="button"
+                                                rel="tooltip" href="voir-detail-parent.html"><i
+                                                    class="ri-eye-line m-0"></i></a></td>
+                                    </tr>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Modal list start -->
+<div class="modal fade" role="dialog" aria-modal="true" id="new-project-modal">
+    <div class="modal-dialog  modal-dialog-centered modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header d-block text-center pb-3 border-bttom"
+                style="background-color:#d0b72a; color:white">
+                <img src="/assets/images/top-header3.png" class="img-fluid rounded w-100" alt="profile-image">
+            </div>
+            <div class="modal-body">
+                <div class="row">
+
+                    <div class="col-lg-6">
+                        <div class="form-group mb-3">
+                            <label for="exampleInputText01" class="h5">Nom</label>
+                            <input type="text" class="form-control" id="exampleInputText01" placeholder="Nom">
+                        </div>
+                    </div>
+                    <div class="col-lg-6">
+                        <div class="form-group mb-3">
+                            <label for="exampleInputText01" class="h5">Prenom</label>
+                            <input type="text" class="form-control" id="exampleInputText01"
+                                placeholder="Prenom">
+                        </div>
+                    </div>
+                    <div class="col-lg-4">
+                        <div class="form-group mb-3">
+                            <label for="exampleInputText2" class="h5">Sexe</label>
+                            <select name="type" class="selectpicker form-control" data-style="py-0">
+                                <option>Masculin</option>
+                                <option>Feminin</option>
+                            </select>
+                        </div>
+                    </div>
+
+
+                    <div class="col-lg-4">
+                        <div class="form-group mb-3">
+                            <label for="exampleInputText01" class="h5">Email</label>
+                            <input type="Email" class="form-control" id="exampleInputText01"
+                                placeholder="Email">
+                        </div>
+                    </div>
+                    <div class="col-lg-4">
+                        <div class="form-group mb-3">
+                            <label for="exampleInputText01" class="h5">Tel</label>
+                            <input type="text" class="form-control" id="exampleInputText01" placeholder="tel">
+                        </div>
+                    </div>
+                    <div class="col-lg-6">
+                        <div class="form-group mb-3">
+                            <label for="exampleInputText01" class="h5">Mot de passe</label>
+                            <input type="Pasword" class="form-control" id="exampleInputText01"
+                                placeholder="Mot de passe">
+                        </div>
+                    </div>
+                    <div class="col-lg-6">
+                        <div class="form-group mb-3">
+                            <label for="exampleInputText01" class="h5">Confiremer Mot de passe</label>
+                            <input type="Pasword" class="form-control" id="exampleInputText01"
+                                placeholder="Mot de passe">
+                        </div>
+                    </div>
+                    <div class="col-lg-12">
+                        <div class="d-flex flex-wrap align-items-ceter justify-content-center mt-2">
+                            <div class="btn btn-primary mr-3" data-dismiss="modal">Enregistrer</div>
+                            <div class="btn btn-primary" data-dismiss="modal">Fermer</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

@@ -6,6 +6,10 @@ const utilisateurRoutes = require('./routes/utilisateurRoutes');
 const partenaireRoutes = require('./routes/partenaireRoutes');
 const deviseRoutes = require('./routes/deviseRoutes'); // Importer les routes des devises
 const entreRoutes = require('./routes/entreRoutes'); // Importer les routes des entrées
+const sortieRoutes = require('./routes/sortieRoute'); // Importer les routes des entrées
+const rembourserRoutes = require('./routes/rembourserRoutes'); // Importer les routes des entrées
+
+
 
 const app = express();
 app.use(bodyParser.json());
@@ -37,6 +41,12 @@ app.use('/api/devises', deviseRoutes);
 
 // Utilisation des routes pour les entrées
 app.use('/api/entrees', entreRoutes);
+
+// Utilisation des routes pour les sortie
+app.use('/api/sorties', sortieRoutes);
+
+// Utilisation des routes pour les sortie
+app.use('/api/rembourser', rembourserRoutes);
 
 const PORT = 3000;
 app.listen(PORT, () => {

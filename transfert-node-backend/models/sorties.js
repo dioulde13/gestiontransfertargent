@@ -1,5 +1,8 @@
 const { DataTypes } = require('sequelize');
 const sequelize = require('./sequelize');
+const Utilisateur = require('./utilisateurs'); 
+const Partenaire = require('./partenaires'); 
+const Devise = require('./devises'); 
 
 const Sortie = sequelize.define('Sortie', {
   id: {
@@ -51,5 +54,12 @@ const Sortie = sequelize.define('Sortie', {
     defaultValue: 'NON PAYEE', // Définir une valeur par défaut
   },
 });
+
+// Définir l'association : Une Entree appartient à un 
+Sortie.belongsTo(Utilisateur, { foreignKey: 'utilisateurId' });
+// Définir l'association : Une Entree appartient à un 
+Sortie.belongsTo(Partenaire, { foreignKey: 'partenaireId' });
+// Définir l'association : Une Entree appartient à un 
+Sortie.belongsTo(Devise, { foreignKey: 'deviseId' });
 
 module.exports = Sortie;

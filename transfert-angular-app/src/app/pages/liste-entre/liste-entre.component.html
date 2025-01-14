@@ -1,12 +1,10 @@
-<div class="container mx-auto p-4 font-sans">
+<!-- <div class="container mx-auto p-4 font-sans">
   <h1 class="text-center text-2xl font-bold text-gray-800 mb-6">Liste des résultats</h1>
 
-  <!-- Vérification si des résultats sont présents -->
   <div *ngIf="allresultat.length > 0; else noResults">
     <table class="w-full border-collapse table-auto">
       <thead>
         <tr class="bg-gray-200 text-left text-sm font-semibold">
-          <!-- En-têtes du tableau -->
           <th class="border px-4 py-2">Id</th>
           <th class="border px-4 py-2">Pays exp</th>
           <th class="border px-4 py-2">Pays dest</th>
@@ -22,7 +20,6 @@
         </tr>
       </thead>
       <tbody>
-        <!-- Boucle pour afficher chaque élément du tableau allresultat -->
         <tr 
           *ngFor="let result of allresultat; let i = index"
           class="hover:bg-gray-100 even:bg-gray-50">
@@ -47,8 +44,161 @@
     </table>
   </div>
 
-  <!-- Si aucun résultat n'est trouvé -->
   <ng-template #noResults>
     <p class="text-center text-gray-600 mt-4">Aucun résultat trouvé.</p>
   </ng-template>
+</div> -->
+
+<div class="content-page">
+  <div class="container-fluid">
+    <div class="row">
+      <div class="col-lg-12">
+        <div class="card bg-transparent">
+          <div class="card-body p-0">
+            <div class="profile-image relative">
+              <img src="/assets/images/top-header.png" class="img-fluid rounded w-full" alt="profile-image">
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="row m-0">
+      <div class="col-lg-12 card-profile">
+        <div class="card card-stretch h-full">
+          <div class="card-body">
+            <div class="table-responsive">
+              <div class="col-lg-12">
+                <div class="card">
+                  <div class="card-body">
+                    <div class="d-flex flex-wrap items-center justify-between breadcrumb-content">
+                      <h5>Liste des Parents</h5>
+                      <div class="d-flex flex-wrap items-center justify-between">
+                        <div class="pl-3 btn-new border-left">
+                          <a href="#" class="btn btn-primary" data-target="#new-project-modal" data-toggle="modal">Ajouter nouveau</a>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <table id="example" class="table data-table table-striped w-full">
+                <thead>
+                  <tr class="text-muted">
+                    <th>Id</th>
+                    <th>Pays exp</th>
+                    <th>Pays dest</th>
+                    <th>Code</th>
+                    <th>Expéditeur</th>
+                    <th>Receveur</th>
+                    <th>Téléphone Recev</th>
+                    <th>Montant GNF</th>
+                    <th>Prix GNF</th>
+                    <th>Partenaire</th>
+                    <th>Paiement Status</th>
+                    <th>Status</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr *ngFor="let result of allresultat; let i = index">
+                    <td class="text-center">{{ i + 1 }}</td>
+                    <td class="text-center">{{ result.pays_exp }}</td>
+                    <td class="border px-4 py-2">{{ result.pays_dest }}</td>
+                    <td class="text-center">{{ result.code }}</td>
+                    <td class="text-center">{{ result.expediteur }}</td>
+                    <td class="text-center">{{ result.receveur }}</td>
+                    <td class="text-center">{{ result.telephone_receveur }}</td>
+                    <td class="text-center">{{ result.montant_gnf + " GNF" }}</td>
+                    <td class="text-center">{{ result.prix_1 + " " + result.signe_2 + " -> " + result.prix_2 + " GNF" }}</td>
+                    <td class="text-center">{{ result.Partenaire.prenom + " " + result.Partenaire.nom }}</td>
+                    <td class="text-center">{{ result.payement_type }}</td>
+                    <td class="text-center">{{ result.status }}</td>
+                    <td class="text-center">
+                      <a class="btn btn-success btn-round btn-icon mx-1" role="button" rel="tooltip" href="voir-detail-parent.html">
+                        <i class="ri-eye-line m-0"></i>
+                      </a>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="new-project-modal" tabindex="-1" role="dialog" aria-labelledby="modalTitle" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="modalTitle">Ajouter une nouvelle entrée</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <form [formGroup]="entreForm" (ngSubmit)="ajouterEntree()">
+          <div class="form-row">
+            <div class="form-group col-md-6">
+              <label for="utilisateurId">Utilisateur ID</label>
+              <input type="text" class="form-control" id="utilisateurId" formControlName="utilisateurId" placeholder="ID de l'utilisateur" />
+            </div>
+            <div class="form-group col-md-6">
+              <label for="partenaireId">Partenaire ID</label>
+              <input type="text" class="form-control" id="partenaireId" formControlName="partenaireId" placeholder="ID du partenaire" />
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group col-md-6">
+              <label for="deviseId">Devise ID</label>
+              <input type="text" class="form-control" id="deviseId" formControlName="deviseId" placeholder="ID de la devise" />
+            </div>
+            <div class="form-group col-md-6">
+              <label for="expediteur">Expéditeur</label>
+              <input type="text" class="form-control" id="expediteur" formControlName="expediteur" placeholder="Nom de l'expéditeur" />
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group col-md-6">
+              <label for="receveur">Receveur</label>
+              <input type="text" class="form-control" id="receveur" formControlName="receveur" placeholder="Nom du receveur" />
+            </div>
+            <div class="form-group col-md-6">
+              <label for="telephoneReceveur">Téléphone du receveur</label>
+              <input type="text" class="form-control" id="telephoneReceveur" formControlName="telephone_receveur" placeholder="Téléphone" />
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group col-md-6">
+              <label for="montantGnf">Montant GNF</label>
+              <input type="number" class="form-control" id="montantGnf" formControlName="montant_gnf" placeholder="Montant en GNF" />
+            </div>
+            <div class="form-group col-md-6">
+              <label for="payementType">Type de paiement</label>
+              <select class="form-control" id="payementType" formControlName="payement_type">
+                <option value="COMPLET">COMPLET</option>
+                <option value="NON COMPLET">NON COMPLET</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="status">Statut</label>
+            <select class="form-control" id="status" formControlName="status">
+              <option value="NON PAYEE">NON PAYEE</option>
+              <option value="PAYEE">PAYEE</option>
+              <option value="CREDIT">CREDIT</option>
+              <option value="ANNULEE">ANNULEE</option>
+            </select>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-dismiss="modal">Annuler</button>
+            <button type="submit" class="btn btn-primary">Ajouter</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
 </div>

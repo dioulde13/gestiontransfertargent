@@ -20,4 +20,9 @@ export class EntreServiceService {
     getAllEntree(): Observable<any> {
      return this.http.get(`${this.apiUrl}/api/entrees/liste`);
    }
+
+    // Méthode pour ajouter une nouvelle entrée
+  ajouterEntree(data: any): Observable<any> {
+    return this.http.post(`${this.apiUrl}/api/entrees/create`, data);
+  }
 }
