@@ -6,6 +6,7 @@ import { ReactiveFormsModule } from '@angular/forms'; // Import du module des fo
 
 @Component({
   selector: 'app-liste-partenaire',
+  standalone: true,
   imports: [CommonModule, ReactiveFormsModule],  // Enlever BrowserModule
   templateUrl: './liste-partenaire.component.html',
   styleUrls: ['./liste-partenaire.component.css']  // Correction de 'styleUrl' en 'styleUrls'

@@ -5,19 +5,21 @@ import { Observable } from 'rxjs';
 @Injectable({
   providedIn: 'root'
 })
-export class DeviseService {
+export class SortieService {
 
- // URL de l'API
+   // URL de l'API
      private apiUrl = 'http://localhost:3000'; 
    
      constructor(private http: HttpClient) { }
    
       // Méthode pour récupérer les données de l'API
-      getAllDevise(): Observable<any> {
-       return this.http.get(`${this.apiUrl}/api/devises/liste`);
+      getAllSortie(): Observable<any> {
+       return this.http.get(`${this.apiUrl}/api/sorties/liste`);
      }
-        // Méthode pour ajouter un partenaire
-    ajouterDevise(deviseData: any): Observable<any> {
-      return this.http.post(`${this.apiUrl}/api/devises/create`, deviseData);
+  
+      // Méthode pour ajouter une nouvelle entrée
+    ajouterSortie(data: any): Observable<any> {
+      return this.http.post(`${this.apiUrl}/api/sorties/create`, data);
     }
+
 }

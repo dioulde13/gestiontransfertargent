@@ -32,7 +32,7 @@
   </div>
    -->
 
-   <div class="content-page">
+<div class="content-page">
     <div class="container-fluid">
         <div class="row">
             <div class="col-lg-12">
@@ -58,14 +58,12 @@
                                     <div class="card-body">
                                         <div
                                             class="d-flex flex-wrap align-items-center justify-content-between breadcrumb-content">
-                                            <h5>Liste des Parents</h5>
-                                            <div
-                                                class="d-flex flex-wrap align-items-center justify-content-between">
+                                            <h5>Liste des devises</h5>
+                                            <div class="d-flex flex-wrap align-items-center justify-content-between">
 
 
                                                 <div class="pl-3 btn-new border-left">
-                                                    <a href="#" class="btn btn-primary"
-                                                        data-target="#new-project-modal"
+                                                    <a href="#" class="btn btn-primary" data-target="#new-project-modal"
                                                         data-toggle="modal">Ajouter nouveau</a>
                                                 </div>
                                             </div>
@@ -73,34 +71,24 @@
                                     </div>
                                 </div>
                             </div>
-                            <table id="example" class="table data-table table-striped table-flush"
-                                style="width:100%">
+                            <table id="example" class="table data-table table-striped table-flush" style="width:100%">
 
                                 <thead>
                                     <tr class="text-muted">
-                                        <th>#ID</th>
-                                        <th>Nom</th>
-                                        <th>Prénom</th>
-                                        <th>Adresse</th>
-                                        <th>Téléphone</th>
-                                        <th>E-mail</th>
-                                        <th>Date</th>
-                                        <th>Menu</th>
+                                        <th class="border px-4 py-2">Id</th>
+                                        <th class="border px-4 py-2">Pays depart</th>
+                                        <th class="border px-4 py-2">Pays arriver</th>
+                                        <th class="border px-4 py-2">Prix devise</th>
+                                        <th class="border px-4 py-2">Prix correspond</th>
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    <tr>
-                                        <td class="text-center">0003</td>
-                                        <td class="text-center">Camara</td>
-                                        <td class="text-center"> Seydina </td>
-                                        <td class="text-center">KIPE</td>
-                                        <td class="text-center">+224 666 55 44 44</td>
-                                        <td class="text-center">exempleexemple.com</td>
-                                        <td class="text-center">10/10/2022</td>
-                                        <td class="text-center"><a
-                                                class="btn btn-success btn-round btn-icon mx-1" role="button"
-                                                rel="tooltip" href="voir-detail-parent.html"><i
-                                                    class="ri-eye-line m-0"></i></a></td>
+                                    <tr *ngFor="let result of allresultat; let i = index">
+                                        <td class="border px-4 py-2">{{ i + 1 }}</td>
+                                        <td class="border px-4 py-2">{{ result.paysDepart }}</td>
+                                        <td class="border px-4 py-2">{{ result.paysArriver }}</td>
+                                        <td class="border px-4 py-2">{{ result.prix_1 +" "+result.signe_2}}</td>
+                                        <td class="border px-4 py-2">{{ result.prix_2 +" "+result.signe_1}}</td>
                                     </tr>
                             </table>
                         </div>
@@ -118,68 +106,42 @@
                 style="background-color:#d0b72a; color:white">
                 <img src="/assets/images/top-header3.png" class="img-fluid rounded w-100" alt="profile-image">
             </div>
-            <div class="modal-body">
-                <div class="row">
 
-                    <div class="col-lg-6">
-                        <div class="form-group mb-3">
-                            <label for="exampleInputText01" class="h5">Nom</label>
-                            <input type="text" class="form-control" id="exampleInputText01" placeholder="Nom">
-                        </div>
-                    </div>
-                    <div class="col-lg-6">
-                        <div class="form-group mb-3">
-                            <label for="exampleInputText01" class="h5">Prenom</label>
-                            <input type="text" class="form-control" id="exampleInputText01"
-                                placeholder="Prenom">
-                        </div>
-                    </div>
-                    <div class="col-lg-4">
-                        <div class="form-group mb-3">
-                            <label for="exampleInputText2" class="h5">Sexe</label>
-                            <select name="type" class="selectpicker form-control" data-style="py-0">
-                                <option>Masculin</option>
-                                <option>Feminin</option>
-                            </select>
-                        </div>
-                    </div>
+            <div class="container">
+                <h2>Ajouter un Devise</h2>
+                <form [formGroup]="deviseForm" (ngSubmit)="onSubmit()">
+                  <div class="form-group">
+                    <label for="utilisateurId">Utilisateur ID</label>
+                    <input id="utilisateurId" name="utilisateurId" formControlName="utilisateurId" class="form-control" />
+                  </div>
+                  <div class="form-group">
+                    <label for="paysDepart">Pays depart</label>
+                    <input id="paysDepart" name="paysDepart" formControlName="paysDepart" class="form-control" />
+                  </div>
+                  <div class="form-group">
+                    <label for="paysArriver">Pays d'arriver</label>
+                    <input id="paysArriver" name="paysArriver" formControlName="paysArriver" class="form-control" />
+                  </div>
+                  <div class="form-group">
+                    <label for="signe_1">Signe 1</label>
+                    <input id="signe_1" name="signe_1" formControlName="signe_1" class="form-control" />
+                  </div>
+                  <div class="form-group">
+                    <label for="signe_2">Signe 2</label>
+                    <input id="signe_2" name="signe_2" formControlName="signe_2" class="form-control" />
+                  </div>
+                  <div class="form-group">
+                    <label for="prix_1">Prix 1</label>
+                    <input id="prix_1" name="prix_1" formControlName="prix_1" type="number" class="form-control" />
+                  </div>
+                  <div class="form-group">
+                    <label for="prix_2">Prix 2</label>
+                    <input id="prix_2" name="prix_2" formControlName="prix_2" class="form-control" type="number" />
+                  </div>
+                  <button type="submit" [disabled]="!deviseForm.valid" class="btn btn-primary">Ajouter Devise</button>
+                </form>
+              </div>
 
-
-                    <div class="col-lg-4">
-                        <div class="form-group mb-3">
-                            <label for="exampleInputText01" class="h5">Email</label>
-                            <input type="Email" class="form-control" id="exampleInputText01"
-                                placeholder="Email">
-                        </div>
-                    </div>
-                    <div class="col-lg-4">
-                        <div class="form-group mb-3">
-                            <label for="exampleInputText01" class="h5">Tel</label>
-                            <input type="text" class="form-control" id="exampleInputText01" placeholder="tel">
-                        </div>
-                    </div>
-                    <div class="col-lg-6">
-                        <div class="form-group mb-3">
-                            <label for="exampleInputText01" class="h5">Mot de passe</label>
-                            <input type="Pasword" class="form-control" id="exampleInputText01"
-                                placeholder="Mot de passe">
-                        </div>
-                    </div>
-                    <div class="col-lg-6">
-                        <div class="form-group mb-3">
-                            <label for="exampleInputText01" class="h5">Confiremer Mot de passe</label>
-                            <input type="Pasword" class="form-control" id="exampleInputText01"
-                                placeholder="Mot de passe">
-                        </div>
-                    </div>
-                    <div class="col-lg-12">
-                        <div class="d-flex flex-wrap align-items-ceter justify-content-center mt-2">
-                            <div class="btn btn-primary mr-3" data-dismiss="modal">Enregistrer</div>
-                            <div class="btn btn-primary" data-dismiss="modal">Fermer</div>
-                        </div>
-                    </div>
-                </div>
-            </div>
         </div>
     </div>
 </div>

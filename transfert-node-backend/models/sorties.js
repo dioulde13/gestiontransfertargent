@@ -26,6 +26,15 @@ const Sortie = sequelize.define('Sortie', {
     type: DataTypes.STRING,
     allowNull: false,
   },
+  pays_exp: {
+    type: DataTypes.STRING,
+    allowNull: false,
+  },
+  pays_dest: {
+    type: DataTypes.STRING,
+    allowNull: false,
+    defaultValue: "Guinée",
+  },
   date_creation: {
     type: DataTypes.DATE,
     allowNull: false,
@@ -38,6 +47,11 @@ const Sortie = sequelize.define('Sortie', {
   receveur: {
     type: DataTypes.STRING,
     allowNull: false,
+  },
+  montant: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+    defaultValue: 0,
   },
   telephone_receveur: {
     type: DataTypes.STRING,

@@ -6,6 +6,7 @@ import { ListeEntreComponent } from './pages/liste-entre/liste-entre.component';
 import { ListeSortieComponent } from './pages/liste-sortie/liste-sortie.component';
 import { ListePartenaireComponent } from './pages/liste-partenaire/liste-partenaire.component';
 import { ListeDeviseComponent } from './pages/liste-devise/liste-devise.component';
+import { ListeRembourserComponent } from './pages/liste-rembourser/liste-rembourser.component';
 
 
 export const routes: Routes = [
@@ -41,6 +42,10 @@ export const routes: Routes = [
       {
         path: 'devise',
         component: ListeDeviseComponent,
+      },
+      {
+        path: 'rembourser',
+        component: ListeRembourserComponent,
       },
     ],
   },
