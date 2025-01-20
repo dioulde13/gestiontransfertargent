@@ -1,4 +1,3 @@
-const Rembourser = require('../models/rembourser'); // Modèle Rembourser
 const Utilisateur = require('../models/utilisateurs'); // Modèle Utilisateur
 const Entre = require('../models/entres'); // Modèle Partenaire
 const Payement = require('../models/payement');
@@ -25,9 +24,9 @@ const ajouterPayement = async (req, res) => {
       return res.status(404).json({ message: 'Entre introuvable.' });
     }
 
-     // Calcul du montant_preter
-     const montant_due = montant;
-     console.log(entre.montant_payer);
+    // Calcul du montant_preter
+    const montant_due = montant;
+    console.log(entre.montant_gnf);
 
 
     // Ajouter une entrée dans la table Rembourser
@@ -37,11 +36,19 @@ const ajouterPayement = async (req, res) => {
       montant,
     });
 
-     // Mettre à jour le montant_preter du partenaire
-     entre.montant_payer = (entre.montant || 0) + montant_due;
-     console.log(entre.montant_payer);
-    //  await entre.save(); // Sauvegarder les modifications dans la base de données
- 
+    // Mettre à jour le montant_preter du partenaire
+    entre.montant_payer = (entre.montant_payer ?? 0) + montant_due;
+    entre.montant_restant = (entre.montant_gnf ?? 0) - entre.montant_payer;
+
+    // Vérification du montant restant pour définir le type de paiement
+    if (entre.montant_restant === 0) {
+      entre.payement_type = "COMPLET";
+    }
+
+    // Enregistrement des modifications
+    await entre.save();
+
+
 
     res.status(201).json({
       message: 'Payement ajouté avec succès.',
@@ -64,7 +71,7 @@ const listerPayement = async (req, res) => {
         },
         {
           model: Entre,
-          attributes: ['id', 'code', 'montant_cfa', 'montant_payer', 'montant_restant'], // Champs à inclure pour le partenaire
+          attributes: ['id', 'code', 'expediteur', 'montant_cfa', 'montant_payer', 'montant_restant'], // Champs à inclure pour le partenaire
         },
       ],
     });

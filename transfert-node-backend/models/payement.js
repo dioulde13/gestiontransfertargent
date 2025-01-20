@@ -23,10 +23,6 @@ const Payement = sequelize.define('Payement', {
     allowNull: false,
     defaultValue: DataTypes.NOW, // Définit la date et l'heure actuelles par défaut
   },
-  code: {
-    type: DataTypes.STRING,
-    allowNull: false,
-  },
   montant: {
     type: DataTypes.BIGINT,
     allowNull: false,

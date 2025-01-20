@@ -123,6 +123,7 @@ const ajouterEntre = async (req, res) => {
       code: newCode, // Utiliser le code généré
       expediteur,
       receveur,
+      montant_gnf: montant_due,
       signe_1: Sign1,
       signe_2: Sign2,
       montant_cfa: montant_cfa || 0, // Par défaut 0 si non fourni

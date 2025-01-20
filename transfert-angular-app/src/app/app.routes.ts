@@ -7,7 +7,7 @@ import { ListeSortieComponent } from './pages/liste-sortie/liste-sortie.componen
 import { ListePartenaireComponent } from './pages/liste-partenaire/liste-partenaire.component';
 import { ListeDeviseComponent } from './pages/liste-devise/liste-devise.component';
 import { ListeRembourserComponent } from './pages/liste-rembourser/liste-rembourser.component';
-import { PayementComponent } from './pages/payement/payement.component';
+import { PayementsComponent } from './pages/payements/payements.component';
 
 
 export const routes: Routes = [
@@ -34,7 +34,7 @@ export const routes: Routes = [
       },
       {
         path: 'payement',
-        component: PayementComponent,
+        component: PayementsComponent,
       },
       {
         path: 'sortie',
