@@ -44,7 +44,7 @@ const ajouterEntre = async (req, res) => {
       deviseId,
       expediteur,
       receveur,
-      montant_gnf,
+      montant_cfa,
       telephone_receveur,
       payement_type,
       status,
@@ -95,7 +95,7 @@ const ajouterEntre = async (req, res) => {
     const PaysDest = devise.paysArriver;
 
     // Calcul du montant_preter
-    const montant_due = montant_gnf;
+    const montant_due = (montant_cfa / Prix1) * Prix2;
 
     // Générer le code automatiquement
     const lastEntry = await Entre.findOne({
@@ -125,7 +125,7 @@ const ajouterEntre = async (req, res) => {
       receveur,
       signe_1: Sign1,
       signe_2: Sign2,
-      montant_gnf: montant_gnf || 0, // Par défaut 0 si non fourni
+      montant_cfa: montant_cfa || 0, // Par défaut 0 si non fourni
       prix_1: Prix1, // Utiliser le prix_1 de Devise par défaut si non fourni
       prix_2: Prix2, // Par défaut 0 si non fourni
       telephone_receveur,

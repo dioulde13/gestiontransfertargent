@@ -1,4 +1,3 @@
-
 <div class="content-page">
   <div class="container-fluid">
     <div class="row">
@@ -25,7 +24,8 @@
                       <h5>Liste des entres</h5>
                       <div class="d-flex flex-wrap items-center justify-between">
                         <div class="pl-3 btn-new border-left">
-                          <a href="#" class="btn btn-primary" data-target="#new-project-modal" data-toggle="modal">Ajouter nouveau</a>
+                          <a href="#" class="btn btn-primary" data-target="#new-project-modal"
+                            data-toggle="modal">Ajouter nouveau</a>
                         </div>
                       </div>
                     </div>
@@ -33,42 +33,40 @@
                 </div>
               </div>
 
-              <table id="example" class="table data-table table-striped w-full">
+              <table id="example" class="table data-table table-striped table-flush" style="width:100%">
                 <thead>
                   <tr class="text-muted">
-                    <th>Id</th>
-                    <th>Pays exp</th>
-                    <th>Pays dest</th>
+                    <th class="border px-4 py-2">Id</th>
                     <th>Code</th>
+                    <th>Date du jours</th>
                     <th>Expéditeur</th>
                     <th>Receveur</th>
-                    <th>Téléphone Recev</th>
-                    <th>Montant GNF</th>
-                    <th>Prix GNF</th>
-                    <th>Partenaire</th>
+                    <th>Téléphone</th>
+                    <th>Montant En Cfa</th>
+                    <th>Prix</th>
+                    <th>Montant En GNF</th>
+                    <th>Montant payer GNF</th>
+                    <th>Montant restant GNF</th>
+                    <!-- <th>Partenaire</th> -->
                     <th>Paiement Status</th>
-                    <th>Status</th>
                   </tr>
                 </thead>
                 <tbody>
-                  <tr *ngFor="let result of allresultat; let i = index">
-                    <td class="text-center">{{ i + 1 }}</td>
-                    <td class="text-center">{{ result.pays_exp }}</td>
-                    <td class="border px-4 py-2">{{ result.pays_dest }}</td>
-                    <td class="text-center">{{ result.code }}</td>
-                    <td class="text-center">{{ result.expediteur }}</td>
-                    <td class="text-center">{{ result.receveur }}</td>
-                    <td class="text-center">{{ result.telephone_receveur }}</td>
-                    <td class="text-center">{{ result.montant_gnf + " GNF" }}</td>
-                    <td class="text-center">{{ result.prix_1 + " " + result.signe_2 + " -> " + result.prix_2 + " GNF" }}</td>
-                    <td class="text-center">{{ result.Partenaire.prenom + " " + result.Partenaire.nom }}</td>
-                    <td class="text-center">{{ result.payement_type }}</td>
-                    <td class="text-center">{{ result.status }}</td>
-                    <td class="text-center">
-                      <a class="btn btn-success btn-round btn-icon mx-1" role="button" rel="tooltip" href="voir-detail-parent.html">
-                        <i class="ri-eye-line m-0"></i>
-                      </a>
-                    </td>
+                <tbody>
+                  <tr *ngFor="let result of allresultat; let i = index" class="hover:bg-gray-100 even:bg-gray-50">
+                    <td >{{ result.id }}</td>
+                    <td>{{ result.code }}</td>
+                    <td>{{ result.date_creation | date:'dd/MM/yyyy HH:mm' }}</td>
+                    <td>{{ result.expediteur }}</td>
+                    <td>{{ result.receveur }}</td>
+                    <td>{{ result.telephone_receveur }}</td>
+                    <td>{{ result.montant_cfa | currency:'' :'' :'1.0-0'}} XOF</td>
+                    <td>{{ result.prix_2 | currency:'' :'' :'1.0-0'}} GNF</td>
+                    <td>{{ (result.montant_cfa / result.prix_1)  * result.prix_2 | currency:'' :'' :'1.0-0' }} GNF</td>
+                    <td>{{ result.montant_payer | currency:'' :'' :'1.0-0' }} GNF</td>
+                    <td>{{ result.montant_restant| currency:'' :'' :'1.0-0' }} GNF</td>
+                    <!-- <td>{{ result.Partenaire.prenom + " " + result.Partenaire.nom }}</td> -->
+                    <td>{{ result.payement_type }}</td>
                   </tr>
                 </tbody>
               </table>
@@ -80,7 +78,8 @@
   </div>
 </div>
 
-<div class="modal fade" id="new-project-modal" tabindex="-1" role="dialog" aria-labelledby="modalTitle" aria-hidden="true">
+<div class="modal fade" id="new-project-modal" tabindex="-1" role="dialog" aria-labelledby="modalTitle"
+  aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
     <div class="modal-content">
       <div class="modal-header">
@@ -94,37 +93,44 @@
           <div class="form-row">
             <div class="form-group col-md-6">
               <label for="utilisateurId">Utilisateur ID</label>
-              <input type="text" class="form-control" id="utilisateurId" formControlName="utilisateurId" placeholder="ID de l'utilisateur" />
+              <input type="text" class="form-control" id="utilisateurId" formControlName="utilisateurId"
+                placeholder="ID de l'utilisateur" />
             </div>
             <div class="form-group col-md-6">
               <label for="partenaireId">Partenaire ID</label>
-              <input type="text" class="form-control" id="partenaireId" formControlName="partenaireId" placeholder="ID du partenaire" />
+              <input type="text" class="form-control" id="partenaireId" formControlName="partenaireId"
+                placeholder="ID du partenaire" />
             </div>
           </div>
           <div class="form-row">
             <div class="form-group col-md-6">
               <label for="deviseId">Devise ID</label>
-              <input type="text" class="form-control" id="deviseId" formControlName="deviseId" placeholder="ID de la devise" />
+              <input type="text" class="form-control" id="deviseId" formControlName="deviseId"
+                placeholder="ID de la devise" />
             </div>
             <div class="form-group col-md-6">
               <label for="expediteur">Expéditeur</label>
-              <input type="text" class="form-control" id="expediteur" formControlName="expediteur" placeholder="Nom de l'expéditeur" />
+              <input type="text" class="form-control" id="expediteur" formControlName="expediteur"
+                placeholder="Nom de l'expéditeur" />
             </div>
           </div>
           <div class="form-row">
             <div class="form-group col-md-6">
               <label for="receveur">Receveur</label>
-              <input type="text" class="form-control" id="receveur" formControlName="receveur" placeholder="Nom du receveur" />
+              <input type="text" class="form-control" id="receveur" formControlName="receveur"
+                placeholder="Nom du receveur" />
             </div>
             <div class="form-group col-md-6">
               <label for="telephoneReceveur">Téléphone du receveur</label>
-              <input type="text" class="form-control" id="telephoneReceveur" formControlName="telephone_receveur" placeholder="Téléphone" />
+              <input type="text" class="form-control" id="telephoneReceveur" formControlName="telephone_receveur"
+                placeholder="Téléphone" />
             </div>
           </div>
           <div class="form-row">
             <div class="form-group col-md-6">
-              <label for="montantGnf">Montant GNF</label>
-              <input type="number" class="form-control" id="montantGnf" formControlName="montant_gnf" placeholder="Montant en GNF" />
+              <label for="montant_cfa">Montant CFA</label>
+              <input type="number" class="form-control" id="montant_cfa" formControlName="montant_cfa"
+                placeholder="Montant en CFA" />
             </div>
             <div class="form-group col-md-6">
               <label for="payementType">Type de paiement</label>

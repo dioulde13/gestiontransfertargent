@@ -54,8 +54,18 @@ const Entre = sequelize.define('Entre', {
     type: DataTypes.STRING,
     allowNull: false,
   },
-  montant_gnf: {
-    type: DataTypes.INTEGER,
+  montant_cfa: {
+    type: DataTypes.BIGINT,
+    allowNull: false,
+    defaultValue: 0,
+  },
+  montant_payer: {
+    type: DataTypes.BIGINT,
+    allowNull: false,
+    defaultValue: 0,
+  }, 
+  montant_restant: {
+    type: DataTypes.BIGINT,
     allowNull: false,
     defaultValue: 0,
   },

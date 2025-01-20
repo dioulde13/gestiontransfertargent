@@ -41,7 +41,7 @@ export class ListeEntreComponent implements OnInit {
       deviseId: ['', Validators.required],
       expediteur: ['', Validators.required],
       receveur: ['', Validators.required],
-      montant_gnf: [0, Validators.required],
+      montant_cfa: [0, Validators.required],
       telephone_receveur: ['', Validators.required],
       payement_type: ['', Validators.required],
       status: ['', Validators.required],
@@ -52,9 +52,9 @@ export class ListeEntreComponent implements OnInit {
   private fetchAllEntrees(): void {
     this.entreService.getAllEntree().subscribe({
       next: (response) => {
-        // Mise à jour du tableau avec les résultats récupérés
-        this.allresultat = response;
-        console.log('Données récupérées avec succès:', this.allresultat);
+        // Trier par ID en ordre décroissant
+        this.allresultat = response.sort((a: any, b: any) => b.id - a.id);
+        console.log(this.allresultat);
       },
       error: (error) => {
         // Gestion des erreurs lors de l'appel API
@@ -62,6 +62,7 @@ export class ListeEntreComponent implements OnInit {
       },
     });
   }
+  
 
   // Méthode pour soumettre le formulaire et ajouter une nouvelle entrée
   ajouterEntree(): void {

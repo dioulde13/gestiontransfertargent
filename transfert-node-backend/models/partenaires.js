@@ -30,7 +30,7 @@ const Partenaire = sequelize.define('Partenaire', {
     allowNull: false,
   },
   montant_preter: {
-    type: DataTypes.INTEGER,
+    type: DataTypes.BIGINT,
     allowNull: false,
     defaultValue: 0,
   },

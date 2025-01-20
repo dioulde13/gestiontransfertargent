@@ -8,6 +8,8 @@ const deviseRoutes = require('./routes/deviseRoutes'); // Importer les routes de
 const entreRoutes = require('./routes/entreRoutes'); // Importer les routes des entrées
 const sortieRoutes = require('./routes/sortieRoute'); // Importer les routes des entrées
 const rembourserRoutes = require('./routes/rembourserRoutes'); // Importer les routes des entrées
+const payementRoutes = require('./routes/payementRoutes'); // Importer les routes des entrées
+
 
 
 
@@ -43,10 +45,13 @@ app.use('/api/devises', deviseRoutes);
 app.use('/api/entrees', entreRoutes);
 
 // Utilisation des routes pour les sortie
-app.use('/api/sorties', sortieRoutes);
+app.use('/api/sorties', sortieRoutes); 
 
 // Utilisation des routes pour les sortie
 app.use('/api/rembourser', rembourserRoutes);
+
+app.use('/api/payement', payementRoutes);
+
 
 const PORT = 3000;
 app.listen(PORT, () => {

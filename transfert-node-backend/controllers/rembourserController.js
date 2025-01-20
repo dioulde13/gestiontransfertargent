@@ -26,6 +26,8 @@ const ajouterRemboursement = async (req, res) => {
 
      // Calcul du montant_preter
      const montant_due = montant;
+     console.log(partenaire.montant_preter);
+
 
     // Ajouter une entrée dans la table Rembourser
     const remboursement = await Rembourser.create({
@@ -36,6 +38,7 @@ const ajouterRemboursement = async (req, res) => {
 
      // Mettre à jour le montant_preter du partenaire
      partenaire.montant_preter = (partenaire.montant_preter || 0) - montant_due;
+     console.log(partenaire.montant_preter);
      await partenaire.save(); // Sauvegarder les modifications dans la base de données
  
 

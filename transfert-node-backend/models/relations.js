@@ -5,10 +5,16 @@ const Sortie = require('./sorties');
 const Partenaire = require('./partenaires');
 const Utilisateur = require('./utilisateurs');
 const Rembourser = require('./rembourser');
+const Payement = require('./payement');
+
 
 // Relation One-to-Many : Un Partenaire peut avoir plusieurs Entres
 Partenaire.hasMany(Entre, { foreignKey: 'partenaireId' });
 Entre.belongsTo(Partenaire, { foreignKey: 'partenaireId' });
+
+// Relation One-to-Many : Un Payement peut avoir plusieurs Entres
+Payement.hasMany(Entre, { foreignKey: 'payementId' });
+Entre.belongsTo(Payement, { foreignKey: 'payementId' });
 
 // Relation One-to-Many : Un Partenaire peut avoir plusieurs Sorties
 Partenaire.hasMany(Sortie, { foreignKey: 'partenaireId' });
