@@ -41,7 +41,7 @@ export class ListeSortieComponent  implements OnInit {
       deviseId: ['', Validators.required],
       expediteur: ['', Validators.required],
       receveur: ['', Validators.required],
-      montant_gnf: [0, Validators.required],
+      montant: [0, Validators.required],
       telephone_receveur: ['', Validators.required],
       payement_type: ['', Validators.required],
       status: ['', Validators.required],

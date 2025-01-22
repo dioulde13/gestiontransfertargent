@@ -71,7 +71,7 @@ const listerPayement = async (req, res) => {
         },
         {
           model: Entre,
-          attributes: ['id', 'code', 'expediteur', 'montant_cfa', 'montant_payer', 'montant_restant'], // Champs à inclure pour le partenaire
+          attributes: ['id', 'code', 'expediteur','pays_dest', 'montant_cfa', 'montant_payer', 'montant_restant'], // Champs à inclure pour le partenaire
         },
       ],
     });

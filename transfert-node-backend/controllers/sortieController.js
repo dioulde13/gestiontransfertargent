@@ -41,7 +41,7 @@ const ajouterSortie = async (req, res) => {
       deviseId,
       expediteur,
       receveur,
-      montant_gnf,
+      montant,
       telephone_receveur,
       payement_type,
       status,
@@ -53,6 +53,7 @@ const ajouterSortie = async (req, res) => {
       !deviseId ||
       !expediteur ||
       !receveur ||
+      !montant ||
       !telephone_receveur ||
       !payement_type ||
       !status
@@ -81,6 +82,11 @@ const ajouterSortie = async (req, res) => {
       return res.status(404).json({ message: 'Devise introuvable.' });
     }
 
+    const Prix1 = devise.prix_1 || 0;
+    const Prix2 = devise.prix_2 || 0;
+    const Sign1 = devise.signe_1;
+    const Sign2 = devise.signe_2;
+
     const lastEntry = await Sortie.findOne({ order: [['id', 'DESC']] });
     let newCode = 'ABS0001';
     if (lastEntry) {
@@ -90,34 +96,34 @@ const ajouterSortie = async (req, res) => {
       }
     }
 
-      const sortie = await Sortie.create({
-        utilisateurId,
-        partenaireId,
-        deviseId,
-        pays_exp: devise.paysDepart,
-        pays_dest: devise.paysArriver,
-        code: newCode,
-        expediteur,
-        receveur,
-        signe_1: devise.signe_1,
-        signe_2: devise.signe_2,
-        montant_gnf: montant_gnf || 0,
-        prix_1: devise.prix_1 || 0,
-        prix_2: devise.prix_2 || 0,
-        telephone_receveur,
-        payement_type,
-        status,
-      });
+    const sortie = await Sortie.create({
+      utilisateurId,
+      partenaireId,
+      deviseId,
+      pays_exp: devise.paysArriver,
+      pays_dest: devise.paysDepart,
+      code: newCode,
+      expediteur,
+      receveur,
+      signe_1: Sign1,
+      signe_2: Sign2,
+      prix_1: Prix1, // Utiliser le prix_1 de Devise par défaut si non fourni
+      prix_2: Prix2,
+      montant,
+      telephone_receveur,
+      payement_type,
+      status,
+    });
 
-      partenaire.montant_preter = (partenaire.montant_preter || 0) + montant_gnf;
-      await partenaire.save();
+    // partenaire.montant_preter = (partenaire.montant_preter || 0) + montant;
+    // await partenaire.save();
 
-      return res.status(201).json({
-        message: 'Sortie créée avec succès.',
-        sortie,
-        montant_preter: partenaire.montant_preter,
-      });
-   
+    return res.status(201).json({
+      message: 'Sortie créée avec succès.',
+      sortie,
+      // montant_preter: partenaire.montant_preter,
+    });
+
   } catch (error) {
     console.error("Erreur lors de l'ajout de la sortie :", error);
     res.status(500).json({ message: 'Erreur interne du serveur.' });

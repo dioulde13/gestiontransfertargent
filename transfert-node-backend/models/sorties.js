@@ -26,6 +26,26 @@ const Sortie = sequelize.define('Sortie', {
     type: DataTypes.STRING,
     allowNull: false,
   },
+  prix_1: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+    defaultValue: 0,
+  },
+  prix_2: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+    defaultValue: 0,
+  },
+  signe_1: {
+    type: DataTypes.STRING,
+    allowNull: false,
+    defaultValue: 0,
+  },
+  signe_2: {
+    type: DataTypes.STRING,
+    allowNull: false,
+    defaultValue: 0,
+  },
   pays_exp: {
     type: DataTypes.STRING,
     allowNull: false,

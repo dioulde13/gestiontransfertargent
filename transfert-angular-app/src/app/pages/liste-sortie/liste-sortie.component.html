@@ -37,14 +37,16 @@
                   <thead>
                     <tr class="text-muted">
                       <th>Id</th>
+                      <th>Date</th>
                       <th>Pays exp</th>
                       <th>Pays dest</th>
                       <th>Code</th>
                       <th>Expéditeur</th>
                       <th>Receveur</th>
                       <th>Téléphone Recev</th>
-                      <th>Montant GNF</th>
+                      <th>Montant </th>
                       <th>Prix GNF</th>
+                      <th>Montant GNF</th>
                       <th>Partenaire</th>
                       <th>Paiement Status</th>
                       <th>Status</th>
@@ -53,14 +55,16 @@
                   <tbody>
                     <tr *ngFor="let result of allresultat; let i = index">
                       <td class="text-center">{{ i + 1 }}</td>
+                      <td>{{ result.date_creation | date:'dd/MM/yyyy HH:mm' }}</td>
                       <td class="text-center">{{ result.pays_exp }}</td>
-                      <td class="border px-4 py-2">{{ result.pays_dest }}</td>
+                      <td class="border px-4 py-2">{{ result.pays_dest }}</td>           
                       <td class="text-center">{{ result.code }}</td>
                       <td class="text-center">{{ result.expediteur }}</td>
                       <td class="text-center">{{ result.receveur }}</td>
                       <td class="text-center">{{ result.telephone_receveur }}</td>
-                      <td class="text-center">{{ result.montant_gnf + " GNF" }}</td>
-                      <td class="text-center">{{ result.prix_1 + " " + result.signe_2 + " -> " + result.prix_2 + " GNF" }}</td>
+                      <td class="text-center">{{ result.montant + " XOF" }}</td>
+                      <td class="text-center">{{ result.prix_2 + " GNF" }}</td>
+                      <td>{{ (result.montant / result.prix_1)  * result.prix_2 | currency:'' :'' :'1.0-0' }} GNF</td>
                       <td class="text-center">{{ result.Partenaire.prenom + " " + result.Partenaire.nom }}</td>
                       <td class="text-center">{{ result.payement_type }}</td>
                       <td class="text-center">{{ result.status }}</td>
@@ -119,8 +123,8 @@
             </div>
             <div class="form-row">
               <div class="form-group col-md-6">
-                <label for="montantGnf">Montant GNF</label>
-                <input type="number" class="form-control" id="montantGnf" formControlName="montant_gnf" placeholder="Montant en GNF" />
+                <label for="montant">Montant GNF</label>
+                <input type="number" class="form-control" id="montant" formControlName="montant" placeholder="Montant en GNF" />
               </div>
               <div class="form-group col-md-6">
                 <label for="payementType">Type de paiement</label>

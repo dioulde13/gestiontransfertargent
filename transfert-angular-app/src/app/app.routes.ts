@@ -8,6 +8,9 @@ import { ListePartenaireComponent } from './pages/liste-partenaire/liste-partena
 import { ListeDeviseComponent } from './pages/liste-devise/liste-devise.component';
 import { ListeRembourserComponent } from './pages/liste-rembourser/liste-rembourser.component';
 import { PayementsComponent } from './pages/payements/payements.component';
+import { ListeDepenseComponent } from './pages/depenses/liste-depense.component';
+import { ListeCreditComponent } from './pages/credits/liste-credit.component';
+import { AuthGuard } from './services/guard/guard-service.guard';
 
 
 export const routes: Routes = [
@@ -27,30 +30,47 @@ export const routes: Routes = [
       {
         path: 'dashboard',
         component: DasboardComponent,
+        canActivate: [AuthGuard]
       },
       {
         path: 'entre',
         component: ListeEntreComponent,
+        canActivate: [AuthGuard]
       },
       {
         path: 'payement',
         component: PayementsComponent,
+        canActivate: [AuthGuard]
       },
       {
         path: 'sortie',
         component: ListeSortieComponent,
+        canActivate: [AuthGuard]
       },
       {
         path: 'partenaire',
         component: ListePartenaireComponent,
+        canActivate: [AuthGuard]
       },
       {
         path: 'devise',
         component: ListeDeviseComponent,
+        canActivate: [AuthGuard]
       },
       {
         path: 'rembourser',
         component: ListeRembourserComponent,
+        canActivate: [AuthGuard]
+      },
+      {
+        path: 'depense',
+        component: ListeDepenseComponent,
+        canActivate: [AuthGuard]
+      },
+      {
+        path: 'credit',
+        component: ListeCreditComponent,
+        canActivate: [AuthGuard]
       },
     ],
   },

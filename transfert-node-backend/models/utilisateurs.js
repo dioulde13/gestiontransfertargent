@@ -24,6 +24,11 @@ const Utilisateur = sequelize.define('Utilisateur', {
     type: DataTypes.STRING,
     allowNull: false,
   },
+  solde: {
+    type: DataTypes.BIGINT,
+    allowNull: false,
+    defaultValue: 0,
+  },
   email: {
     type: DataTypes.STRING,
     allowNull: false,
