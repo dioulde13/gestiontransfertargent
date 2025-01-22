@@ -53,7 +53,7 @@ const ajouterUtilisateur = async (req, res) => {
   }
 };
 
-const getAllUser = async (req, res) => {
+const getAllUser = async (res) => {
     try{
      const utilisateurs = await Utilisateur.findAll();
      res.status(200).json(utilisateurs);
@@ -114,6 +114,9 @@ const login = async (req, res) => {
         prenom: utilisateur.prenom,
         email: utilisateur.email,
         telephone: utilisateur.telephone,
+        solde: utilisateur.solde,
+        role: utilisateur.role,
+        btEnabled: utilisateur.btEnabled
       },
     });
   } catch (err) {

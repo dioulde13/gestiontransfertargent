@@ -31,7 +31,9 @@ export class LoginComponent implements OnInit{
     this.isLoading = true; // Activer l'indicateur de chargement
     this.authService.login(this.email, this.password).subscribe({
       next: (response) => {
+        console.log(response);
         this.authService.saveToken(response.token);
+        this.authService.setUserInfo(response.user);  // Sauvegarder les infos utilisateur             
         this.router.navigate(['/dashboard']); // Redirection après connexion
       },
       error: (err) => {

@@ -42,6 +42,11 @@ const Utilisateur = sequelize.define('Utilisateur', {
     allowNull: false,
     defaultValue: 'ADMIN', // Définir une valeur par défaut
   },
+  btEnabled: {
+    type: DataTypes.BOOLEAN,
+    allowNull: false, // Indique que la valeur ne peut pas être nulle
+    defaultValue: true, // Vous pouvez définir une valeur par défaut (true ou false)
+  },
 });
 
 module.exports = Utilisateur;
