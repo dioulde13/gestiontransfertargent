@@ -53,13 +53,20 @@ const ajouterUtilisateur = async (req, res) => {
   }
 };
 
-const getAllUser = async (res) => {
-    try{
-     const utilisateurs = await Utilisateur.findAll();
-     res.status(200).json(utilisateurs);
-    }catch{
-    res.status(500).json({ message: 'Erreur interne du serveur.' });
+const getAllUser = async (req, res) => {
+  try {
+    // Récupérer toutes les devises
+    const utilisateurs = await Utilisateur.findAll();
+    // Si aucune devise n'est trouvée
+    if (utilisateurs.length === 0) {
+      return res.status(404).json({ message: 'Aucune utilisateurs trouvée.' });
     }
+
+    res.status(200).json(utilisateurs);
+  } catch (error) {
+    console.error('Erreur lors de la récupération des utilisateurs :', error);
+    res.status(500).json({ message: 'Erreur interne du serveur.' });
+  }
 }
 
 // Connexion de l'utilisateur

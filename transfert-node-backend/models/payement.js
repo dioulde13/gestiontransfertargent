@@ -29,9 +29,9 @@ const Payement = sequelize.define('Payement', {
     defaultValue: 0,
   },
   type: {
-    type: DataTypes.ENUM('ENTRE', 'CREDIT'),
+    type: DataTypes.ENUM('CREDIT', 'ENTRE'),
     allowNull: false,
-    defaultValue: 'CREDIT', // Définir une valeur par défaut
+    defaultValue: 'ENTRE', // Définir une valeur par défaut
   },
 });
 

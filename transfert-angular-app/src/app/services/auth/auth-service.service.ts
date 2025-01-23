@@ -1,7 +1,6 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpParams, HttpHeaders } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import { Observable, throwError } from 'rxjs';
-import { catchError, tap } from 'rxjs/operators';
 
 @Injectable({
   providedIn: 'root',
@@ -14,9 +13,6 @@ export class AuthService {
   constructor(private http: HttpClient) {}
 
   login(email: string, password: string): Observable<any> {
-    console.log(email);
-    console.log(password);
-
     return this.http.post(`${this.apiUrl}/api/auth/login`, { email, password });
   }
 
@@ -80,13 +76,6 @@ export class AuthService {
         localStorage.removeItem('userInfo');
         this.userInfo = null;
       }
-    }
-  
-  
-    // Gérer les erreurs globalement
-    private handleError(error: any): Observable<never> {
-      console.error('Une erreur est survenue :', error);
-      return throwError(() => new Error(error.message || 'Erreur du serveur'));
     }
   
     // Fonction pour récupérer l'expiration du token

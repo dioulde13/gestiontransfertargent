@@ -11,6 +11,7 @@ import { PayementsComponent } from './pages/payements/payements.component';
 import { ListeDepenseComponent } from './pages/depenses/liste-depense.component';
 import { ListeCreditComponent } from './pages/credits/liste-credit.component';
 import { AuthGuard } from './services/guard/guard-service.guard';
+import { ListeUtilisateursComponent } from './pages/liste-utilisateurs/liste-utilisateurs.component';
 
 
 export const routes: Routes = [
@@ -70,6 +71,11 @@ export const routes: Routes = [
       {
         path: 'credit',
         component: ListeCreditComponent,
+        canActivate: [AuthGuard]
+      },
+      {
+        path: 'utilisateur',
+        component: ListeUtilisateursComponent,
         canActivate: [AuthGuard]
       },
     ],
