@@ -27,7 +27,12 @@ const Payement = sequelize.define('Payement', {
     type: DataTypes.BIGINT,
     allowNull: false,
     defaultValue: 0,
-  }
+  },
+  type: {
+    type: DataTypes.ENUM('ENTRE', 'CREDIT'),
+    allowNull: false,
+    defaultValue: 'CREDIT', // Définir une valeur par défaut
+  },
 });
 
 // Définir l'association : Une Entree appartient à un 

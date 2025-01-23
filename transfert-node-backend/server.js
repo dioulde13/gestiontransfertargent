@@ -10,6 +10,10 @@ const sortieRoutes = require('./routes/sortieRoute'); // Importer les routes des
 const rembourserRoutes = require('./routes/rembourserRoutes'); // Importer les routes des entrées
 const payementRoutes = require('./routes/payementRoutes'); // Importer les routes des entrées
 const authRoutes = require('./routes/authRoute'); // Importer les routes des entrées
+const depenseRoute = require('./routes/depenseRoute'); // Importer les routes des entrées
+const creditRoute = require('./routes/creditRoute'); // Importer les routes des entrées
+
+
 
 
 
@@ -51,6 +55,10 @@ app.use('/api/sorties', sortieRoutes);
 app.use('/api/rembourser', rembourserRoutes);
 
 app.use('/api/payement', payementRoutes);
+
+app.use('/api/depense', depenseRoute);
+
+app.use('/api/credit', creditRoute);
 
 app.use('/api/auth', authRoutes);
 

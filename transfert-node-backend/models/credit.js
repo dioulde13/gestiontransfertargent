@@ -21,10 +21,6 @@ const Credit = sequelize.define('Credit', {
     type: DataTypes.STRING,
     allowNull: false,
   },
-  motif: {
-    type: DataTypes.STRING,
-    allowNull: false,
-  },
   montant: {
     type: DataTypes.BIGINT,
     allowNull: false,

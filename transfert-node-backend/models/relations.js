@@ -6,8 +6,8 @@ const Partenaire = require('./partenaires');
 const Utilisateur = require('./utilisateurs');
 const Rembourser = require('./rembourser');
 const Payement = require('./payement');
-const Depense = require('./depenses');
-const Credit = require('./credits');
+const Depense = require('./depense');
+const Credit = require('./credit');
 
 
 

@@ -17,11 +17,7 @@ const Depense = sequelize.define('Depense', {
     allowNull: false,
     defaultValue: DataTypes.NOW,
   },
-  nom: {
-    type: DataTypes.STRING,
-    allowNull: false,
-  },
-  description: {
+  motif: {
     type: DataTypes.STRING,
     allowNull: false,
   },
