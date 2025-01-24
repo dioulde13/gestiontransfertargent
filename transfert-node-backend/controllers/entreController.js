@@ -3,28 +3,26 @@ const Utilisateur = require('../models/utilisateurs');
 const Partenaire = require('../models/partenaires');
 const Devise = require('../models/devises');
 
-
+// Récupérer les entrées avec les associations
 const recupererEntreesAvecAssocies = async (req, res) => {
   try {
-    // Récupérer toutes les entrées avec les informations de l'utilisateur et du partenaire associés
     const entrees = await Entre.findAll({
       include: [
         {
           model: Utilisateur,
-          attributes: ['id', 'nom', 'prenom', 'email'], // Ajouter les champs nécessaires de l'utilisateur
+          attributes: ['id', 'nom', 'prenom', 'email', 'solde'], // Champs nécessaires de l'utilisateur
         },
         {
           model: Partenaire,
-          attributes: ['id', 'nom', 'prenom', 'montant_preter'], // Ajouter les champs nécessaires du partenaire
+          attributes: ['id', 'nom', 'prenom', 'montant_preter'], // Champs nécessaires du partenaire
         },
         {
-            model: Devise,
-            attributes: ['id', 'paysDepart', 'paysArriver', 'signe_1', 'signe_2', 'prix_1', 'prix_2', 'prix_1'], // Ajouter les champs nécessaires du partenaire
-          },
+          model: Devise,
+          attributes: ['id', 'paysDepart', 'paysArriver', 'signe_1', 'signe_2', 'prix_1', 'prix_2'], // Champs nécessaires de la devise
+        },
       ],
     });
 
-    // Si aucune entrée n'est trouvée
     if (entrees.length === 0) {
       return res.status(404).json({ message: 'Aucune entrée trouvée.' });
     }
@@ -36,6 +34,7 @@ const recupererEntreesAvecAssocies = async (req, res) => {
   }
 };
 
+// Ajouter une entrée
 const ajouterEntre = async (req, res) => {
   try {
     const {
@@ -45,10 +44,10 @@ const ajouterEntre = async (req, res) => {
       expediteur,
       receveur,
       montant_cfa,
-      telephone_receveur,
-      payement_type,
-      status,
+      telephone_receveur
     } = req.body;
+
+ 
 
     // Vérifier si tous les champs obligatoires sont présents
     if (
@@ -57,23 +56,10 @@ const ajouterEntre = async (req, res) => {
       !deviseId ||
       !expediteur ||
       !receveur ||
-      !telephone_receveur ||
-      !payement_type ||
-      !status
+      !montant_cfa ||
+      !telephone_receveur
     ) {
       return res.status(400).json({ message: 'Tous les champs obligatoires doivent être remplis.' });
-    }
-
-    // Validation des champs ENUM
-    const validPayementTypes = ['COMPLET', 'NON COMPLET'];
-    const validStatuses = ['NON PAYEE', 'PAYEE', 'CREDIT', 'ANNULEE'];
-
-    if (!validPayementTypes.includes(payement_type)) {
-      return res.status(400).json({ message: `Type de paiement invalide. Les valeurs acceptées sont : ${validPayementTypes.join(', ')}` });
-    }
-
-    if (!validStatuses.includes(status)) {
-      return res.status(400).json({ message: `Statut invalide. Les valeurs acceptées sont : ${validStatuses.join(', ')}` });
     }
 
     // Vérifier si le partenaire existe
@@ -82,7 +68,13 @@ const ajouterEntre = async (req, res) => {
       return res.status(404).json({ message: 'Partenaire introuvable.' });
     }
 
-    // Récupérer le prix_1, prix_2, signe_1, signe_2 et paysArriver depuis la table Devise
+    // Récupérer les informations de l'utilisateur connecté
+    const utilisateur = await Utilisateur.findByPk(utilisateurId);
+    if (!utilisateur) {
+      return res.status(404).json({ message: 'Utilisateur introuvable.' });
+    }
+
+    // Récupérer les informations de la devise
     const devise = await Devise.findByPk(deviseId);
     if (!devise) {
       return res.status(404).json({ message: 'Devise introuvable.' });
@@ -94,64 +86,65 @@ const ajouterEntre = async (req, res) => {
     const Sign2 = devise.signe_2;
     const PaysDest = devise.paysArriver;
 
-    // Calcul du montant_preter
-    const montant_due = (montant_cfa / Prix1) * Prix2;
+    const montant_due = (montant_cfa / Prix1) * Prix2; // Calcul du montant dû
+    const soldeCaise = montant_due; // Solde ajouté à l'utilisateur connecté
 
     // Générer le code automatiquement
     const lastEntry = await Entre.findOne({
-      order: [['id', 'DESC']], // Récupérer la dernière entrée
+      order: [['id', 'DESC']],
     });
 
-    let newCode = 'AB0001'; // Code par défaut si aucune entrée n'existe
+    let newCode = 'AB0001';
     if (lastEntry) {
-      const lastCode = lastEntry.code || ''; // S'assurer que lastCode est défini
-      const numericPart = parseInt(lastCode.slice(2), 10); // Extraire la partie numérique
+      const lastCode = lastEntry.code || '';
+      const numericPart = parseInt(lastCode.slice(2), 10);
       if (!isNaN(numericPart)) {
-        const incrementedPart = (numericPart + 1).toString().padStart(4, '0'); // Incrémenter et formater
-        newCode = `AB${incrementedPart}`; // Exemple : "AB0024"
+        const incrementedPart = (numericPart + 1).toString().padStart(4, '0');
+        newCode = `AB${incrementedPart}`;
       }
     }
 
-    if(devise.paysArriver === partenaire.pays){
-       // Créer une nouvelle entrée
-    const entre = await Entre.create({
-      utilisateurId,
-      partenaireId,
-      deviseId,
-      pays_exp: 'Guinée',
-      pays_dest: PaysDest,
-      code: newCode, // Utiliser le code généré
-      expediteur,
-      receveur,
-      montant_gnf: montant_due,
-      signe_1: Sign1,
-      signe_2: Sign2,
-      montant_cfa: montant_cfa || 0, // Par défaut 0 si non fourni
-      prix_1: Prix1, // Utiliser le prix_1 de Devise par défaut si non fourni
-      prix_2: Prix2, // Par défaut 0 si non fourni
-      telephone_receveur,
-      payement_type,
-      status,
-    });
+    if (devise.paysArriver === partenaire.pays) {
+      // Créer une nouvelle entrée
+      const entre = await Entre.create({
+        utilisateurId,
+        partenaireId,
+        deviseId,
+        pays_exp: 'Guinée',
+        pays_dest: PaysDest,
+        code: newCode,
+        expediteur,
+        receveur,
+        montant_gnf: montant_due,
+        signe_1: Sign1,
+        signe_2: Sign2,
+        montant_cfa: montant_cfa || 0,
+        prix_1: Prix1,
+        prix_2: Prix2,
+        telephone_receveur
+      });
 
-    // Mettre à jour le montant_preter du partenaire
-    partenaire.montant_preter = (partenaire.montant_preter || 0) + montant_due;
-    await partenaire.save(); // Sauvegarder les modifications dans la base de données
+      // Mettre à jour le solde de l'utilisateur connecté
+      utilisateur.solde = (utilisateur.solde || 0) + soldeCaise;
+      await utilisateur.save();
 
-    res.status(201).json({
-      message: 'Entrée créée avec succès.',
-      entre,
-      montant_preter: partenaire.montant_preter, // Inclure le montant préter dans la réponse
-    });
-    } else{
+      // Mettre à jour le montant_prêter du partenaire
+      partenaire.montant_preter = (partenaire.montant_preter || 0) + montant_due;
+      await partenaire.save();
+
+      res.status(201).json({
+        message: 'Entrée créée avec succès.',
+        entre,
+        solde: utilisateur.solde,
+        montant_preter: partenaire.montant_preter,
+      });
+    } else {
       res.status(400).json({ message: 'Le pays de destination ne correspond pas au pays du partenaire.' });
     }
-  
   } catch (error) {
-    console.error('Erreur lors de l\'ajout de l\'entrée :', error);
+    console.error("Erreur lors de l'ajout de l'entrée :", error);
     res.status(500).json({ message: 'Erreur interne du serveur.' });
   }
 };
 
-
-module.exports = { ajouterEntre, recupererEntreesAvecAssocies};
+module.exports = { ajouterEntre, recupererEntreesAvecAssocies };

@@ -42,9 +42,7 @@ const ajouterSortie = async (req, res) => {
       expediteur,
       receveur,
       montant,
-      telephone_receveur,
-      payement_type,
-      status,
+      telephone_receveur
     } = req.body;
 
     if (
@@ -54,28 +52,21 @@ const ajouterSortie = async (req, res) => {
       !expediteur ||
       !receveur ||
       !montant ||
-      !telephone_receveur ||
-      !payement_type ||
-      !status
+      !telephone_receveur
     ) {
       return res.status(400).json({ message: 'Tous les champs obligatoires doivent être remplis.' });
-    }
-
-    const validPayementTypes = ['COMPLET', 'NON COMPLET'];
-    const validStatuses = ['NON PAYEE', 'PAYEE', 'CREDIT', 'ANNULEE'];
-
-    if (!validPayementTypes.includes(payement_type)) {
-      return res.status(400).json({ message: `Type de paiement invalide. Valeurs acceptées : ${validPayementTypes.join(', ')}` });
-    }
-
-    if (!validStatuses.includes(status)) {
-      return res.status(400).json({ message: `Statut invalide. Valeurs acceptées : ${validStatuses.join(', ')}` });
     }
 
     const partenaire = await Partenaire.findByPk(partenaireId);
     if (!partenaire) {
       return res.status(404).json({ message: 'Partenaire introuvable.' });
     }
+
+     // Récupérer les informations de l'utilisateur connecté
+     const utilisateur = await Utilisateur.findByPk(utilisateurId);
+     if (!utilisateur) {
+       return res.status(404).json({ message: 'Utilisateur introuvable.' });
+     }
 
     const devise = await Devise.findByPk(deviseId);
     if (!devise) {
@@ -86,6 +77,10 @@ const ajouterSortie = async (req, res) => {
     const Prix2 = devise.prix_2 || 0;
     const Sign1 = devise.signe_1;
     const Sign2 = devise.signe_2;
+
+    const montant_due = (montant / Prix1) * Prix2; // Calcul du montant dû
+    const soldeCaise = montant_due; // Solde ajouté à l'utilisateur connecté
+
 
     const lastEntry = await Sortie.findOne({ order: [['id', 'DESC']] });
     let newCode = 'ABS0001';
@@ -104,19 +99,23 @@ const ajouterSortie = async (req, res) => {
       pays_dest: devise.paysDepart,
       code: newCode,
       expediteur,
+      telephone_receveur,
       receveur,
+      montant_gnf: montant_due,
       signe_1: Sign1,
       signe_2: Sign2,
       prix_1: Prix1, // Utiliser le prix_1 de Devise par défaut si non fourni
       prix_2: Prix2,
-      montant,
-      telephone_receveur,
-      payement_type,
-      status,
+      montant: montant,
     });
 
-    // partenaire.montant_preter = (partenaire.montant_preter || 0) + montant;
-    // await partenaire.save();
+      // Mettre à jour le solde de l'utilisateur connecté
+      utilisateur.solde = (utilisateur.solde || 0) - soldeCaise;
+      await utilisateur.save();
+
+      // Mettre à jour le montant_prêter du partenaire
+      partenaire.montant_preter = (partenaire.montant_preter || 0) - montant_due;
+      await partenaire.save();
 
     return res.status(201).json({
       message: 'Sortie créée avec succès.',

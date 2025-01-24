@@ -44,12 +44,9 @@
                       <th>Expéditeur</th>
                       <th>Receveur</th>
                       <th>Téléphone Recev</th>
-                      <th>Montant </th>
+                      <th>Montant XOF</th>
                       <th>Prix GNF</th>
-                      <th>Montant GNF</th>
-                      <th>Partenaire</th>
-                      <th>Paiement Status</th>
-                      <th>Status</th>
+                      <th>Montant GNF</th>  
                     </tr>
                   </thead>
                   <tbody>
@@ -62,13 +59,9 @@
                       <td class="text-center">{{ result.expediteur }}</td>
                       <td class="text-center">{{ result.receveur }}</td>
                       <td class="text-center">{{ result.telephone_receveur }}</td>
-                      <td class="text-center">{{ result.montant + " XOF" }}</td>
-                      <td class="text-center">{{ result.prix_2 + " GNF" }}</td>
+                      <td class="text-center">{{ result.montant | currency:'' :'' :'1.0-0' }} XOF</td>
+                      <td class="text-center">{{ result.prix_2 | currency:'' :'' :'1.0-0'}} GNF</td>
                       <td>{{ (result.montant / result.prix_1)  * result.prix_2 | currency:'' :'' :'1.0-0' }} GNF</td>
-                      <td class="text-center">{{ result.Partenaire.prenom + " " + result.Partenaire.nom }}</td>
-                      <td class="text-center">{{ result.payement_type }}</td>
-                      <td class="text-center">{{ result.status }}</td>
-                     
                     </tr>
                   </tbody>
                 </table>
@@ -93,55 +86,62 @@
           <form [formGroup]="sortieForm" (ngSubmit)="ajouterEntree()">
             <div class="form-row">
               <div class="form-group col-md-6">
-                <label for="utilisateurId">Utilisateur ID</label>
-                <input type="text" class="form-control" id="utilisateurId" formControlName="utilisateurId" placeholder="ID de l'utilisateur" />
-              </div>
-              <div class="form-group col-md-6">
-                <label for="partenaireId">Partenaire ID</label>
-                <input type="text" class="form-control" id="partenaireId" formControlName="partenaireId" placeholder="ID du partenaire" />
-              </div>
-            </div>
-            <div class="form-row">
-              <div class="form-group col-md-6">
-                <label for="deviseId">Devise ID</label>
-                <input type="text" class="form-control" id="deviseId" formControlName="deviseId" placeholder="ID de la devise" />
-              </div>
-              <div class="form-group col-md-6">
                 <label for="expediteur">Expéditeur</label>
-                <input type="text" class="form-control" id="expediteur" formControlName="expediteur" placeholder="Nom de l'expéditeur" />
+                <input type="text" class="form-control" id="expediteur" formControlName="expediteur"
+                  placeholder="Nom de l'expéditeur" />
               </div>
-            </div>
-            <div class="form-row">
               <div class="form-group col-md-6">
                 <label for="receveur">Receveur</label>
-                <input type="text" class="form-control" id="receveur" formControlName="receveur" placeholder="Nom du receveur" />
-              </div>
-              <div class="form-group col-md-6">
-                <label for="telephoneReceveur">Téléphone du receveur</label>
-                <input type="text" class="form-control" id="telephoneReceveur" formControlName="telephone_receveur" placeholder="Téléphone" />
+                <input type="text" class="form-control" id="receveur" formControlName="receveur"
+                  placeholder="Nom du receveur" />
               </div>
             </div>
             <div class="form-row">
               <div class="form-group col-md-6">
-                <label for="montant">Montant GNF</label>
-                <input type="number" class="form-control" id="montant" formControlName="montant" placeholder="Montant en GNF" />
+                <label for="telephoneReceveur">Téléphone du receveur</label>
+                <input type="text" class="form-control" id="telephoneReceveur" formControlName="telephone_receveur"
+                  placeholder="Téléphone" />
               </div>
               <div class="form-group col-md-6">
-                <label for="payementType">Type de paiement</label>
-                <select class="form-control" id="payementType" formControlName="payement_type">
-                  <option value="COMPLET">COMPLET</option>
-                  <option value="NON COMPLET">NON COMPLET</option>
-                </select>
+                <div class="form-group mb-3">
+                  <label for="devise">Pays destination</label>
+                  <select
+                    class="form-control"
+                    id="devise"
+                    formControlName="deviseId"
+                    required
+                  >
+                    <option value="" disabled selected>Sélectionnez un pays</option>
+                    <option *ngFor="let devise of allDevise" [value]="devise.id">
+                      {{ devise.paysArriver }}
+                    </option>
+                  </select>
+                </div>
+                
               </div>
             </div>
-            <div class="form-group">
-              <label for="status">Statut</label>
-              <select class="form-control" id="status" formControlName="status">
-                <option value="NON PAYEE">NON PAYEE</option>
-                <option value="PAYEE">PAYEE</option>
-                <option value="CREDIT">CREDIT</option>
-                <option value="ANNULEE">ANNULEE</option>
-              </select>
+            <div class="form-row">
+              <div class="form-group col-md-6">
+                <div class="form-group mb-3">
+                  <label for="devise">Partenaire</label>
+                  <select
+                    class="form-control"
+                    id="partenaire"
+                    formControlName="partenaireId"
+                    required
+                  >
+                    <option value="" disabled selected>Sélectionnez un partenaire</option>
+                    <option *ngFor="let partenaire of allPartenaire" [value]="partenaire.id">
+                      {{ partenaire.prenom+" "+ partenaire.nom+" "+ (partenaire.montant_preter | currency:'' :'' :'1.0-0')}}
+                    </option>
+                  </select>
+                </div>
+              </div>
+              <div class="form-group col-md-6">
+                <label for="montant">Montant CFA</label>
+                <input type="number" class="form-control" id="montant" formControlName="montant"
+                  placeholder="Montant en CFA" />
+              </div>
             </div>
             <div class="modal-footer">
               <button type="button" class="btn btn-secondary" data-dismiss="modal">Annuler</button>

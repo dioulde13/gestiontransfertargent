@@ -10,4 +10,7 @@ router.post('/login', utilisateurController.login);
 // Route pour connecter un utilisateur
 router.get('/all', utilisateurController.getAllUser);
 
+router.get('/infoUser', utilisateurController.getUserInfo);
+
+
 module.exports = router;

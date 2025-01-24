@@ -41,6 +41,7 @@
                       <th class="border px-4 py-2">Prenom</th>
                       <th class="border px-4 py-2">Eamil</th>
                       <th class="border px-4 py-2">Telephone</th>
+                      <th class="border px-4 py-2">Role</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -51,6 +52,7 @@
                       <td >{{ result.prenom }}</td>
                       <td >{{ result.email }}</td>
                       <td >{{ result.telephone }}</td>
+                      <td >{{ result.role }}</td>
                     </tr>
                   </tbody>
                 </table>
@@ -141,7 +143,7 @@
                 <label for="vcRole">Rôle</label>
                 <select
                   id="vcRole"
-                  [(ngModel)]="user.vcRole"
+                  [(ngModel)]="user.role"
                   name="vcRole"
                   class="form-control"
                   required

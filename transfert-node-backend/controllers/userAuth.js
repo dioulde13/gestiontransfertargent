@@ -6,6 +6,59 @@ const { ValidationError } = require('sequelize');
 // Clé secrète JWT
 const JWT_SECRET = 'votre_clé_secrète_pour_jwt';
 
+
+// Récupérer les informations de l'utilisateur connecté
+const getUserInfo = async (req, res) => {
+  try {
+    // Récupérer le token depuis l'en-tête Authorization
+    const authHeader = req.headers.authorization;
+
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      return res.status(401).json({
+        success: false,
+        message: 'Token manquant ou invalide.',
+      });
+    }
+
+    const token = authHeader.split(' ')[1];
+
+    // Vérifier et décoder le token
+    const decoded = jwt.verify(token, JWT_SECRET);
+
+    // Récupérer l'utilisateur à partir de l'ID présent dans le token
+    const utilisateur = await Utilisateur.findOne({
+      where: { id: decoded.id },
+      attributes: { exclude: ['password'] }, // Exclure le mot de passe pour des raisons de sécurité
+    });
+
+    if (!utilisateur) {
+      return res.status(404).json({
+        success: false,
+        message: 'Utilisateur non trouvé.',
+      });
+    }
+
+    // Retourner les informations de l'utilisateur
+    res.status(200).json({
+      success: true,
+      user: utilisateur,
+    });
+  } catch (err) {
+    if (err.name === 'JsonWebTokenError') {
+      return res.status(401).json({
+        success: false,
+        message: 'Token invalide.',
+      });
+    }
+    res.status(500).json({
+      success: false,
+      message: 'Erreur lors de la récupération des informations utilisateur.',
+      error: err.message,
+    });
+  }
+};
+
+
 // Ajouter un utilisateur
 const ajouterUtilisateur = async (req, res) => {
   try {
@@ -135,4 +188,4 @@ const login = async (req, res) => {
   }
 };
 
-module.exports = { ajouterUtilisateur, login , getAllUser};
+module.exports = { ajouterUtilisateur, login , getAllUser, getUserInfo};

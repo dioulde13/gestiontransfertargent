@@ -15,7 +15,7 @@ interface User {
   date_creation: string;
   email: string;
   password: string;
-  vcRole: string;
+  role: string;
   btEnabled: boolean;
 }
 
@@ -65,7 +65,7 @@ export class ListeUtilisateursComponent implements OnInit {
       date_creation: '',
       email: '',
       password: '',
-      vcRole: '',
+      role: '',
       btEnabled: true,
     };
   }
@@ -92,7 +92,7 @@ export class ListeUtilisateursComponent implements OnInit {
 
   filterByRole(): void {
     this.filteredUsers = this.selectedRole
-      ? this.users.filter(user => user.vcRole === this.selectedRole)
+      ? this.users.filter(user => user.role === this.selectedRole)
       : [...this.users];
   }
 
@@ -187,7 +187,7 @@ export class ListeUtilisateursComponent implements OnInit {
       this.user.telephone.trim() !== '' &&
       this.user.email.trim() !== '' &&
       this.user.password.trim() !== '' &&
-      this.user.vcRole.trim() !== ''
+      this.user.role.trim() !== ''
     );
   }
 }

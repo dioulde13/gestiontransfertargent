@@ -1,19 +1,25 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormBuilder, FormGroup,ReactiveFormsModule, Validators } from '@angular/forms';
+import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { SortieService } from '../../services/sortie/sortie.service';
+import { AuthService } from '../../services/auth/auth-service.service';
+import { DeviseService } from '../../services/devise/devise.service';
+import { PartenaireServiceService } from '../../services/partenaire/partenaire-service.service';
 
 
 @Component({
   selector: 'app-liste-sortie',
   standalone: true,
-  imports: [CommonModule,ReactiveFormsModule],
+  imports: [CommonModule, ReactiveFormsModule],
   templateUrl: './liste-sortie.component.html',
   styleUrl: './liste-sortie.component.css'
 })
-export class ListeSortieComponent  implements OnInit {
+export class ListeSortieComponent implements OnInit {
   // Tableau pour stocker les résultats des entrées
   allresultat: any[] = [];
+
+  userInfo: any = null;
+  idUser: string = '';
 
   // Formulaire pour ajouter une entrée
   sortieForm!: FormGroup;
@@ -21,8 +27,11 @@ export class ListeSortieComponent  implements OnInit {
   // Injection des dépendances nécessaires
   constructor(
     private sortieService: SortieService,
+    private authService: AuthService,
+    private deviseService: DeviseService,
+    private partenaireService: PartenaireServiceService,
     private fb: FormBuilder
-  ) {}
+  ) { }
 
   // Initialisation du composant
   ngOnInit(): void {
@@ -31,20 +40,69 @@ export class ListeSortieComponent  implements OnInit {
 
     // Récupération des données existantes via l'API
     this.fetchAllEntrees();
+    this.getUserInfo(); // Récupération des infos utilisateur
+    this.fetchAllEntrees(); // Récupération des données existantes
+    this.fetchDevise();
+    this.fetchPartenaire();
   }
+
+  allPartenaire: any[] = [];
+
+  // Récupération des devises
+  fetchPartenaire(): void {
+    this.partenaireService.getAllPartenaire().subscribe(
+      (response) => {
+        this.allPartenaire = response;
+        console.log('Liste des partenaires:', this.allPartenaire);
+      },
+      (error) => {
+        console.error('Erreur lors de la récupération des partenaires:', error);
+      }
+    );
+  }
+
+  allDevise: any[] = [];
+
+  // Récupération des devises
+  fetchDevise(): void {
+    this.deviseService.getAllDevise().subscribe(
+      (response) => {
+        this.allDevise = response;
+        console.log('Liste des devises:', this.allDevise);
+      },
+      (error) => {
+        console.error('Erreur lors de la récupération des devises:', error);
+      }
+    );
+  }
+
+  getUserInfo() {
+    this.authService.getUserInfo().subscribe(
+      {
+        next: (response) => {
+          this.userInfo = response.user;
+          //   if (this.userInfo) {
+          this.idUser = this.userInfo.id;
+          console.log('Informations utilisateur:', this.userInfo);
+
+          // Mettre à jour le champ utilisateurId dans le formulaire
+          this.sortieForm.patchValue({ utilisateurId: this.idUser });
+        }
+      }
+    );
+  }
+
 
   // Initialiser le formulaire avec des validations
   private initForm() {
     this.sortieForm = this.fb.group({
-      utilisateurId: ['', Validators.required],
+      utilisateurId: [this.idUser], // Liaison utilisateurId
       partenaireId: ['', Validators.required],
-      deviseId: ['', Validators.required],
+      deviseId: ['', Validators.required], // Initialisé à vide
       expediteur: ['', Validators.required],
       receveur: ['', Validators.required],
       montant: [0, Validators.required],
       telephone_receveur: ['', Validators.required],
-      payement_type: ['', Validators.required],
-      status: ['', Validators.required],
     });
   }
 
@@ -65,6 +123,7 @@ export class ListeSortieComponent  implements OnInit {
 
   // Méthode pour soumettre le formulaire et ajouter une nouvelle entrée
   ajouterEntree(): void {
+    console.log(this.sortieForm.value);
     if (this.sortieForm.valid) {
       const formData = this.sortieForm.value; // Récupérer les valeurs du formulaire
       this.sortieService.ajouterSortie(formData).subscribe({

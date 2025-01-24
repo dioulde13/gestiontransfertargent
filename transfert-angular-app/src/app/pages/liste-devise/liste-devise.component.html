@@ -87,8 +87,8 @@
                                         <td class="border px-4 py-2">{{ i + 1 }}</td>
                                         <td class="border px-4 py-2">{{ result.paysDepart }}</td>
                                         <td class="border px-4 py-2">{{ result.paysArriver }}</td>
-                                        <td class="border px-4 py-2">{{ result.prix_1 +" "+result.signe_2}}</td>
-                                        <td class="border px-4 py-2">{{ result.prix_2 +" "+result.signe_1}}</td>
+                                        <td class="border px-4 py-2">{{ (result.prix_1 | currency:'' :'' :'1.0-0') +" "+result.signe_2}}</td>
+                                        <td class="border px-4 py-2">{{ (result.prix_2  | currency:'' :'' :'1.0-0') +" "+result.signe_1}}</td>
                                     </tr>
                             </table>
                         </div>
