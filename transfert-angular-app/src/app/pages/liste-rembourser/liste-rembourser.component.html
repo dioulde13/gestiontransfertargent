@@ -78,6 +78,25 @@
                 </option>
               </select>
             </div>
+            <div class="form-group mb-3">
+              <label for="nom">Nom client</label>
+              <input type="text" class="form-control" id="nom" formControlName="nom"
+                placeholder="Nom du client" />
+            </div>
+              <div class="form-group mb-3">
+                <label for="devise">Prix</label>
+                <select
+                  class="form-control"
+                  id="devise"
+                  formControlName="deviseId"
+                  required
+                >
+                  <option value="" disabled selected>Sélectionnez un prix</option>
+                  <option *ngFor="let devise of allDevise" [value]="devise.id">
+                    {{ devise.paysArriver+" "+ (devise.prix_1 | currency:'' :'' :'1.0-0')+" "+ devise.signe_2 +"->"+ (devise.prix_2 | currency:'' :'' :'1.0-0') +" "+ devise.signe_1 }}
+                  </option>
+                </select>
+            </div>
           <div class="form-group">
             <label for="montant">Montant</label>
             <input id="montant" formControlName="montant" class="form-control" type="number" />

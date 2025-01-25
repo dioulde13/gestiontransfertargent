@@ -5,6 +5,7 @@ import { ReactiveFormsModule } from '@angular/forms'; // Import du module des fo
 import { RembourserService } from '../../services/rembourser/rembourser.service';
 import { AuthService } from '../../services/auth/auth-service.service';
 import { PartenaireServiceService } from '../../services/partenaire/partenaire-service.service';
+import { DeviseService } from '../../services/devise/devise.service';
 
 @Component({
   selector: 'app-liste-rembourser',
@@ -25,6 +26,7 @@ export class ListeRembourserComponent implements OnInit {
   constructor(
     private fb: FormBuilder,
     private authService: AuthService,
+    private deviseService: DeviseService,
     private partenaireService: PartenaireServiceService,
     private rembourserService: RembourserService
   ) { }
@@ -35,11 +37,29 @@ export class ListeRembourserComponent implements OnInit {
     // Initialisation du formulaire avec les validations
     this.rembourserForm = this.fb.group({
       utilisateurId: [this.idUser],
+      deviseId: ['', Validators.required],
       partenaireId: ['', Validators.required],
+      nom: ['', Validators.required],
       montant: [0, [Validators.required, Validators.min(0)]],
     });
     this.getUserInfo(); // Récupération des infos utilisateur
     this.fetchPartenaire();
+    this.fetchDevise();
+  }
+
+  allDevise: any[] = [];
+
+  // Récupération des devises
+  fetchDevise(): void {
+    this.deviseService.getAllDevise().subscribe(
+      (response) => {
+        this.allDevise = response;
+        console.log('Liste des devises:', this.allDevise);
+      },
+      (error) => {
+        console.error('Erreur lors de la récupération des devises:', error);
+      }
+    );
   }
 
   allPartenaire: any[] = [];

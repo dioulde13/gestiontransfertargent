@@ -55,6 +55,10 @@ Echange.belongsTo(Utilisateur, { foreignKey: 'utilisateurId' });
 Utilisateur.hasMany(Rembourser, { foreignKey: 'utilisateurId' });
 Rembourser.belongsTo(Utilisateur, { foreignKey: 'utilisateurId' });
 
+// Relation One-to-Many : Un Devise peut avoir plusieurs Entres
+Devise.hasMany(Rembourser, { foreignKey: 'deviseId' });
+Rembourser.belongsTo(Devise, { foreignKey: 'deviseId' });
+
 // Relation One-to-Many : Un Utilisateur peut avoir plusieurs Entres
 Utilisateur.hasMany(Depense, { foreignKey: 'utilisateurId' });
 Depense.belongsTo(Utilisateur, { foreignKey: 'utilisateurId' });
