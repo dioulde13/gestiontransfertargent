@@ -27,10 +27,11 @@ const ajouterPayement = async (req, res) => {
     const montant_due = montant;
     const soldeCaise = montant_due; // Solde ajouté à l'utilisateur connecté
 
-    // Ajouter une entrée dans la table Rembourser
+    // Ajouter une entrée dans la table Payement
     const payement = await Payement.create({
       utilisateurId,
-      code, // On utilise l'id récupéré à partir du code
+      entreId: entre.id, // Inclure entreId
+      code: code, // Inclure entreId
       montant,
     });
 
@@ -59,6 +60,7 @@ const ajouterPayement = async (req, res) => {
     res.status(500).json({ message: 'Erreur interne du serveur.' });
   }
 };
+
 
 // Lister toutes les entrées de la table Rembourser avec associations
 const listerPayement = async (req, res) => {
