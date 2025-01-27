@@ -3,13 +3,12 @@ const Utilisateur = require('../models/utilisateurs'); // Modèle Utilisateur
 const Partenaire = require('../models/partenaires'); // Modèle Partenaire
 const Devise = require('../models/devises');
 
-// Ajouter une nouvelle entrée dans la table Rembourser
 const ajouterRemboursement = async (req, res) => {
   try {
-    const { utilisateurId, deviseId, partenaireId, nom, prix, montant } = req.body;
+    const { utilisateurId, deviseId, partenaireId, nom, montant } = req.body;
 
     // Vérification des champs requis
-    if (!utilisateurId || !partenaireId || !deviseId || !nom || !prix || !montant) {
+    if (!utilisateurId || !partenaireId || !deviseId || !nom || !montant) {
       return res.status(400).json({ message: 'Tous les champs sont obligatoires.' });
     }
 
@@ -25,24 +24,38 @@ const ajouterRemboursement = async (req, res) => {
       return res.status(404).json({ message: 'Partenaire introuvable.' });
     }
 
-     // Récupérer les informations de la devise
-     const devise = await Devise.findByPk(deviseId);
-     if (!devise) {
-       return res.status(404).json({ message: 'Devise introuvable.' });
-     }
+    // Récupérer les informations de la devise
+    const devise = await Devise.findByPk(deviseId);
+    if (!devise) {
+      return res.status(404).json({ message: 'Devise introuvable.' });
+    }
 
-     const Prix1 = devise.prix_1 || 0;
-     const Prix2 = devise.prix_2 || 0;
-     const Sign1 = devise.signe_1;
-     const Sign2 = devise.signe_2;
+    const Prix1 = devise.prix_1 || 0;
+    const Prix2 = devise.prix_2 || 0;
+    const Sign1 = devise.signe_1 || 'N/A'; // Fournir une valeur par défaut si null
+    const Sign2 = devise.signe_2 || 'N/A'; // Fournir une valeur par défaut si null
 
-     // Calcul du montant_preter
-     const montant_due = (montant / Prix1) * Prix2; // Calcul du montant dû
-     console.log(partenaire.montant_preter);
+    // Vérifications supplémentaires pour les signes
+    if (!Sign1 || !Sign2) {
+      return res.status(400).json({ message: "Les informations de la devise sont incomplètes." });
+    }
 
-     const soldeCaise =  montant_due; // Solde ajouté à l'utilisateur connecté
+    // Calcul du montant dû
+    const montant_due = (montant / Prix1) * Prix2;
 
-
+    // Débogage des données avant l'insertion
+    console.log({
+      utilisateurId,
+      partenaireId,
+      deviseId,
+      montant_gnf: montant_due,
+      montant,
+      nom,
+      signe_1: Sign1,
+      signe_2: Sign2,
+      prix_1: Prix1,
+      prix_2: Prix2,
+    });
 
     // Ajouter une entrée dans la table Rembourser
     const remboursement = await Rembourser.create({
@@ -51,6 +64,7 @@ const ajouterRemboursement = async (req, res) => {
       deviseId,
       montant_gnf: montant_due,
       montant,
+      nom,
       signe_1: Sign1,
       signe_2: Sign2,
       prix_1: Prix1,
@@ -58,14 +72,12 @@ const ajouterRemboursement = async (req, res) => {
     });
 
     // Mettre à jour le solde de l'utilisateur connecté
-    utilisateur.solde = (utilisateur.solde || 0) - soldeCaise;
+    utilisateur.solde = (utilisateur.solde || 0) - montant_due;
     await utilisateur.save();
 
-     // Mettre à jour le montant_preter du partenaire
-     partenaire.montant_preter = (partenaire.montant_preter || 0) - montant;
-     console.log(partenaire.montant_preter);
-     await partenaire.save(); // Sauvegarder les modifications dans la base de données
- 
+    // Mettre à jour le montant_preter du partenaire
+    partenaire.montant_preter = (partenaire.montant_preter || 0) - montant;
+    await partenaire.save();
 
     res.status(201).json({
       message: 'Remboursement ajouté avec succès.',
@@ -76,6 +88,7 @@ const ajouterRemboursement = async (req, res) => {
     res.status(500).json({ message: 'Erreur interne du serveur.' });
   }
 };
+
 
 // Lister toutes les entrées de la table Rembourser avec associations
 const listerRemboursements = async (req, res) => {

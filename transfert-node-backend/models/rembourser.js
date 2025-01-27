@@ -24,22 +24,26 @@ const Rembourser = sequelize.define('Rembourser', {
     allowNull: false,
   },
   prix_1: {
-    type: DataTypes.BIGINT,
-    allowNull: false, // Ajout de la contrainte pour montant
+    type: DataTypes.INTEGER,
+    allowNull: false,
+    defaultValue: 0,
   },
   prix_2: {
-    type: DataTypes.BIGINT,
-    allowNull: false, // Ajout de la contrainte pour montant
+    type: DataTypes.INTEGER,
+    allowNull: false,
+    defaultValue: 0,
   },
-  sign_1: {
-    type: DataTypes.BIGINT,
-    allowNull: false, // Ajout de la contrainte pour montant
+  signe_1: {
+    type: DataTypes.STRING,
+    allowNull: false,
+    defaultValue: 0,
   },
-  sign_2: {
-    type: DataTypes.BIGINT,
-    allowNull: false, // Ajout de la contrainte pour montant
+  signe_2: {
+    type: DataTypes.STRING,
+    allowNull: false,
+    defaultValue: 0,
   },
-    montant: {
+  montant: {
     type: DataTypes.BIGINT,
     allowNull: false, // Ajout de la contrainte pour montant
   },

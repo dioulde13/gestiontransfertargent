@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';  // Remplacer BrowserModule par 
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ReactiveFormsModule } from '@angular/forms'; // Import du module des formulaires réactifs
 import { PayementService } from '../../services/payements/payement.service';
+import { AuthService } from '../../services/auth/auth-service.service';
 
 @Component({
   selector: 'app-payements',
@@ -15,18 +16,22 @@ export class PayementsComponent implements OnInit {
   // Tableau pour stocker les résultats
   allresultat: any[] = [];
 
+  userInfo: any = null;
+  idUser: string = '';
+
   payementForm!: FormGroup;
 
   constructor(
     private fb: FormBuilder,
-    private payementService: PayementService
+    private payementService: PayementService,
+    private authService: AuthService,
   ) {}
 
   ngOnInit(): void {
     // Initialisation du formulaire avec les validations
     this.payementForm = this.fb.group({
-      utilisateurId: ['', Validators.required],
-      entreId: ['', Validators.required],
+      utilisateurId: [this.idUser],
+      code: ['', Validators.required],
       montant: ['', Validators.required],
     });
 
@@ -40,6 +45,24 @@ export class PayementsComponent implements OnInit {
         console.error('Erreur lors de la récupération des données', error);
       },
     });
+    this.getUserInfo(); // Récupération des infos utilisateur
+  }
+
+
+  getUserInfo() {
+    this.authService.getUserInfo().subscribe(
+      {
+        next: (response) => {
+          this.userInfo = response.user;
+          //   if (this.userInfo) {
+          this.idUser = this.userInfo.id;
+          console.log('Informations utilisateur:', this.userInfo);
+
+          // Mettre à jour le champ utilisateurId dans le formulaire
+          this.payementForm.patchValue({ utilisateurId: this.idUser });
+        }
+      }
+    );
   }
 
   onSubmit() {

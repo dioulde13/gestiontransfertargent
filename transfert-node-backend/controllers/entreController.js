@@ -87,7 +87,6 @@ const ajouterEntre = async (req, res) => {
     const PaysDest = devise.paysArriver;
 
     const montant_due = (montant_cfa / Prix1) * Prix2; // Calcul du montant dû
-    const soldeCaise =  montant_due; // Solde ajouté à l'utilisateur connecté
 
     // Générer le code automatiquement
     const lastEntry = await Entre.findOne({
@@ -124,9 +123,6 @@ const ajouterEntre = async (req, res) => {
         telephone_receveur
       });
 
-      // Mettre à jour le solde de l'utilisateur connecté
-      utilisateur.solde = (utilisateur.solde || 0) + soldeCaise;
-      await utilisateur.save();
 
       // Mettre à jour le montant_prêter du partenaire
       partenaire.montant_preter = (partenaire.montant_preter || 0) + montant_cfa;

@@ -2,13 +2,12 @@ const Utilisateur = require('../models/utilisateurs'); // Modèle Utilisateur
 const Entre = require('../models/entres'); // Modèle Partenaire
 const Payement = require('../models/payement');
 
-// Ajouter une nouvelle entrée dans la table Rembourser
 const ajouterPayement = async (req, res) => {
   try {
-    const { utilisateurId, entreId, montant } = req.body;
+    const { utilisateurId, code, montant } = req.body;
 
     // Vérification des champs requis
-    if (!utilisateurId || !entreId || !montant) {
+    if (!utilisateurId || !code || !montant) {
       return res.status(400).json({ message: 'Tous les champs sont obligatoires.' });
     }
 
@@ -18,25 +17,28 @@ const ajouterPayement = async (req, res) => {
       return res.status(404).json({ message: 'Utilisateur introuvable.' });
     }
 
-    // Vérifier si le entre existe
-    const entre = await Entre.findByPk(entreId);
+    // Vérifier si l'entrée (Entre) existe à travers le code
+    const entre = await Entre.findOne({ where: { code } });
     if (!entre) {
-      return res.status(404).json({ message: 'Entre introuvable.' });
+      return res.status(404).json({ message: 'Entre introuvable avec ce code.' });
     }
 
-    // Calcul du montant_preter
+    // Calcul du montant_due
     const montant_due = montant;
-    console.log(entre.montant_gnf);
-
+    const soldeCaise = montant_due; // Solde ajouté à l'utilisateur connecté
 
     // Ajouter une entrée dans la table Rembourser
     const payement = await Payement.create({
       utilisateurId,
-      entreId,
+      code, // On utilise l'id récupéré à partir du code
       montant,
     });
 
-    // Mettre à jour le montant_preter du partenaire
+    // Mettre à jour le solde de l'utilisateur connecté
+    utilisateur.solde = (utilisateur.solde || 0) + soldeCaise;
+    await utilisateur.save();
+
+    // Mettre à jour le montant payé et restant dans l'entrée
     entre.montant_payer = (entre.montant_payer ?? 0) + montant_due;
     entre.montant_restant = (entre.montant_gnf ?? 0) - entre.montant_payer;
 
@@ -47,8 +49,6 @@ const ajouterPayement = async (req, res) => {
 
     // Enregistrement des modifications
     await entre.save();
-
-
 
     res.status(201).json({
       message: 'Payement ajouté avec succès.',

@@ -65,12 +65,8 @@
           <h2>Ajouter un payement</h2>
           <form [formGroup]="payementForm" (ngSubmit)="onSubmit()">
             <div class="form-group">
-              <label for="utilisateurId">Utilisateur ID</label>
-              <input id="utilisateurId" formControlName="utilisateurId" class="form-control" />
-            </div>
-            <div class="form-group">
-                <label for="entreId">Entre id</label>
-                <input id="entreId" formControlName="entreId" class="form-control" />
+                <label for="code">Code entre</label>
+                <input id="code" formControlName="code" class="form-control" />
               </div>
             
             <div class="form-group">

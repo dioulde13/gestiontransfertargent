@@ -14,8 +14,8 @@ const Payement = sequelize.define('Payement', {
     type: DataTypes.INTEGER,
     allowNull: false, // Ou true si facultatif
   },
-  entreId: {
-    type: DataTypes.INTEGER,
+  code: {
+    type: DataTypes.STRING,
     allowNull: false, // Ou true si facultatif
   },
   date_creation: {
