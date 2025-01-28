@@ -3,40 +3,50 @@ const Utilisateur = require('../models/utilisateurs');
 
 const ajouterCredit = async (req, res) => {
   try {
-    const { utilisateurId, nom, montant ,type} = req.body;
+    const { utilisateurId, nom, montant, type } = req.body;
 
-    // Vérifier si tous les champs nécessaires sont fournis
-    if (!utilisateurId || !nom || montant || !type) {
+    // Vérification des champs requis
+    if (!utilisateurId || !nom || !montant || !type) {
       return res.status(400).json({ message: 'Tous les champs sont obligatoires.' });
     }
 
-    // Vérifier si l'utilisateur existe
+    // Vérification de l'existence de l'utilisateur
     const utilisateur = await Utilisateur.findByPk(utilisateurId);
     if (!utilisateur) {
       return res.status(404).json({ message: 'Utilisateur introuvable.' });
     }
 
-    // Créer un nouveau partenaire
+    // Création d'un nouveau crédit
     const credit = await Credit.create({
       utilisateurId,
       nom,
       montant,
-      type
+      type,
     });
 
-     if(type ==="SORTIE"){
-      utilisateur.solde = (utilisateur.solde || 0) - montant;
-     } else if(type ==="ENTREE" || type ==="PAYEMENT"){
-      utilisateur.solde = (utilisateur.solde || 0) + montant;
-     }
-     await utilisateur.save();
+    // Mise à jour du solde de l'utilisateur en fonction du type de transaction
+    switch (type) {
+      case 'SORTIE':
+        utilisateur.solde = (utilisateur.solde || 0) - montant;
+        break;
+      case 'ENTREE':
+      case 'PAYEMENT':
+        utilisateur.solde = (utilisateur.solde || 0) + montant;
+        break;
+      default:
+        return res.status(400).json({ message: 'Type de transaction invalide.' });
+    }
 
+    // Sauvegarde des modifications de l'utilisateur
+    await utilisateur.save();
+
+    // Réponse en cas de succès
     res.status(201).json({
-      message: 'Credit ajouté avec succès.',
+      message: 'Crédit ajouté avec succès.',
       credit,
     });
   } catch (error) {
-    console.error('Erreur lors de l\'ajout du credit :', error);
+    console.error('Erreur lors de l\'ajout du crédit :', error);
     res.status(500).json({ message: 'Erreur interne du serveur.' });
   }
 };

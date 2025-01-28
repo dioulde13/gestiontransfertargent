@@ -17,6 +17,10 @@ const Credit = sequelize.define('Credit', {
     allowNull: false,
     defaultValue: DataTypes.NOW,
   },
+  reference: {
+    type: DataTypes.STRING,
+    allowNull: false,
+  },
   nom: {
     type: DataTypes.STRING,
     allowNull: false,
@@ -27,9 +31,19 @@ const Credit = sequelize.define('Credit', {
     defaultValue: 0,
   },
   type: {
-    type: DataTypes.ENUM('ENTREE','PAYEMENT', 'SORTIE'),
+    type: DataTypes.ENUM('ENTREE', 'SORTIE'),
     allowNull: false,
     defaultValue: 'SORTIE', // Définir une valeur par défaut
+  },
+  montantPaye: { 
+    type: DataTypes.BIGINT,
+    allowNull: false,
+    defaultValue: 0,
+  }, // Nouveau champ
+  montantRestant: { 
+    type: DataTypes.BIGINT,
+    allowNull: false,
+    defaultValue: 0
   }
 });
 

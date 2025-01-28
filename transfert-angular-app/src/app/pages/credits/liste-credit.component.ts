@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';  // Remplacer BrowserModule par 
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ReactiveFormsModule } from '@angular/forms'; // Import du module des formulaires réactifs
 import { CreditService } from '../../services/credits/credit.service';
+import { AuthService } from '../../services/auth/auth-service.service';
 
 @Component({
   selector: 'app-liste-credit',
@@ -16,22 +17,52 @@ export class ListeCreditComponent implements OnInit {
   // Tableau pour stocker les résultats
   allresultat: any[] = [];
 
+  userInfo: any = null;
+  idUser: string = '';
+
   creditForm!: FormGroup;
 
   constructor(
     private fb: FormBuilder,
-    private creditService: CreditService
+    private creditService: CreditService,
+    private authService: AuthService
   ) { }
 
   ngOnInit(): void {
     // Initialisation du formulaire avec les validations
+    // Initialisation du formulaire
     this.creditForm = this.fb.group({
-      utilisateurId: ['', Validators.required],
+      // Champ pour l'identifiant de l'utilisateur (pré-rempli avec l'ID de l'utilisateur courant)
+      utilisateurId: [this.idUser],
+
+      // Champ pour le nom, obligatoire
       nom: ['', Validators.required],
+
+      // Champ pour le montant, obligatoire et doit être un nombre positif ou zéro
       montant: [0, [Validators.required, Validators.min(0)]],
+
+      // Champ pour le type de transaction, obligatoire
       type: ['', Validators.required],
     });
+
     this.getAllCredit();
+    this.getUserInfo(); // Récupération des infos utilisateur
+  }
+
+  getUserInfo() {
+    this.authService.getUserInfo().subscribe(
+      {
+        next: (response) => {
+          this.userInfo = response.user;
+          //   if (this.userInfo) {
+          this.idUser = this.userInfo.id;
+          console.log('Informations utilisateur:', this.userInfo);
+
+          // Mettre à jour le champ utilisateurId dans le formulaire
+          this.creditForm.patchValue({ utilisateurId: this.idUser });
+        }
+      }
+    );
   }
 
   getAllCredit() {
@@ -50,10 +81,11 @@ export class ListeCreditComponent implements OnInit {
   onSubmit() {
     if (this.creditForm.valid) {
       const formData = this.creditForm.value;
-
+      console.log(formData);
       // Appeler le service pour ajouter le partenaire
       this.creditService.ajoutCredit(formData).subscribe(
         response => {
+          this.getAllCredit();
           console.log('Credit ajouté avec succès:', response);
           alert('Credit ajouté avec succès!');
           this.creditForm.reset(); // Réinitialiser le formulaire après ajout
