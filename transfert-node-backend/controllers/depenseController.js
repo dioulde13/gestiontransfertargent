@@ -10,12 +10,22 @@ const ajouterDepense = async (req, res) => {
       return res.status(400).json({ message: 'Tous les champs sont obligatoires.' });
     }
 
+    // Vérifier si l'utilisateur existe
+    const utilisateur = await Utilisateur.findByPk(utilisateurId);
+    if (!utilisateur) {
+      return res.status(404).json({ message: 'Utilisateur introuvable.' });
+    }
+
     // Créer un nouveau partenaire
     const depense = await Depense.create({
       utilisateurId,
       motif,
       montant,
     });
+
+     // Mettre à jour le solde de l'utilisateur connecté
+     utilisateur.solde = (utilisateur.solde || 0) - montant;
+     await utilisateur.save();
 
     res.status(201).json({
       message: 'Depense ajouté avec succès.',

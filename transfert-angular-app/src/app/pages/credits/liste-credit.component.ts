@@ -29,6 +29,7 @@ export class ListeCreditComponent implements OnInit {
       utilisateurId: ['', Validators.required],
       nom: ['', Validators.required],
       montant: [0, [Validators.required, Validators.min(0)]],
+      type: ['', Validators.required],
     });
     this.getAllCredit();
   }
@@ -53,13 +54,13 @@ export class ListeCreditComponent implements OnInit {
       // Appeler le service pour ajouter le partenaire
       this.creditService.ajoutCredit(formData).subscribe(
         response => {
-          console.log('Partenaire ajouté avec succès:', response);
-          alert('Partenaire ajouté avec succès!');
+          console.log('Credit ajouté avec succès:', response);
+          alert('Credit ajouté avec succès!');
           this.creditForm.reset(); // Réinitialiser le formulaire après ajout
         },
         error => {
-          console.error('Erreur lors de l\'ajout du partenaire:', error);
-          alert('Erreur lors de l\'ajout du partenaire.');
+          console.error('Erreur lors de l\'ajout du credit:', error);
+          alert('Erreur lors de l\'ajout du credit.');
         }
       );
     } else {

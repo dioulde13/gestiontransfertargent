@@ -77,8 +77,17 @@
               <label for="montant">Montant</label>
               <input id="montant" formControlName="montant" class="form-control" type="number" />
             </div>
+            <div class="form-group">
+              <label for="type">Type</label>
+              <select id="type" formControlName="type" class="form-control">
+                <option value="SORTIE">Sortie</option>
+                <option value="ENTREE">Entrée</option>
+                <option value="PAYEMENT">Payement</option>
+              </select>
+            </div>
             <button type="submit" [disabled]="!creditForm.valid" class="btn btn-primary">Ajouter credit</button>
           </form>
+          
         </div>
       </div>
     </div>

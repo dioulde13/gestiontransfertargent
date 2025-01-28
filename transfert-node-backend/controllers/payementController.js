@@ -23,10 +23,6 @@ const ajouterPayement = async (req, res) => {
       return res.status(404).json({ message: 'Entre introuvable avec ce code.' });
     }
 
-    // Calcul du montant_due
-    const montant_due = montant;
-    const soldeCaise = montant_due; // Solde ajouté à l'utilisateur connecté
-
     // Ajouter une entrée dans la table Payement
     const payement = await Payement.create({
       utilisateurId,
@@ -36,7 +32,7 @@ const ajouterPayement = async (req, res) => {
     });
 
     // Mettre à jour le solde de l'utilisateur connecté
-    utilisateur.solde = (utilisateur.solde || 0) + soldeCaise;
+    utilisateur.solde = (utilisateur.solde || 0) + montant;
     await utilisateur.save();
 
     // Mettre à jour le montant payé et restant dans l'entrée

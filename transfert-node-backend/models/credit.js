@@ -26,6 +26,11 @@ const Credit = sequelize.define('Credit', {
     allowNull: false,
     defaultValue: 0,
   },
+  type: {
+    type: DataTypes.ENUM('ENTREE','PAYEMENT', 'SORTIE'),
+    allowNull: false,
+    defaultValue: 'SORTIE', // Définir une valeur par défaut
+  }
 });
 
 // Définir l'association : Un Credit appartient à un utilisateur

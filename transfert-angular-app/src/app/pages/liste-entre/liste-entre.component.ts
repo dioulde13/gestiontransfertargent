@@ -36,10 +36,10 @@ export class ListeEntreComponent implements OnInit {
   // Initialisation du composant
   ngOnInit(): void {
     this.initForm(); // Initialisation du formulaire
-    this.getUserInfo(); // Récupération des infos utilisateur
     this.fetchAllEntrees(); // Récupération des données existantes
     this.fetchDevise();
     this.fetchPartenaire();
+    this.getUserInfo(); // Récupération des infos utilisateur
   }
 
   getUserInfo() {
