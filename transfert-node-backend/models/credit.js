@@ -30,11 +30,6 @@ const Credit = sequelize.define('Credit', {
     allowNull: false,
     defaultValue: 0,
   },
-  type: {
-    type: DataTypes.ENUM('ENTREE', 'SORTIE'),
-    allowNull: false,
-    defaultValue: 'SORTIE', // Définir une valeur par défaut
-  },
   montantPaye: { 
     type: DataTypes.BIGINT,
     allowNull: false,

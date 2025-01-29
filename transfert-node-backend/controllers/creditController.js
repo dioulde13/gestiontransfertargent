@@ -3,10 +3,10 @@ const Utilisateur = require('../models/utilisateurs');
 
 const ajouterCredit = async (req, res) => {
   try {
-    const { utilisateurId, nom, montant, type } = req.body;
+    const { utilisateurId, nom, montant } = req.body;
 
     // Vérification des champs requis
-    if (!utilisateurId || !nom || !montant || !type) {
+    if (!utilisateurId || !nom || !montant) {
       return res.status(400).json({ message: 'Tous les champs sont obligatoires.' });
     }
 
@@ -16,26 +16,38 @@ const ajouterCredit = async (req, res) => {
       return res.status(404).json({ message: 'Utilisateur introuvable.' });
     }
 
+    // Générer une nouvelle référence unique
+    let newCode = '';
+    const generateUniqueCode = async () => {
+      const randomSuffix = Math.random().toString(36).substring(2, 8).toUpperCase();
+      newCode = `REF${randomSuffix}`;
+
+      // Vérifier si le code généré existe déjà
+      const existingCredit = await Credit.findOne({
+        where: { reference: newCode }
+      });
+
+      // Si un crédit avec cette référence existe déjà, générer un autre code
+      if (existingCredit) {
+        return generateUniqueCode();
+      }
+
+      return newCode;
+    };
+
+    // Générer la référence unique
+    newCode = await generateUniqueCode();
+
     // Création d'un nouveau crédit
     const credit = await Credit.create({
       utilisateurId,
       nom,
-      montant,
-      type,
+      reference: newCode,
+      montant
     });
 
-    // Mise à jour du solde de l'utilisateur en fonction du type de transaction
-    switch (type) {
-      case 'SORTIE':
-        utilisateur.solde = (utilisateur.solde || 0) - montant;
-        break;
-      case 'ENTREE':
-      case 'PAYEMENT':
-        utilisateur.solde = (utilisateur.solde || 0) + montant;
-        break;
-      default:
-        return res.status(400).json({ message: 'Type de transaction invalide.' });
-    }
+    // Mettre à jour le solde de l'utilisateur
+    utilisateur.solde = (utilisateur.solde || 0) - montant;
 
     // Sauvegarde des modifications de l'utilisateur
     await utilisateur.save();

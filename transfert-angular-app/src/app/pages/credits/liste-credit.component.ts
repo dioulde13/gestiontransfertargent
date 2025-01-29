@@ -39,10 +39,8 @@ export class ListeCreditComponent implements OnInit {
       nom: ['', Validators.required],
 
       // Champ pour le montant, obligatoire et doit être un nombre positif ou zéro
-      montant: [0, [Validators.required, Validators.min(0)]],
-
-      // Champ pour le type de transaction, obligatoire
-      type: ['', Validators.required],
+      montant: [0, [Validators.required, Validators.min(0)]]
+      
     });
 
     this.getAllCredit();

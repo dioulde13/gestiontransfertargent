@@ -36,7 +36,7 @@ const ajouterPayement = async (req, res) => {
     await utilisateur.save();
 
     // Mettre à jour le montant payé et restant dans l'entrée
-    entre.montant_payer = (entre.montant_payer ?? 0) + montant_due;
+    entre.montant_payer = (entre.montant_payer ?? 0) + montant;
     entre.montant_restant = (entre.montant_gnf ?? 0) - entre.montant_payer;
 
     // Vérification du montant restant pour définir le type de paiement

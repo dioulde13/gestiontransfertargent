@@ -21,7 +21,7 @@
                   <div class="card">
                     <div class="card-body">
                       <div class="d-flex flex-wrap items-center justify-between breadcrumb-content">
-                        <h5>Liste des credit</h5>
+                        <h5>Liste des payements</h5>
                         <div class="d-flex flex-wrap items-center justify-between">
                           <div class="pl-3 btn-new border-left">
                             <a href="#" class="btn btn-primary" data-target="#new-project-modal"
@@ -37,23 +37,15 @@
                   <thead>
                     <tr class="text-muted">
                       <th class="border px-4 py-2">Id</th>
-                      <th class="border px-4 py-2">Reference</th>
-                      <th class="border px-4 py-2">Nom</th>
-                      <th class="border px-4 py-2">Date</th>
+                      <th class="border px-4 py-2">Date payement</th>
                       <th class="border px-4 py-2">Montant</th>
-                      <th class="border px-4 py-2">Montant Paye</th>
-                      <th class="border px-4 py-2">Montant Restant</th>
                     </tr>
                   </thead>
                   <tbody>
                     <tr *ngFor="let result of allresultat; let i = index" class="hover:bg-gray-100 even:bg-gray-50">
                       <td class="border px-4 py-2">{{ i + 1 }}</td>
-                      <td class="border px-4 py-2">{{ result.reference }}</td>
-                      <td class="border px-4 py-2">{{ result.nom }}</td>
-                      <td>{{ result.date_creation | date:'dd/MM/yyyy HH:mm' }}</td>
-                      <td class="border px-4 py-2">{{ result.montant | currency:'' :'' :'1.0-0' }} GNF</td>
-                      <td class="border px-4 py-2">{{ result.montantPaye | currency:'' :'' :'1.0-0' }} GNF</td>
-                      <td class="border px-4 py-2">{{ result.montantRestant | currency:'' :'' :'1.0-0' }} GNF</td>
+                      <!-- <td class="border px-4 py-2">{{" "+result.Entre.pays_dest+" / "+""+result.Entre.code+" / "+ ""+result.Entre.expediteur+" / "}}{{ result.date_creation | date:'dd/MM/yyyy HH:mm'}}</td> -->
+                      <td class="border px-4 py-2">{{ result.montant  | currency:'' :'' :'1.0-0'}} GNF</td> 
                     </tr>
                   </tbody>
                 </table>
@@ -70,49 +62,19 @@
       <div class="modal-content">
   
         <div class="container">
-          <h2>Ajouter un credit</h2>
-          <form [formGroup]="creditForm" (ngSubmit)="onSubmit()">
-            <!-- Champ Nom -->
+          <h2>Ajouter un payement credit</h2>
+          <form [formGroup]="payementCreditForm" (ngSubmit)="onSubmit()">
             <div class="form-group">
-              <label for="nom">Nom</label>
-              <input 
-                id="nom" 
-                formControlName="nom" 
-                class="form-control" 
-                placeholder="Entrez le nom" 
-              />
-              <!-- Message d'erreur -->
-              <div *ngIf="creditForm.get('nom')?.invalid && creditForm.get('nom')?.touched" class="text-danger">
-                <small>Le nom est obligatoire.</small>
+                <label for="reference">Reference credit</label>
+                <input id="reference" formControlName="reference" class="form-control" />
               </div>
-            </div>
-          
-            <!-- Champ Montant -->
+            
             <div class="form-group">
               <label for="montant">Montant</label>
-              <input 
-                id="montant" 
-                formControlName="montant" 
-                class="form-control" 
-                type="number" 
-                placeholder="Entrez le montant" 
-              />
-              <!-- Messages d'erreur -->
-              <div *ngIf="creditForm.get('montant')?.invalid && creditForm.get('montant')?.touched" class="text-danger">
-                <small *ngIf="creditForm.get('montant')?.hasError('required')">Le montant est obligatoire.</small>
-                <small *ngIf="creditForm.get('montant')?.hasError('min')">Le montant doit être supérieur ou égal à 0.</small>
-              </div>
+              <input id="montant" formControlName="montant" class="form-control" type="number" />
             </div>
-          
-            <!-- Bouton de soumission -->
-            <button 
-              type="submit" 
-              [disabled]="creditForm.invalid" 
-              class="btn btn-primary mt-3">
-              Ajouter Crédit
-            </button>
+            <button type="submit" [disabled]="!payementCreditForm.valid" class="btn btn-primary">Ajouter payement</button>
           </form>
-                    
         </div>
       </div>
     </div>

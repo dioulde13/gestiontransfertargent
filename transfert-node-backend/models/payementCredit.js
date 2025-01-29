@@ -18,6 +18,10 @@ const PayementCreadit = sequelize.define('PayementCreadit', {
     type: DataTypes.INTEGER,
     allowNull: false,
   },
+  reference: {
+    type: DataTypes.STRING,
+    allowNull: false, // Ou true si facultatif
+  },
   date_creation: {
     type: DataTypes.DATE,
     allowNull: false,
