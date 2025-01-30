@@ -16,23 +16,35 @@ const ajouterCredit = async (req, res) => {
       return res.status(404).json({ message: 'Utilisateur introuvable.' });
     }
 
-    // Générer une nouvelle référence unique
-    let newCode = '';
+  
     const generateUniqueCode = async () => {
-      const randomSuffix = Math.random().toString(36).substring(2, 8).toUpperCase();
-      newCode = `REF${randomSuffix}`;
-
-      // Vérifier si le code généré existe déjà
-      const existingCredit = await Credit.findOne({
-        where: { reference: newCode }
-      });
-
-      // Si un crédit avec cette référence existe déjà, générer un autre code
-      if (existingCredit) {
-        return generateUniqueCode();
+      let newCode = 'AB0001'; // Code par défaut
+      const lastEntry = await Credit.findOne({ order: [['createdAt', 'DESC']] }); // Récupère le dernier crédit
+    
+      if (lastEntry) {
+        const lastCode = lastEntry.code || '';
+        const numericPart = parseInt(lastCode.slice(2), 10);
+    
+        if (!isNaN(numericPart)) {
+          const incrementedPart = (numericPart + 1).toString().padStart(4, '0');
+          newCode = `AB${incrementedPart}`;
+        }
       }
-
+    
+      // Vérification de l'unicité
+      const checkUniqueCode = async (code) => {
+        const existingCredit = await Credit.findOne({ where: { reference: code } });
+        return existingCredit ? false : true;
+      };
+    
+      // Si le code généré existe déjà, générer un autre aléatoire
+      while (!(await checkUniqueCode(newCode))) {
+        const randomSuffix = Math.random().toString(36).substring(2, 8).toUpperCase();
+        newCode = `REF${randomSuffix}`;
+      }
+    
       return newCode;
+    
     };
 
     // Générer la référence unique
@@ -74,6 +86,7 @@ const recupererCredit = async (req, res) => {
             attributes: ['id', 'nom', 'prenom', 'email'], // Vous pouvez spécifier les attributs que vous voulez afficher
           },
         ],
+        order:[['date_creation', 'DESC']]
       }
     );
   

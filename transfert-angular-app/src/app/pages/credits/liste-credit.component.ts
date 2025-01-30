@@ -85,8 +85,11 @@ export class ListeCreditComponent implements OnInit {
         response => {
           this.getAllCredit();
           console.log('Credit ajouté avec succès:', response);
+          this.creditForm.patchValue({
+            nom: '',
+            montant: ''
+          });
           alert('Credit ajouté avec succès!');
-          this.creditForm.reset(); // Réinitialiser le formulaire après ajout
         },
         error => {
           console.error('Erreur lors de l\'ajout du credit:', error);

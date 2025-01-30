@@ -21,6 +21,7 @@ const recupererEntreesAvecAssocies = async (req, res) => {
           attributes: ['id', 'paysDepart', 'paysArriver', 'signe_1', 'signe_2', 'prix_1', 'prix_2'], // Champs nécessaires de la devise
         },
       ],
+      order: [['date_creation', 'DESC']]
     });
 
     if (entrees.length === 0) {

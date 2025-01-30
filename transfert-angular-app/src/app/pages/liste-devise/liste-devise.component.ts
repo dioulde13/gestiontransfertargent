@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';  // Remplacer BrowserModule par 
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ReactiveFormsModule } from '@angular/forms'; // Import du module des formulaires réactifs
 import { DeviseService } from '../../services/devise/devise.service';
+import { AuthService } from '../../services/auth/auth-service.service';
 
 
 @Component({
@@ -17,9 +18,11 @@ export class ListeDeviseComponent implements OnInit{
   allresultat: any[] = [];
   deviseForm!: FormGroup;
 
+  userInfo: any = null;
+  idUser: string = '';
+
   // Injection du service ApiService
-  constructor(private devise: DeviseService,private fb: FormBuilder
-  ) {}
+  constructor(private devise: DeviseService,private fb: FormBuilder, private authService: AuthService ) {}
 
   // Méthode d'initialisation
   ngOnInit(): void {
@@ -46,6 +49,23 @@ export class ListeDeviseComponent implements OnInit{
         console.error('Erreur lors de la récupération des données', error);
       },
     });
+    this.getUserInfo(); // Récupération des infos utilisateur
+  }
+
+  getUserInfo() {
+    this.authService.getUserInfo().subscribe(
+      {
+        next: (response) => {
+          this.userInfo = response.user;
+          //   if (this.userInfo) {
+          this.idUser = this.userInfo.id;
+          console.log('Informations utilisateur:', this.userInfo);
+
+          // Mettre à jour le champ utilisateurId dans le formulaire
+          this.deviseForm.patchValue({ utilisateurId: this.idUser });
+        }
+      }
+    );
   }
 
   onSubmit() {
@@ -56,12 +76,19 @@ export class ListeDeviseComponent implements OnInit{
       this.devise.ajouterDevise(formData).subscribe(
         response => {
           console.log('Partenaire ajouté avec succès:', response);
-          alert('Partenaire ajouté avec succès!');
-          this.deviseForm.reset(); // Réinitialiser le formulaire après ajout
+          this.deviseForm.patchValue({
+            paysDepart: '',
+            paysArriver: '',
+            signe_1: '',
+            signe_2: '',
+            prix_1: '',
+            prix_2: ''
+          });
+          alert('Devise ajouté avec succès!');
         },
         error => {
-          console.error('Erreur lors de l\'ajout du partenaire:', error);
-          alert('Erreur lors de l\'ajout du partenaire.');
+          console.error('Erreur lors de l\'ajout du devise:', error);
+          alert('Erreur lors de l\'ajout du devise.');
         }
       );
     } else {

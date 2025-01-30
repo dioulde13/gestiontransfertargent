@@ -67,11 +67,17 @@ export class ListeEntreComponent implements OnInit {
       this.entreService.ajouterEntree(formData).subscribe({
         next: (response) => {
           console.log('Entrée ajoutée avec succès:', response);
-          alert('Entrée ajoutée avec succès !');
-
-          // Réinitialiser le formulaire et mettre à jour la liste
-          this.entreForm.reset();
           this.fetchAllEntrees();
+          // Réinitialiser le formulaire et mettre à jour la liste
+          this.entreForm.patchValue({
+            partenaireId: '',
+            deviseId: '',
+            expediteur: '',
+            receveur: '',
+            montant_cfa: '',
+            telephone_receveur: ''
+          }); 
+          alert('Entrée ajoutée avec succès !');
         },
         error: (error) => {
           console.error('Erreur lors de l\'ajout de l\'entrée:', error);
@@ -131,8 +137,8 @@ export class ListeEntreComponent implements OnInit {
   private fetchAllEntrees(): void {
     this.entreService.getAllEntree().subscribe({
       next: (response) => {
-        // Trier par ID en ordre décroissant
-        this.allresultat = response.sort((a: any, b: any) => b.id - a.id);
+        this.allresultat = response;
+        // this.allresultat = response.sort((a: any, b: any) => b.id - a.id);
         console.log(this.allresultat);
       },
       error: (error) => {

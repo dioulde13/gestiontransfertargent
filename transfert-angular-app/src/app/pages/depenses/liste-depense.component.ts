@@ -78,8 +78,11 @@ export class ListeDepenseComponent implements OnInit {
         response => {
           this.getAllDepense();
           console.log('Deppense ajouté avec succès:', response);
-          alert('Partenaire ajouté avec succès!');
-          this.depenseForm.reset(); // Réinitialiser le formulaire après ajout
+          alert('Deppense ajouté avec succès!');
+          this.depenseForm.patchValue({
+            motif: '',
+            montant: ''
+          }); 
         },
         error => {
           console.error('Erreur lors de l\'ajout du depense:', error);

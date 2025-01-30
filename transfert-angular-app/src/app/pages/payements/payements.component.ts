@@ -73,8 +73,11 @@ export class PayementsComponent implements OnInit {
       this.payementService.ajouterPayement(formData).subscribe(
         response => {
           console.log('Payement ajouté avec succès:', response);
+          this.payementForm.patchValue({
+            code: '',
+            montant: ''
+          });
           alert('Payement ajouté avec succès!');
-          this.payementForm.reset(); // Réinitialiser le formulaire après ajout
         },
         error => {
           console.error('Erreur lors de l\'ajout du payement:', error);

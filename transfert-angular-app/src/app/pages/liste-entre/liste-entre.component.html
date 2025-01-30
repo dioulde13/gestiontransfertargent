@@ -36,7 +36,7 @@
               <table id="example" class="table data-table table-striped table-flush" style="width:100%">
                 <thead>
                   <tr class="text-muted">
-                    <th class="border px-4 py-2">Id</th>
+                    <!-- <th class="border px-4 py-2">Id</th> -->
                     <th>Code</th>
                     <th>Date du jours</th>
                     <th>Expéditeur</th>
@@ -54,7 +54,7 @@
                 <tbody>
                 <tbody>
                   <tr *ngFor="let result of allresultat; let i = index" class="hover:bg-gray-100 even:bg-gray-50">
-                    <td>{{ result.id }}</td>
+                    <!-- <td>{{ result.id }}</td> -->
                     <td>{{ result.code }}</td>
                     <td>{{ result.date_creation | date:'dd/MM/yyyy HH:mm' }}</td>
                     <td>{{ result.expediteur }}</td>

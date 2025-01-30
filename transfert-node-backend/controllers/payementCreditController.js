@@ -19,9 +19,11 @@ const ajouterPayementCredit = async (req, res) => {
         }
 
         // Vérifier si le montant payé ne dépasse pas le montant restant à payer
-        if (montant <= credit.montantRestant) {
+        if (montant > credit.montantRestant) {
             return res.status(400).json({ message: "Le montant dépasse le reste à payer" });
         }
+       
+
 
         // Créer le paiement de crédit
         const paiement = await PayementCreadit.create({
@@ -31,14 +33,16 @@ const ajouterPayementCredit = async (req, res) => {
             montant,
         });
 
-        // Mettre à jour le reste à payer du crédit
-        await Credit.update(
-            {
-                montantPaye: credit.montantPaye + montant,
-                montantRestant: credit.montant - montantPaye
-            },
-            { where: { reference } }  // Mise à jour du crédit basé sur la référence
-        );
+        // Mettre à jour le solde de l'utilisateur connecté
+        utilisateur.solde = (utilisateur.solde || 0) + montant;
+        await utilisateur.save();
+
+
+        credit.montantPaye = (credit.montantPaye ?? 0) + montant;
+        credit.montantRestant = (credit.montant ?? 0) - credit.montantPaye;
+
+        // Enregistrement des modifications
+        await credit.save();
 
         res.status(201).json({
             message: "Paiement ajouté avec succès",

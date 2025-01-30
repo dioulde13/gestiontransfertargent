@@ -42,10 +42,53 @@ export class ListeRembourserComponent implements OnInit {
       nom: ['', Validators.required],
       montant: [0, [Validators.required, Validators.min(0)]],
     });
-    this.getUserInfo(); // Récupération des infos utilisateur
     this.fetchPartenaire();
     this.fetchDevise();
+    this.getUserInfo(); // Récupération des infos utilisateur
   }
+
+  getUserInfo() {
+    this.authService.getUserInfo().subscribe(
+      {
+        next: (response) => {
+          this.userInfo = response.user;
+          //   if (this.userInfo) {
+          this.idUser = this.userInfo.id;
+          console.log('Informations utilisateur:', this.userInfo);
+
+          // Mettre à jour le champ utilisateurId dans le formulaire
+          this.rembourserForm.patchValue({ utilisateurId: this.idUser });
+        }
+      }
+    );
+  }
+
+  onSubmit() {
+    if (this.rembourserForm.valid) {
+      const formData = this.rembourserForm.value;
+      // Appeler le service pour ajouter le partenaire
+      this.rembourserService.ajouterRembourser(formData).subscribe(
+        response => {
+          console.log('Partenaire ajouté avec succès:', response);
+          this.getAllRemboursement();
+          this.rembourserForm.patchValue({
+            deviseId: '',
+            partenaireId: '',
+            nom: '',
+            montant: ''
+          });
+          alert('Partenaire ajouté avec succès!');
+        },
+        error => {
+          console.error('Erreur lors de l\'ajout du partenaire:', error);
+          alert('Erreur lors de l\'ajout du partenaire.');
+        }
+      );
+    } else {
+      alert('Veuillez remplir tous les champs obligatoires.');
+    }
+  }
+
 
   allDevise: any[] = [];
 
@@ -79,21 +122,7 @@ export class ListeRembourserComponent implements OnInit {
 
 
 
-  getUserInfo() {
-    this.authService.getUserInfo().subscribe(
-      {
-        next: (response) => {
-          this.userInfo = response.user;
-          //   if (this.userInfo) {
-          this.idUser = this.userInfo.id;
-          console.log('Informations utilisateur:', this.userInfo);
-
-          // Mettre à jour le champ utilisateurId dans le formulaire
-          this.rembourserForm.patchValue({ utilisateurId: this.idUser });
-        }
-      }
-    );
-  }
+ 
   private getAllRemboursement(): void {
     // Appel à l'API et gestion des réponses
     this.rembourserService.getAllRebourser().subscribe({
@@ -107,25 +136,4 @@ export class ListeRembourserComponent implements OnInit {
     });
   }
 
-  onSubmit() {
-    if (this.rembourserForm.valid) {
-      const formData = this.rembourserForm.value;
-
-      // Appeler le service pour ajouter le partenaire
-      this.rembourserService.ajouterRembourser(formData).subscribe(
-        response => {
-          console.log('Partenaire ajouté avec succès:', response);
-          alert('Partenaire ajouté avec succès!');
-          this.rembourserForm.reset(); // Réinitialiser le formulaire après ajout
-          this.getAllRemboursement();
-        },
-        error => {
-          console.error('Erreur lors de l\'ajout du partenaire:', error);
-          alert('Erreur lors de l\'ajout du partenaire.');
-        }
-      );
-    } else {
-      alert('Veuillez remplir tous les champs obligatoires.');
-    }
-  }
-}
+ }

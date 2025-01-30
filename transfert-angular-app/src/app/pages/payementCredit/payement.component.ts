@@ -75,12 +75,19 @@ export class PayementComponent implements OnInit {
         response => {
           console.log('Payement ajouté avec succès:', response);
           alert('Payement ajouté avec succès!');
-          this.payementCreditForm.reset(); // Réinitialiser le formulaire après ajout
-        },
-        error => {
-          console.error('Erreur lors de l\'ajout du payement:', error);
-          alert('Erreur lors de l\'ajout du payement.');
+          this.payementCreditForm.patchValue({
+            reference: '',
+            montant: ''
+          });   },
+        (error) => {
+          // Vérifie si l'erreur contient un message spécifique
+          const errorMessage = error.error?.message || 'Une erreur est survenue lors de l\'ajout du résultat.';
+          alert(errorMessage);
         }
+        // error => {
+        //   console.error('Erreur lors de l\'ajout du payement:', error);
+        //   alert('Erreur lors de l\'ajout du payement.');
+        // }
       );
     } else {
       alert('Veuillez remplir tous les champs obligatoires.');

@@ -129,11 +129,17 @@ export class ListeSortieComponent implements OnInit {
       this.sortieService.ajouterSortie(formData).subscribe({
         next: (response) => {
           console.log('Entrée ajoutée avec succès:', response);
-          alert('Entrée ajoutée avec succès !');
-
-          // Réinitialiser le formulaire et mettre à jour la liste
-          this.sortieForm.reset();
           this.fetchAllEntrees();
+          // Réinitialiser le formulaire et mettre à jour la liste
+          this.sortieForm.patchValue({
+            partenaireId: '',
+            deviseId: '',
+            expediteur: '',
+            receveur: '',
+            montant_cfa: '',
+            telephone_receveur: ''
+          }); 
+          alert('Entrée ajoutée avec succès !');
         },
         error: (error) => {
           console.error('Erreur lors de l\'ajout de l\'entrée:', error);
