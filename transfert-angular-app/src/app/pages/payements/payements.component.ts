@@ -35,8 +35,13 @@ export class PayementsComponent implements OnInit {
       montant: ['', Validators.required],
     });
 
-    // Appel à l'API et gestion des réponses
-    this.payementService.getAllPayement().subscribe({
+   this.getAllPayement();
+    this.getUserInfo(); // Récupération des infos utilisateur
+  }
+
+  getAllPayement(){
+     // Appel à l'API et gestion des réponses
+     this.payementService.getAllPayement().subscribe({
       next: (response) => {
         this.allresultat = response;
         console.log(this.allresultat);
@@ -45,9 +50,7 @@ export class PayementsComponent implements OnInit {
         console.error('Erreur lors de la récupération des données', error);
       },
     });
-    this.getUserInfo(); // Récupération des infos utilisateur
   }
-
 
   getUserInfo() {
     this.authService.getUserInfo().subscribe(
@@ -65,23 +68,30 @@ export class PayementsComponent implements OnInit {
     );
   }
 
+  loading: boolean = false;
+
   onSubmit() {
     if (this.payementForm.valid) {
       const formData = this.payementForm.value;
-
+     this.loading = true;
       // Appeler le service pour ajouter le partenaire
       this.payementService.ajouterPayement(formData).subscribe(
         response => {
+          this.loading = false;
           console.log('Payement ajouté avec succès:', response);
           this.payementForm.patchValue({
             code: '',
             montant: ''
           });
+          this.getAllPayement();
           alert('Payement ajouté avec succès!');
         },
         error => {
-          console.error('Erreur lors de l\'ajout du payement:', error);
-          alert('Erreur lors de l\'ajout du payement.');
+          this.loading = false;
+          const errorMessage = error.error?.message || 'Une erreur est survenue lors de l\'ajout du résultat.';
+          alert(errorMessage);
+          // console.error('Erreur lors de l\'ajout du payement:', error);
+          // alert('Erreur lors de l\'ajout du payement.');
         }
       );
     } else {

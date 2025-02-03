@@ -39,6 +39,11 @@ const Credit = sequelize.define('Credit', {
     type: DataTypes.BIGINT,
     allowNull: false,
     defaultValue: 0
+  },
+  montant_plus: {
+    type: DataTypes.BIGINT,
+    allowNull: false,
+    defaultValue: 0,
   }
 });
 

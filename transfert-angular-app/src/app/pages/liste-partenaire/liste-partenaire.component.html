@@ -85,7 +85,10 @@
             <label for="montant_preter">Montant Prêté</label>
             <input id="montant_preter" formControlName="montant_preter" class="form-control" type="number" />
           </div>
-          <button type="submit" [disabled]="!partenaireForm.valid" class="btn btn-primary">Ajouter Partenaire</button>
+          <button type="submit"  class="btn btn-primary">
+            <span *ngIf="isLoading">Création en cours...</span>
+              <span *ngIf="!isLoading">Ajouter</span>
+          </button>
         </form>
       </div>
     </div>

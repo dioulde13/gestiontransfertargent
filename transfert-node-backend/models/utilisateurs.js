@@ -29,6 +29,11 @@ const Utilisateur = sequelize.define('Utilisateur', {
     allowNull: false,
     defaultValue: 0,
   },
+  encien_solde: {
+    type: DataTypes.BIGINT,
+    allowNull: false,
+    defaultValue: 0,
+  },
   email: {
     type: DataTypes.STRING,
     allowNull: false,

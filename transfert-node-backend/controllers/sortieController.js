@@ -114,7 +114,7 @@ const ajouterSortie = async (req, res) => {
       await utilisateur.save();
 
       // Mettre à jour le montant_prêter du partenaire
-      partenaire.montant_preter = (partenaire.montant_preter || 0) - montant_due;
+      partenaire.montant_preter = (partenaire.montant_preter || 0) - montant;
       await partenaire.save();
 
     return res.status(201).json({

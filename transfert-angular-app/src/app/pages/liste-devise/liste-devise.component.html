@@ -134,7 +134,10 @@
                     <label for="prix_2">Prix 2</label>
                     <input id="prix_2" name="prix_2" formControlName="prix_2" class="form-control" type="number" />
                   </div>
-                  <button type="submit" [disabled]="!deviseForm.valid" class="btn btn-primary">Ajouter Devise</button>
+                  <button type="submit" [disabled]="!deviseForm.valid" class="btn btn-primary">
+                    <span *ngIf="isLoading">Création en cours...</span>
+              <span *ngIf="!isLoading">Ajouter</span>
+                  </button>
                 </form>
               </div>
 

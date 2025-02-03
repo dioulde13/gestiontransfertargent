@@ -6,10 +6,14 @@ import { AuthService } from '../../services/auth/auth-service.service';
 import { DeviseService } from '../../services/devise/devise.service';
 import { PartenaireServiceService } from '../../services/partenaire/partenaire-service.service';
 
+import { Subject } from 'rxjs';
+import { DataTablesModule } from 'angular-datatables';
+
+
 @Component({
   selector: 'app-liste-entre',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, FormsModule],
+  imports: [CommonModule, ReactiveFormsModule, FormsModule, DataTablesModule],
   templateUrl: './liste-entre.component.html',
   styleUrls: ['./liste-entre.component.css']
 })
@@ -24,6 +28,12 @@ export class ListeEntreComponent implements OnInit {
   // Formulaire pour ajouter une entrée
   entreForm!: FormGroup;
 
+  isLoading: boolean = false;
+
+  dtoptions: any = {};
+
+  dtTrigger: Subject<any> = new Subject<any>();
+
   // Injection des dépendances nécessaires
   constructor(
     private entreService: EntreServiceService,
@@ -35,6 +45,11 @@ export class ListeEntreComponent implements OnInit {
 
   // Initialisation du composant
   ngOnInit(): void {
+    this.dtoptions = {
+      paging: true, // Activer la pagination
+      pagingType: 'full_numbers', // Type de pagination
+      pageLength: 10 // Nombre d'éléments par page
+    };
     this.initForm(); // Initialisation du formulaire
     this.fetchAllEntrees(); // Récupération des données existantes
     this.fetchDevise();
@@ -62,8 +77,8 @@ export class ListeEntreComponent implements OnInit {
   ajouterEntree(): void {
     console.log( this.entreForm.value);
     if (this.entreForm.valid) {
+      this.isLoading = true;
       const formData = this.entreForm.value; // Récupérer les valeurs du formulaire
-
       this.entreService.ajouterEntree(formData).subscribe({
         next: (response) => {
           console.log('Entrée ajoutée avec succès:', response);
@@ -77,9 +92,11 @@ export class ListeEntreComponent implements OnInit {
             montant_cfa: '',
             telephone_receveur: ''
           }); 
+          this.isLoading = false;
           alert('Entrée ajoutée avec succès !');
         },
         error: (error) => {
+          this.isLoading = false;
           console.error('Erreur lors de l\'ajout de l\'entrée:', error);
           alert('Erreur lors de l\'ajout de l\'entrée.');
         },
@@ -138,7 +155,9 @@ export class ListeEntreComponent implements OnInit {
     this.entreService.getAllEntree().subscribe({
       next: (response) => {
         this.allresultat = response;
-        // this.allresultat = response.sort((a: any, b: any) => b.id - a.id);
+        if (this.allresultat && this.allresultat.length > 0) {
+          this.dtTrigger.next(null); // Initialisation de DataTables
+        }
         console.log(this.allresultat);
       },
       error: (error) => {
@@ -146,5 +165,6 @@ export class ListeEntreComponent implements OnInit {
       },
     });
   }
+  
 
 }

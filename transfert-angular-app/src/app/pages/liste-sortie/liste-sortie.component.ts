@@ -121,10 +121,13 @@ export class ListeSortieComponent implements OnInit {
     });
   }
 
+  loading: boolean = false;
+
   // Méthode pour soumettre le formulaire et ajouter une nouvelle entrée
   ajouterEntree(): void {
     console.log(this.sortieForm.value);
     if (this.sortieForm.valid) {
+      this.loading = true;
       const formData = this.sortieForm.value; // Récupérer les valeurs du formulaire
       this.sortieService.ajouterSortie(formData).subscribe({
         next: (response) => {
@@ -136,9 +139,10 @@ export class ListeSortieComponent implements OnInit {
             deviseId: '',
             expediteur: '',
             receveur: '',
-            montant_cfa: '',
+            montant: '',
             telephone_receveur: ''
           }); 
+          this.loading = false;
           alert('Entrée ajoutée avec succès !');
         },
         error: (error) => {

@@ -1,7 +1,7 @@
 const { DataTypes } = require('sequelize');
 const sequelize = require('./sequelize');
 
-const Echange = sequelize.define('Echange', {
+const PayementEchange = sequelize.define('PayementEchange', {
   id: {
     type: DataTypes.INTEGER,
     autoIncrement: true,
@@ -11,13 +11,9 @@ const Echange = sequelize.define('Echange', {
     type: DataTypes.INTEGER,
     allowNull: false, // Ou true si facultatif
   },
-  nom: {
-    type: DataTypes.STRING,
-    allowNull: false,
-  },
-  montant_cfa: {
-    type: DataTypes.BIGINT,
-    allowNull: false, // Ajout de la contrainte pour montant
+  echangeId: {
+    type: DataTypes.INTEGER,
+    allowNull: false, // Ou true si facultatif
   },
   montant_gnf: {
     type: DataTypes.BIGINT,
@@ -34,4 +30,4 @@ const Echange = sequelize.define('Echange', {
   },
 });
 
-module.exports = Echange;
+module.exports = PayementEchange;

@@ -78,7 +78,8 @@ export class PayementComponent implements OnInit {
           this.payementCreditForm.patchValue({
             reference: '',
             montant: ''
-          });   },
+          });  
+         },
         (error) => {
           // Vérifie si l'erreur contient un message spécifique
           const errorMessage = error.error?.message || 'Une erreur est survenue lors de l\'ajout du résultat.';

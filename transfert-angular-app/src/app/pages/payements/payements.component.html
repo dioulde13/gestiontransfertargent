@@ -73,7 +73,10 @@
               <label for="montant">Montant</label>
               <input id="montant" formControlName="montant" class="form-control" type="number" />
             </div>
-            <button type="submit" [disabled]="!payementForm.valid" class="btn btn-primary">Ajouter payement</button>
+            <button type="submit" [disabled]="!payementForm.valid" class="btn btn-primary">
+              <span *ngIf="loading">Création en cours...</span>
+              <span *ngIf="!loading">Ajouter</span>
+            </button>
           </form>
         </div>
       </div>

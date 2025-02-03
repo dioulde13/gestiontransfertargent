@@ -122,11 +122,14 @@ export class ListeUtilisateursComponent implements OnInit {
   closeAddUserModal(): void {
     this.isAddUserModalOpen = false;
   }
+  loading : boolean = false;
 
   addUser(): void {
     if (this.isValidForm()) {
+      this.loading = true;
       this.utilisateurService.addUser(this.user).subscribe({
         next: () => {
+          this.loading = false;
           this.showNotification('Utilisateur ajouté avec succès !');
           this.fetchUsers();
           this.closeAddUserModal();

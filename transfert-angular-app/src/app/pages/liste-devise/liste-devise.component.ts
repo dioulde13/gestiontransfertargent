@@ -13,8 +13,8 @@ import { AuthService } from '../../services/auth/auth-service.service';
   templateUrl: './liste-devise.component.html',
   styleUrl: './liste-devise.component.css'
 })
-export class ListeDeviseComponent implements OnInit{
-// Tableau pour stocker les résultats
+export class ListeDeviseComponent implements OnInit {
+  // Tableau pour stocker les résultats
   allresultat: any[] = [];
   deviseForm!: FormGroup;
 
@@ -22,7 +22,7 @@ export class ListeDeviseComponent implements OnInit{
   idUser: string = '';
 
   // Injection du service ApiService
-  constructor(private devise: DeviseService,private fb: FormBuilder, private authService: AuthService ) {}
+  constructor(private devise: DeviseService, private fb: FormBuilder, private authService: AuthService) { }
 
   // Méthode d'initialisation
   ngOnInit(): void {
@@ -36,20 +36,24 @@ export class ListeDeviseComponent implements OnInit{
       prix_1: ['', Validators.required],
       prix_2: ['', Validators.required],
     });
+    this.getAllDevise();
 
+    this.getUserInfo(); // Récupération des infos utilisateur
+  }
+
+  getAllDevise(){
     // Appel à l'API et gestion des réponses
     this.devise.getAllDevise().subscribe({
       next: (response) => {
         // Vérification du succès de la réponse
-          this.allresultat = response; // Assurez-vous que 'data' existe dans la réponse
-          console.log(this.allresultat);
+        this.allresultat = response; // Assurez-vous que 'data' existe dans la réponse
+        console.log(this.allresultat);
       },
       error: (error) => {
         // Gestion des erreurs lors de l'appel à l'API
         console.error('Erreur lors de la récupération des données', error);
       },
     });
-    this.getUserInfo(); // Récupération des infos utilisateur
   }
 
   getUserInfo() {
@@ -68,14 +72,18 @@ export class ListeDeviseComponent implements OnInit{
     );
   }
 
+  isLoading: boolean = false;
+
   onSubmit() {
     if (this.deviseForm.valid) {
       const formData = this.deviseForm.value;
-
+      this.isLoading = true;
       // Appeler le service pour ajouter le partenaire
       this.devise.ajouterDevise(formData).subscribe(
         response => {
           console.log('Partenaire ajouté avec succès:', response);
+          this.isLoading = false;
+          this.getAllDevise();
           this.deviseForm.patchValue({
             paysDepart: '',
             paysArriver: '',

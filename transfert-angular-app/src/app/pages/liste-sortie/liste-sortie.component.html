@@ -132,7 +132,7 @@
                   >
                     <option value="" disabled selected>Sélectionnez un partenaire</option>
                     <option *ngFor="let partenaire of allPartenaire" [value]="partenaire.id">
-                      {{ partenaire.prenom+" "+ partenaire.nom+" "+ (partenaire.montant_preter | currency:'' :'' :'1.0-0')}}
+                      {{ partenaire.prenom+" "+ partenaire.nom+" "+partenaire.pays+" "+(partenaire.montant_preter | currency:'' :'' :'1.0-0')}}
                     </option>
                   </select>
                 </div>
@@ -145,7 +145,10 @@
             </div>
             <div class="modal-footer">
               <button type="button" class="btn btn-secondary" data-dismiss="modal">Annuler</button>
-              <button type="submit" class="btn btn-primary">Ajouter</button>
+              <button type="submit" class="btn btn-primary">
+                <span *ngIf="loading">Création en cours...</span>
+              <span *ngIf="!loading">Ajouter</span>
+              </button>
             </div>
           </form>
         </div>

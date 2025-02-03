@@ -172,7 +172,10 @@
             <!-- Boutons d'action -->
             <div class="modal-footer">
               <button type="button" class="btn btn-secondary" data-dismiss="modal">Annuler</button>
-              <button type="submit" class="btn btn-primary">Ajouter</button>
+              <button type="submit" class="btn btn-primary">
+                <span *ngIf="loading">Création en cours...</span>
+                <span *ngIf="!loading">Ajouter</span>
+              </button>
             </div>
           </form>
         </div>

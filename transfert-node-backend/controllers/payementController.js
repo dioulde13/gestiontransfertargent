@@ -23,6 +23,21 @@ const ajouterPayement = async (req, res) => {
       return res.status(404).json({ message: 'Entre introuvable avec ce code.' });
     }
 
+     // Mettre à jour le solde de l'utilisateur connecté
+     utilisateur.solde = (utilisateur.solde || 0) + montant;
+     await utilisateur.save();
+ 
+     const montantEnCoursPayement = montant + entre.montant_payer;
+     console.log(montantEnCoursPayement);
+     if (montantEnCoursPayement > entre.montant_gnf) {
+       return 'le montant payer est supperieur au montant restant'
+     } else {
+       // Mettre à jour le montant payé et restant dans l'entrée
+       entre.montant_payer = (entre.montant_payer ?? 0) + montant;
+       entre.montant_restant = (entre.montant_gnf ?? 0) - entre.montant_payer;
+     }
+ 
+
     // Ajouter une entrée dans la table Payement
     const payement = await Payement.create({
       utilisateurId,
@@ -31,19 +46,11 @@ const ajouterPayement = async (req, res) => {
       montant,
     });
 
-    // Mettre à jour le solde de l'utilisateur connecté
-    utilisateur.solde = (utilisateur.solde || 0) + montant;
-    await utilisateur.save();
-
-    // Mettre à jour le montant payé et restant dans l'entrée
-    entre.montant_payer = (entre.montant_payer ?? 0) + montant;
-    entre.montant_restant = (entre.montant_gnf ?? 0) - entre.montant_payer;
-
+   
     // Vérification du montant restant pour définir le type de paiement
     if (entre.montant_restant === 0) {
       entre.payement_type = "COMPLET";
     }
-
     // Enregistrement des modifications
     await entre.save();
 
@@ -69,7 +76,7 @@ const listerPayement = async (req, res) => {
         },
         {
           model: Entre,
-          attributes: ['id', 'code', 'expediteur','pays_dest', 'montant_cfa', 'montant_payer', 'montant_restant'], // Champs à inclure pour le partenaire
+          attributes: ['id', 'code', 'expediteur', 'pays_dest', 'montant_cfa', 'montant_payer', 'montant_restant'], // Champs à inclure pour le partenaire
         },
       ],
     });

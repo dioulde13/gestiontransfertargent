@@ -67,13 +67,15 @@ export class ListePartenaireComponent implements OnInit {
       },
     });
   }
+  isLoading: boolean = false;
 
   onSubmit() {
     if (this.partenaireForm.valid) {
       const formData = this.partenaireForm.value;
-      // Appeler le service pour ajouter le partenaire
+      this.isLoading = true;
       this.partenaireService.ajouterPartenaire(formData).subscribe(
         response => {
+          this.isLoading = false;
           console.log('Partenaire ajouté avec succès:', response);
           this.partenaireForm.patchValue({
             nom: '',
