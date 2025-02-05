@@ -33,10 +33,10 @@
                 </div>
               </div>
 
-              <table id="example" class="table data-table table-striped w-full">
+              <table  datatable [dtOptions]="dtoptions" [dtTrigger]="dtTrigger"
+              class="table data-table table-striped table-flush" style="width:100%">
                 <thead>
                   <tr class="text-muted">
-                    <th class="border px-4 py-2">Id</th>
                     <th class="border px-4 py-2">Nom</th>
                     <th class="border px-4 py-2">Prenom</th>
                     <th class="border px-4 py-2">Pays</th>
@@ -44,8 +44,7 @@
                   </tr>
                 </thead>
                 <tbody>
-                  <tr *ngFor="let result of allresultat; let i = index" class="hover:bg-gray-100 even:bg-gray-50">
-                    <td class="border px-4 py-2">{{ i + 1 }}</td>
+                  <tr *ngFor="let result of allresultat;" class="hover:bg-gray-100 even:bg-gray-50">
                     <td class="border px-4 py-2">{{ result.nom }}</td>
                     <td class="border px-4 py-2">{{ result.prenom }}</td>
                     <td class="border px-4 py-2">{{ result.pays }}</td>

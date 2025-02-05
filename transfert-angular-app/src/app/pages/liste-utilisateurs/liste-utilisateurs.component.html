@@ -33,10 +33,10 @@
                   </div>
                 </div>
   
-                <table id="example" class="table data-table table-striped table-flush" style="width:100%">
+                <table  datatable [dtOptions]="dtoptions" [dtTrigger]="dtTrigger"
+                class="table data-table table-striped table-flush" style="width:100%">
                   <thead>
                     <tr class="text-muted">
-                      <th class="border px-4 py-2">Id</th>
                       <th class="border px-4 py-2">Nom</th>
                       <th class="border px-4 py-2">Prenom</th>
                       <th class="border px-4 py-2">Eamil</th>
@@ -46,8 +46,7 @@
                   </thead>
                   <tbody>
                   <tbody>
-                    <tr *ngFor="let result of filteredUsers;" class="hover:bg-gray-100 even:bg-gray-50">
-                      <td >{{ result.id }}</td>
+                    <tr *ngFor="let result of users;" class="hover:bg-gray-100 even:bg-gray-50">
                       <td >{{ result.nom }}</td>
                       <td >{{ result.prenom }}</td>
                       <td >{{ result.email }}</td>

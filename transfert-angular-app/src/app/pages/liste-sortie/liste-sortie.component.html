@@ -33,10 +33,10 @@
                   </div>
                 </div>
   
-                <table id="example" class="table data-table table-striped w-full">
-                  <thead>
+                <table  datatable [dtOptions]="dtoptions" [dtTrigger]="dtTrigger"
+                class="table data-table table-striped table-flush" style="width:100%">
+                   <thead>
                     <tr class="text-muted">
-                      <th>Id</th>
                       <th>Date</th>
                       <th>Pays exp</th>
                       <th>Pays dest</th>
@@ -50,8 +50,7 @@
                     </tr>
                   </thead>
                   <tbody>
-                    <tr *ngFor="let result of allresultat; let i = index">
-                      <td class="text-center">{{ i + 1 }}</td>
+                    <tr *ngFor="let result of allresultat;">
                       <td>{{ result.date_creation | date:'dd/MM/yyyy HH:mm' }}</td>
                       <td class="text-center">{{ result.pays_exp }}</td>
                       <td class="border px-4 py-2">{{ result.pays_dest }}</td>           

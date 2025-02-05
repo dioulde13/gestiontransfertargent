@@ -4,11 +4,13 @@ import { PartenaireServiceService } from '../../services/partenaire/partenaire-s
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ReactiveFormsModule } from '@angular/forms'; // Import du module des formulaires réactifs
 import { AuthService } from '../../services/auth/auth-service.service';
+import { Subject } from 'rxjs';
+import { DataTablesModule } from 'angular-datatables';
 
 @Component({
   selector: 'app-liste-partenaire',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],  // Enlever BrowserModule
+  imports: [CommonModule, ReactiveFormsModule, DataTablesModule],  // Enlever BrowserModule
   templateUrl: './liste-partenaire.component.html',
   styleUrls: ['./liste-partenaire.component.css']  // Correction de 'styleUrl' en 'styleUrls'
 })
@@ -21,6 +23,10 @@ export class ListePartenaireComponent implements OnInit {
 
   partenaireForm!: FormGroup;
 
+  dtoptions: any = {};
+
+  dtTrigger: Subject<any> = new Subject<any>();
+
   constructor(
     private fb: FormBuilder,
     private authService: AuthService,
@@ -28,6 +34,11 @@ export class ListePartenaireComponent implements OnInit {
   ) { }
 
   ngOnInit(): void {
+    this.dtoptions = {
+      paging: true, // Activer la pagination
+      pagingType: 'full_numbers', // Type de pagination
+      pageLength: 10 // Nombre d'éléments par page
+    };
     // Initialisation du formulaire avec les validations
     this.partenaireForm = this.fb.group({
       utilisateurId: ['', Validators.required],
@@ -60,6 +71,9 @@ export class ListePartenaireComponent implements OnInit {
     this.partenaireService.getAllPartenaire().subscribe({
       next: (response) => {
         this.allresultat = response;
+        if (this.allresultat && this.allresultat.length > 0) {
+          this.dtTrigger.next(null); // Initialisation de DataTables
+        }
         console.log(this.allresultat);
       },
       error: (error) => {

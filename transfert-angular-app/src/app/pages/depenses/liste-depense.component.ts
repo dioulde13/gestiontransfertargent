@@ -4,11 +4,14 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ReactiveFormsModule } from '@angular/forms'; // Import du module des formulaires réactifs
 import { DepenseService } from '../../services/depenses/depense.service';
 import { AuthService } from '../../services/auth/auth-service.service';
+import { Subject } from 'rxjs';
+import { DataTablesModule } from 'angular-datatables';
+
 
 @Component({
   selector: 'app-liste-depense',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],  // Enlever BrowserModule
+  imports: [CommonModule, ReactiveFormsModule, DataTablesModule],  // Enlever BrowserModule
   templateUrl: './liste-depense.component.html',
   styleUrl: './liste-depense.component.css'
 })
@@ -21,6 +24,10 @@ export class ListeDepenseComponent implements OnInit {
   idUser: string = '';
 
   depenseForm!: FormGroup;
+  
+    dtoptions: any = {};
+  
+    dtTrigger: Subject<any> = new Subject<any>();
 
   constructor(
     private fb: FormBuilder,
@@ -30,6 +37,11 @@ export class ListeDepenseComponent implements OnInit {
   ) { }
 
   ngOnInit(): void {
+    this.dtoptions = {
+      paging: true, // Activer la pagination
+      pagingType: 'full_numbers', // Type de pagination
+      pageLength: 10 // Nombre d'éléments par page
+    };
     // Initialisation du formulaire avec les validations
     this.depenseForm = this.fb.group({
       utilisateurId: [this.idUser],
@@ -61,6 +73,9 @@ export class ListeDepenseComponent implements OnInit {
     this.depenseService.getAllDepense().subscribe({
       next: (response) => {
         this.allresultat = response;
+        if (this.allresultat && this.allresultat.length > 0) {
+          this.dtTrigger.next(null); // Initialisation de DataTables
+        }
         console.log(this.allresultat);
       },
       error: (error) => {
@@ -69,10 +84,13 @@ export class ListeDepenseComponent implements OnInit {
     });
   }
 
+  loading: boolean = false;
+
+
   onSubmit() {
     if (this.depenseForm.valid) {
+      this.loading = true;
       const formData = this.depenseForm.value;
-
       // Appeler le service pour ajouter le partenaire
       this.depenseService.ajoutDepense(formData).subscribe(
         response => {
@@ -83,6 +101,7 @@ export class ListeDepenseComponent implements OnInit {
             motif: '',
             montant: ''
           }); 
+          this.loading = false;
         },
         error => {
           console.error('Erreur lors de l\'ajout du depense:', error);

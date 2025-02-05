@@ -71,10 +71,9 @@
                                     </div>
                                 </div>
                             </div>
-                            <table id="example" class="table data-table table-striped table-flush" style="width:100%">
-                                <thead>
+                            <table  datatable [dtOptions]="dtoptions" [dtTrigger]="dtTrigger"
+                            class="table data-table table-striped table-flush" style="width:100%">                                <thead>
                                     <tr class="text-muted">
-                                        <th class="border px-4 py-2">Id</th>
                                         <th class="border px-4 py-2">Pays depart</th>
                                         <th class="border px-4 py-2">Pays arriver</th>
                                         <th class="border px-4 py-2">Prix devise</th>
@@ -83,8 +82,7 @@
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    <tr *ngFor="let result of allresultat; let i = index">
-                                        <td class="border px-4 py-2">{{ i + 1 }}</td>
+                                    <tr *ngFor="let result of allresultat;">
                                         <td class="border px-4 py-2">{{ result.paysDepart }}</td>
                                         <td class="border px-4 py-2">{{ result.paysArriver }}</td>
                                         <td class="border px-4 py-2">{{ (result.prix_1 | currency:'' :'' :'1.0-0') +" "+result.signe_2}}</td>

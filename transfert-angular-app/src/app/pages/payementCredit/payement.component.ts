@@ -4,12 +4,14 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ReactiveFormsModule } from '@angular/forms'; // Import du module des formulaires réactifs
 import { AuthService } from '../../services/auth/auth-service.service';
 import { PayementCreditService } from '../../services/payementCredit/payement-credit.service';
+import { Subject } from 'rxjs';
+import { DataTablesModule } from 'angular-datatables';
 
 
 @Component({
   selector: 'app-payement',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],  // Enlever BrowserModule
+  imports: [CommonModule, ReactiveFormsModule, DataTablesModule],  // Enlever BrowserModule
   templateUrl: './payement.component.html',
   styleUrl: './payement.component.css'
 })
@@ -22,6 +24,10 @@ export class PayementComponent implements OnInit {
 
   payementCreditForm!: FormGroup;
 
+   dtoptions: any = {};
+      
+  dtTrigger: Subject<any> = new Subject<any>();
+
   constructor(
     private fb: FormBuilder,
     private payementCreditService: PayementCreditService,
@@ -29,24 +35,34 @@ export class PayementComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
+    this.dtoptions = {
+      paging: true, // Activer la pagination
+      pagingType: 'full_numbers', // Type de pagination
+      pageLength: 10 // Nombre d'éléments par page
+    };
     // Initialisation du formulaire avec les validations
     this.payementCreditForm = this.fb.group({
       utilisateurId: [this.idUser],
       reference: ['', Validators.required],
       montant: ['', Validators.required],
     });
+    this.getAllPayementCredit();
+    this.getUserInfo(); // Récupération des infos utilisateur
+  }
 
-    // Appel à l'API et gestion des réponses
+  getAllPayementCredit(){
     this.payementCreditService.getAllPayementCredit().subscribe({
       next: (response) => {
         this.allresultat = response;
+        if (this.allresultat && this.allresultat.length > 0) {
+          this.dtTrigger.next(null); // Initialisation de DataTables
+        }
         console.log(this.allresultat);
       },
       error: (error) => {
         console.error('Erreur lors de la récupération des données', error);
       },
     });
-    this.getUserInfo(); // Récupération des infos utilisateur
   }
 
 
@@ -66,10 +82,13 @@ export class PayementComponent implements OnInit {
     );
   }
 
+  loading: boolean = false;
+
+
   onSubmit() {
     if (this.payementCreditForm.valid) {
       const formData = this.payementCreditForm.value;
-
+      this.loading = true;
       // Appeler le service pour ajouter le partenaire
       this.payementCreditService.ajouterPayementCredit(formData).subscribe(
         response => {
@@ -79,6 +98,8 @@ export class PayementComponent implements OnInit {
             reference: '',
             montant: ''
           });  
+          this.getAllPayementCredit();
+          this.loading = false;
          },
         (error) => {
           // Vérifie si l'erreur contient un message spécifique

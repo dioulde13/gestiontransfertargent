@@ -21,7 +21,7 @@
                   <div class="card">
                     <div class="card-body">
                       <div class="d-flex flex-wrap items-center justify-between breadcrumb-content">
-                        <h5>Liste des credit</h5>
+                        <h5>Liste des depenses</h5>
                         <div class="d-flex flex-wrap items-center justify-between">
                           <div class="pl-3 btn-new border-left">
                             <a href="#" class="btn btn-primary" data-target="#new-project-modal"
@@ -33,17 +33,16 @@
                   </div>
                 </div>
   
-                <table id="example" class="table data-table table-striped w-full">
-                  <thead>
+                <table id="transactions-table" datatable [dtOptions]="dtoptions" [dtTrigger]="dtTrigger"
+                class="table data-table table-striped table-flush" style="width:100%">                 
+                 <thead>
                     <tr class="text-muted">
-                      <th class="border px-4 py-2">Id</th>
                       <th class="border px-4 py-2">Motif</th>
                       <th class="border px-4 py-2">Montant</th>
                     </tr>
                   </thead>
                   <tbody>
-                    <tr *ngFor="let result of allresultat; let i = index" class="hover:bg-gray-100 even:bg-gray-50">
-                      <td class="border px-4 py-2">{{ i + 1 }}</td>
+                    <tr *ngFor="let result of allresultat;" class="hover:bg-gray-100 even:bg-gray-50">
                       <td class="border px-4 py-2">{{ result.motif }}</td>
                       <td class="border px-4 py-2">{{ result.montant | currency:'' :'' :'1.0-0' }} GNF</td>
                     
@@ -73,7 +72,9 @@
               <label for="montant">Montant</label>
               <input id="montant" formControlName="montant" class="form-control" type="number" />
             </div>
-            <button type="submit" [disabled]="!depenseForm.valid" class="btn btn-primary">Ajouter depense</button>
+            <button type="submit" [disabled]="!depenseForm.valid" class="btn btn-primary">  
+              <span *ngIf="loading">Création en cours...</span>
+              <span *ngIf="!loading">Ajouter</span></button>
           </form>
         </div>
       </div>

@@ -4,12 +4,14 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ReactiveFormsModule } from '@angular/forms'; // Import du module des formulaires réactifs
 import { DeviseService } from '../../services/devise/devise.service';
 import { AuthService } from '../../services/auth/auth-service.service';
+import { Subject } from 'rxjs';
+import { DataTablesModule } from 'angular-datatables';
 
 
 @Component({
   selector: 'app-liste-devise',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],  // Enlever BrowserModule
+  imports: [CommonModule, ReactiveFormsModule, DataTablesModule],  // Enlever BrowserModule
   templateUrl: './liste-devise.component.html',
   styleUrl: './liste-devise.component.css'
 })
@@ -21,11 +23,20 @@ export class ListeDeviseComponent implements OnInit {
   userInfo: any = null;
   idUser: string = '';
 
+    dtoptions: any = {};
+        
+    dtTrigger: Subject<any> = new Subject<any>();
+
   // Injection du service ApiService
   constructor(private devise: DeviseService, private fb: FormBuilder, private authService: AuthService) { }
 
   // Méthode d'initialisation
   ngOnInit(): void {
+    this.dtoptions = {
+      paging: true, // Activer la pagination
+      pagingType: 'full_numbers', // Type de pagination
+      pageLength: 10 // Nombre d'éléments par page
+    };
 
     this.deviseForm = this.fb.group({
       utilisateurId: ['', Validators.required],
@@ -47,6 +58,9 @@ export class ListeDeviseComponent implements OnInit {
       next: (response) => {
         // Vérification du succès de la réponse
         this.allresultat = response; // Assurez-vous que 'data' existe dans la réponse
+        if (this.allresultat && this.allresultat.length > 0) {
+          this.dtTrigger.next(null); // Initialisation de DataTables
+        }
         console.log(this.allresultat);
       },
       error: (error) => {

@@ -4,11 +4,13 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ReactiveFormsModule } from '@angular/forms'; // Import du module des formulaires réactifs
 import { CreditService } from '../../services/credits/credit.service';
 import { AuthService } from '../../services/auth/auth-service.service';
+import { Subject } from 'rxjs';
+import { DataTablesModule } from 'angular-datatables';
 
 @Component({
   selector: 'app-liste-credit',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],  // Enlever BrowserModule
+  imports: [CommonModule, ReactiveFormsModule, DataTablesModule],  // Enlever BrowserModule
   templateUrl: './liste-credit.component.html',
   styleUrl: './liste-credit.component.css'
 })
@@ -22,6 +24,10 @@ export class ListeCreditComponent implements OnInit {
 
   creditForm!: FormGroup;
 
+  dtoptions: any = {};
+    
+  dtTrigger: Subject<any> = new Subject<any>();
+
   constructor(
     private fb: FormBuilder,
     private creditService: CreditService,
@@ -29,6 +35,11 @@ export class ListeCreditComponent implements OnInit {
   ) { }
 
   ngOnInit(): void {
+    this.dtoptions = {
+      paging: true, // Activer la pagination
+      pagingType: 'full_numbers', // Type de pagination
+      pageLength: 10 // Nombre d'éléments par page
+    };
     // Initialisation du formulaire avec les validations
     // Initialisation du formulaire
     this.creditForm = this.fb.group({
@@ -68,6 +79,9 @@ export class ListeCreditComponent implements OnInit {
     this.creditService.getAllCredit().subscribe({
       next: (response) => {
         this.allresultat = response;
+        if (this.allresultat && this.allresultat.length > 0) {
+          this.dtTrigger.next(null); // Initialisation de DataTables
+        }
         console.log(this.allresultat);
       },
       error: (error) => {
@@ -76,8 +90,12 @@ export class ListeCreditComponent implements OnInit {
     });
   }
 
+  loading: boolean = false;
+
+
   onSubmit() {
     if (this.creditForm.valid) {
+      this.loading = true;
       const formData = this.creditForm.value;
       console.log(formData);
       // Appeler le service pour ajouter le partenaire
@@ -89,6 +107,7 @@ export class ListeCreditComponent implements OnInit {
             nom: '',
             montant: ''
           });
+          this.loading = false;
           alert('Credit ajouté avec succès!');
         },
         error => {

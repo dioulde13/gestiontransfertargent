@@ -4,11 +4,13 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ReactiveFormsModule } from '@angular/forms'; // Import du module des formulaires réactifs
 import { PayementService } from '../../services/payements/payement.service';
 import { AuthService } from '../../services/auth/auth-service.service';
+import { Subject } from 'rxjs';
+import { DataTablesModule } from 'angular-datatables';
 
 @Component({
   selector: 'app-payements',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],  // Enlever BrowserModule
+  imports: [CommonModule, ReactiveFormsModule, DataTablesModule],  // Enlever BrowserModule
   templateUrl: './payements.component.html',
   styleUrl: './payements.component.css'
 })
@@ -21,6 +23,10 @@ export class PayementsComponent implements OnInit {
 
   payementForm!: FormGroup;
 
+  dtoptions: any = {};
+
+  dtTrigger: Subject<any> = new Subject<any>();
+
   constructor(
     private fb: FormBuilder,
     private payementService: PayementService,
@@ -28,6 +34,11 @@ export class PayementsComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
+    this.dtoptions = {
+      paging: true, // Activer la pagination
+      pagingType: 'full_numbers', // Type de pagination
+      pageLength: 10 // Nombre d'éléments par page
+    };
     // Initialisation du formulaire avec les validations
     this.payementForm = this.fb.group({
       utilisateurId: [this.idUser],
@@ -44,6 +55,9 @@ export class PayementsComponent implements OnInit {
      this.payementService.getAllPayement().subscribe({
       next: (response) => {
         this.allresultat = response;
+        if (this.allresultat && this.allresultat.length > 0) {
+          this.dtTrigger.next(null); // Initialisation de DataTables
+        }
         console.log(this.allresultat);
       },
       error: (error) => {

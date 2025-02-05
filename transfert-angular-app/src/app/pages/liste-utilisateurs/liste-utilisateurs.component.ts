@@ -5,6 +5,8 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { UtilisateurService } from '../../services/utilisateurs/utilisateur.service';
 import { AuthService } from '../../services/auth/auth-service.service';
+import { Subject } from 'rxjs';
+import { DataTablesModule } from 'angular-datatables';
 
 // Interface utilisateur
 interface User {
@@ -22,20 +24,22 @@ interface User {
 @Component({
   selector: 'app-liste-utilisateurs',
   standalone: true,
-  imports: [CommonModule, FormsModule, MatSnackBarModule],
+  imports: [CommonModule, FormsModule, MatSnackBarModule, DataTablesModule],
   templateUrl: './liste-utilisateurs.component.html',
   styleUrl: './liste-utilisateurs.component.css',
 })
 export class ListeUtilisateursComponent implements OnInit {
   user: User = this.getEmptyUser();
-  users: User[] = [];
-  filteredUsers: User[] = [];
+  users: any[] = [];
   errorMessage: string = '';
   userInfo: any = null; // Informations de l'utilisateur connecté
 
   // Recherche et filtres
   searchTerm: string = '';
   selectedRole: string = '';
+  dtoptions: any = {};
+
+  dtTrigger: Subject<any> = new Subject<any>();
 
   // Gestion des modales
   isAddUserModalOpen: boolean = false; // Modale d'ajout
@@ -50,6 +54,11 @@ export class ListeUtilisateursComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
+    this.dtoptions = {
+      paging: true, // Activer la pagination
+      pagingType: 'full_numbers', // Type de pagination
+      pageLength: 10 // Nombre d'éléments par page
+    };
     this.fetchUsers();
     this.userInfo = this.authService.getUserInfo();
     console.log('Informations utilisateur:', this.userInfo);
@@ -79,32 +88,18 @@ export class ListeUtilisateursComponent implements OnInit {
     });
   }
 
-  /** Gestion de la recherche et des filtres */
-  rechercherUsers(): User[] {
-    if (!this.searchTerm) {
-      return this.users;
-    }
-    return this.users.filter(user =>
-      user.email.toLowerCase().includes(this.searchTerm.toLowerCase()) ||
-      user.telephone.includes(this.searchTerm)
-    );
-  }
-
-  filterByRole(): void {
-    this.filteredUsers = this.selectedRole
-      ? this.users.filter(user => user.role === this.selectedRole)
-      : [...this.users];
-  }
+ 
 
   /** Récupérer les utilisateurs */
   fetchUsers(): void {
     this.utilisateurService.getUsers().subscribe({
       next: (response) => {
-        const currentUserEmail = this.userInfo?.user?.email || '';
         this.users = response
-          .filter((user: User) => user.email !== currentUserEmail)
-          .sort((a: User, b: User) => b.id - a.id); // Trier par ID décroissant
-        this.filteredUsers = [...this.users];
+        console.log(this.users);
+        if (this.users && this.users.length > 0) {
+          this.dtTrigger.next(null); // Initialisation de DataTables
+        }
+
       },
       error: (error) => {
         this.errorMessage = `Erreur : ${error.message}`;

@@ -6,11 +6,13 @@ import { RembourserService } from '../../services/rembourser/rembourser.service'
 import { AuthService } from '../../services/auth/auth-service.service';
 import { PartenaireServiceService } from '../../services/partenaire/partenaire-service.service';
 import { DeviseService } from '../../services/devise/devise.service';
+import { Subject } from 'rxjs';
+import { DataTablesModule } from 'angular-datatables';
 
 @Component({
   selector: 'app-liste-rembourser',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [CommonModule, ReactiveFormsModule, DataTablesModule],
   templateUrl: './liste-rembourser.component.html',
   styleUrl: './liste-rembourser.component.css'
 })
@@ -23,6 +25,10 @@ export class ListeRembourserComponent implements OnInit {
 
   rembourserForm!: FormGroup;
 
+  dtoptions: any = {};
+
+  dtTrigger: Subject<any> = new Subject<any>();
+
   constructor(
     private fb: FormBuilder,
     private authService: AuthService,
@@ -32,8 +38,13 @@ export class ListeRembourserComponent implements OnInit {
   ) { }
 
   ngOnInit(): void {
-    this.getAllRemboursement();
 
+    this.dtoptions = {
+      paging: true, // Activer la pagination
+      pagingType: 'full_numbers', // Type de pagination
+      pageLength: 10 // Nombre d'éléments par page
+    };
+    this.getAllRemboursement();
     // Initialisation du formulaire avec les validations
     this.rembourserForm = this.fb.group({
       utilisateurId: [this.idUser],
@@ -112,6 +123,9 @@ export class ListeRembourserComponent implements OnInit {
     this.partenaireService.getAllPartenaire().subscribe(
       (response) => {
         this.allPartenaire = response;
+        if (this.allPartenaire && this.allPartenaire.length > 0) {
+          this.dtTrigger.next(null); // Initialisation de DataTables
+        }
         console.log('Liste des partenaires:', this.allPartenaire);
       },
       (error) => {

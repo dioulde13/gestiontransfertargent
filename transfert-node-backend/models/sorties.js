@@ -26,6 +26,10 @@ const Sortie = sequelize.define('Sortie', {
     type: DataTypes.STRING,
     allowNull: false,
   },
+  codeGenere: {
+    type: DataTypes.STRING,
+    allowNull: false,
+  },
   prix_1: {
     type: DataTypes.INTEGER,
     allowNull: false,
