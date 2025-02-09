@@ -16,7 +16,7 @@
               <div class="card card-block card-stretch card-height">
                   <div class="card-body">
                       <div class="top-block d-flex align-items-center justify-content-center">
-                          <span style="font-size: 30px;">Caisse</span>
+                          <span style="font-size: 20px;">Caisse</span>
                       </div>
                       <div>
                         <span class="d-flex align-items-center justify-content-center" style="font-size: 30px; color: black;"> 
@@ -29,54 +29,42 @@
           <div class="col-lg-3 card-profile">
               <div class="card card-block card-stretch card-height">
                   <div class="card-body">
-                      <div class="top-block d-flex align-items-center justify-content-between">
-                          <h5>Eleves</h5>
-                          <span class="badge badge-warning">voir</span>
-                      </div>
-                      <h3><span class="counter">10</span></h3>
-                      <div class="d-flex align-items-center justify-content-between mt-1">
-                          <p class="mb-0">Total Eleves</p>
-                          <span class="text-info">95%</span>
-                      </div>
-                      <div class="iq-progress-bar bg-info-light mt-2">
-                          <span class="bg-warning iq-progress progress-1" data-percent="55"></span>
-                      </div>
+                    <div class="top-block d-flex align-items-center justify-content-center">
+                        <span style="font-size: 20px;">Nombre entre par jours</span>
+                    </div>
+                    <div>
+                      <span class="d-flex align-items-center justify-content-center" style="font-size: 30px; color: black;"> 
+                          {{ entreDuJour | currency:'' :'' :'1.0-0'}}
+                      </span>
+                    </div>
                   </div>
               </div> 
           </div>
           <div class="col-lg-3 card-profile">
               <div class="card card-block card-stretch card-height">
                   <div class="card-body">
-                      <div class="top-block d-flex align-items-center justify-content-between">
-                          <h5>Transactions</h5>
-                          <span class="badge badge-primary">voir</span>
-                      </div>
-                      <h3><span class="counter">10</span></h3>
-                      <div class="d-flex align-items-center justify-content-between mt-1">
-                          <p class="mb-0">Total Transactions</p>
-                          <span class="text-info">95%</span>
-                      </div>
-                      <div class="iq-progress-bar bg-info-light mt-2">
-                          <span class="bg-primary iq-progress progress-1" data-percent="55"></span>
-                      </div>
+                    <div class="top-block d-flex align-items-center justify-content-center">
+                        <span style="font-size: 20px;">Nombre sortie par jours</span>
+                    </div>
+                    <div>
+                      <span class="d-flex align-items-center justify-content-center" style="font-size: 30px; color: black;"> 
+                          {{ 2000 | currency:'' :'' :'1.0-0'}}
+                      </span>
+                    </div>
                   </div>
               </div> 
           </div>
           <div class="col-lg-3 card-profile">
               <div class="card card-block card-stretch card-height">
                   <div class="card-body">
-                      <div class="top-block d-flex align-items-center justify-content-between">
-                          <h5>Professeurs</h5>
-                          <span class="badge badge-info">voir</span>
-                      </div>
-                      <h3><span class="counter">10</span></h3>
-                      <div class="d-flex align-items-center justify-content-between mt-1">
-                          <p class="mb-0">Total Professeurs</p>
-                          <span class="text-info">95%</span>
-                      </div>
-                      <div class="iq-progress-bar bg-info-light mt-2">
-                          <span class="bg-info iq-progress progress-1" data-percent="55"></span>
-                      </div>
+                    <div class="top-block d-flex align-items-center justify-content-center">
+                        <span style="font-size: 20px;">Payement par jours</span>
+                    </div>
+                    <div>
+                      <span class="d-flex align-items-center justify-content-center" style="font-size: 30px; color: black;"> 
+                          {{ 2000 | currency:'' :'' :'1.0-0'}}
+                      </span>
+                    </div>
                   </div>
               </div> 
           </div>
@@ -85,89 +73,59 @@
           <div class="col-lg-3 card-profile">
               <div class="card card-block card-stretch card-height">
                   <div class="card-body">
-                      <div class="top-block d-flex align-items-center justify-content-between">
-                          <h5>Bourse d'étude</h5>
-                          <a href="#"><span class="badge badge-succes">voir</span></a>
-                      </div>
-                      <h3><span class="counter">10</span></h3>
-                      <div class="d-flex align-items-center justify-content-between mt-1">
-                          <p class="mb-0">Total Bourse</p>
-                          <span class="text-info">95%</span>
-                      </div>
-                      <div class="iq-progress-bar bg-info-light mt-2">
-                          <span class="bg-succes iq-progress progress-1" data-percent="55"></span>
-                      </div>
+                    <div class="top-block d-flex align-items-center justify-content-center">
+                        <span style="font-size: 20px;">Echange par jours</span>
+                    </div>
+                    <div>
+                      <span class="d-flex align-items-center justify-content-center" style="font-size: 30px; color: black;"> 
+                          {{ 2000 | currency:'' :'' :'1.0-0'}}
+                      </span>
+                    </div>
                   </div>
               </div> 
           </div>		 
           <div class="col-lg-3 card-profile">
               <div class="card card-block card-stretch card-height">
                   <div class="card-body">
-                      <div class="top-block d-flex align-items-center justify-content-between">
-                          <h5>Santé etudiants</h5>
-                          <a href="#"><span class="badge badge-info">voir</span></a>
-                      </div>
-                      <h3><span class="counter">10</span></h3>
-                      <div class="d-flex align-items-center justify-content-between mt-1">
-                          <p class="mb-0">Total Santé</p>
-                          <span class="text-info">95%</span>
-                      </div>
-                      <div class="iq-progress-bar bg-info-light mt-2">
-                          <span class="bg-info iq-progress progress-1" data-percent="55"></span>
-                      </div>
+                    <div class="top-block d-flex align-items-center justify-content-center">
+                        <span style="font-size: 20px;">Payement echange par jours</span>
+                    </div>
+                    <div>
+                      <span class="d-flex align-items-center justify-content-center" style="font-size: 30px; color: black;"> 
+                          {{ 500 | currency:'' :'' :'1.0-0'}}
+                      </span>
+                    </div>
                   </div>
               </div> 
           </div>	
           <div class="col-lg-3 card-profile">
               <div class="card card-block card-stretch card-height">
                   <div class="card-body">
-                      <div class="top-block d-flex align-items-center justify-content-between">
-                          <h5>Absences</h5>
-                          <a href="#"><span class="badge badge-secondary">voir</span></a>
-                      </div>
-                      <h3><span class="counter">10</span></h3>
-                      <div class="d-flex align-items-center justify-content-between mt-1">
-                          <p class="mb-0">Total Absences</p>
-                          <span class="text-info">95%</span>
-                      </div>
-                      <div class="iq-progress-bar bg-info-light mt-2">
-                          <span class="bg-secondary iq-progress progress-1" data-percent="55"></span>
-                      </div>
+                    <div class="top-block d-flex align-items-center justify-content-center">
+                        <span style="font-size: 20px;">Retour par jours</span>
+                    </div>
+                    <div>
+                      <span class="d-flex align-items-center justify-content-center" style="font-size: 30px; color: black;"> 
+                          {{ 2000 | currency:'' :'' :'1.0-0'}}
+                      </span>
+                    </div>
                   </div>
               </div> 
           </div>	
           <div class="col-lg-3 card-profile">
               <div class="card card-block card-stretch card-height">
                   <div class="card-body">
-                      <div class="top-block d-flex align-items-center justify-content-between">
-                          <h5>Messagerie</h5>
-                          <span class="badge badge-info">voir</span>
-                      </div>
-                      <h3><span class="counter">10</span></h3>
-                      <div class="d-flex align-items-center justify-content-between mt-1">
-                          <p class="mb-0">Total Message</p>
-                          <span class="text-info">95%</span>
-                      </div>
-                      <div class="iq-progress-bar bg-info-light mt-2">
-                          <span class="bg-info iq-progress progress-1" data-percent="55"></span>
-                      </div>
+                    <div class="top-block d-flex align-items-center justify-content-center">
+                        <span style="font-size: 20px;">Depenses par jours</span>
+                    </div>
+                    <div>
+                      <span class="d-flex align-items-center justify-content-center" style="font-size: 30px; color: black;"> 
+                          {{ 2000 | currency:'' :'' :'1.0-0'}} GNF
+                      </span>
+                    </div>
                   </div>
               </div> 
           </div>
-
-          
-        <div class="col-lg-12 card-profile">
-       <div class="card">
-                <div class="card-header d-flex justify-content-between">
-                   <div class="header-title">
-                      <h4 class="card-title">Statisque par mois</h4>
-                   </div>
-                </div>
-                <div class="card-body">
-                   <div id="apex-column"></div>
-                </div>
-             </div>
-       </div>
           
         </div>
     </div>

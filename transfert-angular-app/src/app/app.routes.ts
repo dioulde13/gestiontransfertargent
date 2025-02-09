@@ -13,6 +13,8 @@ import { ListeCreditComponent } from './pages/credits/liste-credit.component';
 import { AuthGuard } from './services/guard/guard-service.guard';
 import { ListeUtilisateursComponent } from './pages/liste-utilisateurs/liste-utilisateurs.component';
 import { PayementComponent } from './pages/payementCredit/payement.component';
+import { PayementEchangeComponent } from './pages/payement-echange/payement-echange.component';
+import { ListeEchangeComponent } from './pages/liste-echange/liste-echange.component';
 
 
 export const routes: Routes = [
@@ -37,6 +39,15 @@ export const routes: Routes = [
       {
         path: 'entre',
         component: ListeEntreComponent,
+        canActivate: [AuthGuard]
+      },{
+        path: 'echange',
+        component: ListeEchangeComponent,
+        canActivate: [AuthGuard]
+      },
+      {
+        path: 'payementEchange',
+        component: PayementEchangeComponent,
         canActivate: [AuthGuard]
       },
       {

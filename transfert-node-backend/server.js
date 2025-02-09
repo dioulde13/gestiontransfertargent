@@ -13,7 +13,8 @@ const authRoutes = require('./routes/authRoute'); // Importer les routes des ent
 const depenseRoute = require('./routes/depenseRoute'); // Importer les routes des entrées
 const creditRoute = require('./routes/creditRoute'); // Importer les routes des entrées
 const payementCreditRoute = require('./routes/payementCreditRoute'); // Importer les routes des entrées
-
+const echangeRoute = require('./routes/echangeRoute'); // Importer les routes des entrées
+const payementEchangeRoute = require('./routes/payementEchangeRoute'); // Importer les routes des entrées
 
 
 
@@ -60,6 +61,10 @@ app.use('/api/payementCredit', payementCreditRoute);
 
 
 app.use('/api/depense', depenseRoute);
+
+app.use('/api/echange', echangeRoute);
+
+app.use('/api/payementEchange', payementEchangeRoute);
 
 app.use('/api/credit', creditRoute);
 

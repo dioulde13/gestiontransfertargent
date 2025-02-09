@@ -32,19 +32,37 @@
                     </div>
                   </div>
                 </div>
+
+                <div class="row mb-4">
+                  <div class="col-md-3">
+                    <input type="date" id="startDate" class="form-control" placeholder="Date Début">
+                  </div>
+                  <div class="col-md-3">
+                    <input type="date" id="endDate" class="form-control" placeholder="Date Fin">
+                  </div>
+                  <div class="col-md-3 d-flex">
+                    <button id="btnFilter" class="btn btn-primary"
+                      style="border-radius: 60px; padding: 5px 10px; font-size: 14px;">
+                      Filtrer
+                    </button>
+                  </div>
+                  <div class="col-md-3 d-flex">
+                    <div id="totalMontant" style="font-weight: bold; margin-top: 10px;">Total Montant GNF : 0 GNF</div>
+                  </div>
+                </div>
   
-                <table  datatable [dtOptions]="dtoptions" [dtTrigger]="dtTrigger"
-                class="table data-table table-striped table-flush" style="width:100%">
-                <thead>
-                    <tr class="text-muted">
-                      <th class="border px-4 py-2">Date payement</th>
-                      <th class="border px-4 py-2">Montant</th>
+                <table  id="transactions-table" datatable [dtOptions]="dtoptions" [dtTrigger]="dtTrigger" class="table table-striped">
+                  <thead>
+                    <tr>
+                      <th>Date paiement</th>
+                      <th>Montant</th>
                     </tr>
                   </thead>
                   <tbody>
-                    <tr *ngFor="let result of allresultat;" class="hover:bg-gray-100 even:bg-gray-50">
+                    <tr *ngFor="let result of allresultat">
                       <td class="border px-4 py-2">{{" "+result.Entre.pays_dest+" / "+""+result.Entre.code+" / "+ ""+result.Entre.expediteur+" / "}}{{ result.date_creation | date:'dd/MM/yyyy HH:mm'}}</td>
-                      <td class="border px-4 py-2">{{ result.montant  | currency:'' :'' :'1.0-0'}} GNF</td> 
+                      <!-- <td>{{ result.date_creation | date: 'dd/MM/yyyy HH:mm' }}</td> -->
+                      <td>{{ result.montant | currency: '' :'' : '1.0-0' }} GNF</td>
                     </tr>
                   </tbody>
                 </table>

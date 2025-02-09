@@ -1,1 +1,144 @@
-<p>liste-echange works!</p>
+<div class="content-page">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-lg-12">
+                <div class="card bg-transparent">
+                    <div class="card-body p-0">
+                        <div class="profile-image relative">
+                            <img src="/assets/images/top-header.png" class="img-fluid rounded w-full"
+                                alt="profile-image">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row m-0">
+            <div class="col-lg-12 card-profile">
+                <div class="card card-stretch h-full">
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <div class="col-lg-12">
+                                <div class="card">
+                                    <div class="card-body">
+                                        <div class="d-flex flex-wrap items-center justify-between breadcrumb-content">
+                                            <h5>Liste des echanges</h5>
+                                            <div class="d-flex flex-wrap items-center justify-between">
+                                                <div class="pl-3 btn-new border-left">
+                                                    <a href="#" class="btn btn-primary" data-target="#new-project-modal"
+                                                        data-toggle="modal">Ajouter nouveau</a>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row mb-4">
+                                <div class="col-md-4 d-flex mb-3 mb-md-0">
+                                  <input type="date" id="startDate" class="form-control" placeholder="Date Début" style="border-radius: 25px;">
+                                </div>
+                                <div class="col-md-4 d-flex mb-3 mb-md-0">
+                                  <input type="date" id="endDate" class="form-control" placeholder="Date Fin" style="border-radius: 25px;">
+                                </div>
+                                <div class="col-md-4 d-flex">
+                                  <button id="btnFilter" class="btn btn-primary" style="border-radius: 60px; padding: 5px 10px; font-size: 14px;">
+                                    Filtrer
+                                  </button>
+                                </div>
+                              </div>
+                              
+                              <div class="table-responsive">
+                                <table id="transactions-table" class="table data-table table-striped table-flush" style="width:100%">
+                                  <thead>
+                                    <tr>
+                                      <th>Code</th>
+                                      <th>Date du jour</th>
+                                      <th>Nom client</th>
+                                      <th>Montant En Cfa</th>
+                                      <th>Prix</th>
+                                      <th>Montant En GNF</th>
+                                      <th>Montant payé GNF</th>
+                                      <th>Montant restant GNF</th>
+                                      <th>Statut Paiement</th>
+                                    </tr>
+                                  </thead>
+                                  <tbody>
+                                    <tr *ngFor="let result of allresultat">
+                                      <td>{{ result.code }}</td>
+                                      <td>{{ result.date_creation | date: 'dd/MM/yyyy HH:mm' }}</td>
+                                      <td>{{ result.nom }}</td>
+                                      <td>{{ result.montant_devise | currency: '' : '' : '1.0-0' }} XOF</td>
+                                      <td>{{ result.prix_2 | currency: '' : '' : '1.0-0' }} GNF</td>
+                                      <td>{{ (result.montant_devise / result.prix_1) * result.prix_2 | currency: '' : '' : '1.0-0' }} GNF</td>
+                                      <td>{{ result.montant_payer | currency: '' : '' : '1.0-0' }} GNF</td>
+                                      <td>{{ result.montant_restant | currency: '' : '' : '1.0-0' }} GNF</td>
+                                      <td>{{ result.payement_type }}</td>
+                                    </tr>
+                                  </tbody>
+                                </table>
+                              </div>
+                          </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="new-project-modal" tabindex="-1" role="dialog" aria-labelledby="modalTitle"
+    aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalTitle">Ajouter une nouvelle entrée</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form [formGroup]="echangeForm" (ngSubmit)="ajouterEchange()">
+                    <div class="form-row">
+                        <div class="form-group col-md-6">
+                            <label for="nom">Nom</label>
+                            <input type="text" class="form-control" id="nom" formControlName="nom"
+                                placeholder="Nom de l'expéditeur" />
+                        </div>
+                        <div class="form-group col-md-6">
+
+                            <div class="form-group mb-3">
+                                <label for="devise">Devise</label>
+                                <select class="form-control" id="devise" formControlName="deviseId" required>
+                                    <option value="" disabled selected>Sélectionnez un pays</option>
+                                    <option *ngFor="let devise of allDevise" [value]="devise.id">
+                                        {{ devise.paysArriver+" "+ (devise.prix_1 | currency:'' :'' :'1.0-0')+" "+
+                                        devise.signe_2 +"->"+
+                                        (devise.prix_2 | currency:'' :'' :'1.0-0') +" "+ devise.signe_1 }}
+                                    </option>
+                                </select>
+                            </div>
+                        </div>
+
+
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group col-lg-12">
+                            <label for="montant_devise">Montant </label>
+                            <input type="number" class="form-control" id="montant_devise"
+                                formControlName="montant_devise" placeholder="Montant" />
+                        </div>
+
+                    </div>
+
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Annuler</button>
+                        <button type="submit" class="btn btn-primary">
+                            <span *ngIf="isLoading">Création en cours...</span>
+                            <span *ngIf="!isLoading">Ajouter</span>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

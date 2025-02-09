@@ -9,4 +9,7 @@ router.post('/create', entreController.ajouterEntre);
 // Route pour récupérer la liste des entrées avec les informations des utilisateurs et des partenaires associés
 router.get('/liste', entreController.recupererEntreesAvecAssocies);
 
+router.get('/compte', entreController.compterEntreesDuJour);
+
+
 module.exports = router;
