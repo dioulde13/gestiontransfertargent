@@ -1,6 +1,8 @@
 const Echange = require('../models/echanger');
 const Utilisateur = require('../models/utilisateurs');
 const Devise = require('../models/devises');
+const { Sequelize} = require('sequelize');
+
 
 
 const ajouterEchange = async (req, res) => {
@@ -83,7 +85,29 @@ const ajouterEchange = async (req, res) => {
     }
 };
 
-module.exports = { ajouterEchange };
+// Compter le nombre d'entrées du jour actuel
+const compterEchangeDuJour = async (req, res) => {
+    try {
+      // Obtenir la date actuelle au format YYYY-MM-DD
+      const dateActuelle = new Date().toISOString().slice(0, 10);
+  
+      const nombreEchange = await Echange.count({
+        where: Sequelize.where(
+          Sequelize.fn('DATE', Sequelize.col('date_creation')),
+          dateActuelle
+        )
+      });
+  
+      res.status(200).json({
+        date: dateActuelle,
+        nombre_echange: nombreEchange
+      });
+    } catch (error) {
+      console.error('Erreur lors du comptage des entrées du jour :', error);
+      res.status(500).json({ message: 'Erreur interne du serveur.' });
+    }
+  };
+
 
 const recupererEchange = async (req, res) => {
     try {
@@ -116,4 +140,4 @@ const recupererEchange = async (req, res) => {
     }
 };
 
-module.exports = { ajouterEchange, recupererEchange };
+module.exports = { ajouterEchange, recupererEchange , compterEchangeDuJour};

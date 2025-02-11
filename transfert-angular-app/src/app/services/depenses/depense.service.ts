@@ -12,6 +12,12 @@ export class DepenseService {
 
   constructor(private http: HttpClient) { }
 
+
+   // Méthode pour récupérer les données de l'API
+   getCompteDepense(): Observable<any> {
+    return this.http.get(`${this.apiUrl}/api/depense/compte`);
+  }
+
   // Méthode pour récupérer les données de l'API
   getAllDepense(): Observable<any> {
     return this.http.get(`${this.apiUrl}/api/depense/liste`);

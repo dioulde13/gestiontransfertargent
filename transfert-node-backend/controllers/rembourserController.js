@@ -2,6 +2,8 @@ const Rembourser = require('../models/rembourser'); // Modèle Rembourser
 const Utilisateur = require('../models/utilisateurs'); // Modèle Utilisateur
 const Partenaire = require('../models/partenaires'); // Modèle Partenaire
 const Devise = require('../models/devises');
+const { Sequelize} = require('sequelize');
+
 
 const ajouterRemboursement = async (req, res) => {
   try {
@@ -89,6 +91,30 @@ const ajouterRemboursement = async (req, res) => {
   }
 };
 
+// Compter le nombre d'entrées du jour actuel
+const compterRembourserDuJour = async (req, res) => {
+  try {
+    // Obtenir la date actuelle au format YYYY-MM-DD
+    const dateActuelle = new Date().toISOString().slice(0, 10);
+
+    const nombreRembourser = await Rembourser.count({
+      where: Sequelize.where(
+        Sequelize.fn('DATE', Sequelize.col('date_creation')),
+        dateActuelle
+      )
+    });
+
+    res.status(200).json({
+      date: dateActuelle,
+      nombre_rembourser: nombreRembourser
+    });
+  } catch (error) {
+    console.error('Erreur lors du comptage des sorties du jour :', error);
+    res.status(500).json({ message: 'Erreur interne du serveur.' });
+  }
+};
+
+
 
 // Lister toutes les entrées de la table Rembourser avec associations
 const listerRemboursements = async (req, res) => {
@@ -121,4 +147,4 @@ const listerRemboursements = async (req, res) => {
   }
 };
 
-module.exports = { ajouterRemboursement, listerRemboursements };
+module.exports = { ajouterRemboursement, listerRemboursements, compterRembourserDuJour };

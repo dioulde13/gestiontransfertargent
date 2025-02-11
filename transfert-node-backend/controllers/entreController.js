@@ -2,7 +2,7 @@ const Entre = require('../models/entres');
 const Utilisateur = require('../models/utilisateurs');
 const Partenaire = require('../models/partenaires');
 const Devise = require('../models/devises');
-const { Sequelize, Op } = require('sequelize');
+const { Sequelize} = require('sequelize');
 
 
 // Récupérer les entrées avec les associations
@@ -50,7 +50,7 @@ const ajouterEntre = async (req, res) => {
       telephone_receveur
     } = req.body;
 
- 
+
 
     // Vérifier si tous les champs obligatoires sont présents
     if (
@@ -168,4 +168,59 @@ const compterEntreesDuJour = async (req, res) => {
     res.status(500).json({ message: 'Erreur interne du serveur.' });
   }
 };
-module.exports = { ajouterEntre, recupererEntreesAvecAssocies, compterEntreesDuJour };
+
+const annulerEntre = async (req, res) => {
+  try {
+    const { id } = req.params; // Récupération de l'ID de l'entrée à annuler
+
+    // Vérifier si l'entrée existe
+    const entre = await Entre.findByPk(id);
+    if (!entre) {
+      return res.status(404).json({ message: "Entrée introuvable." });
+    }
+    // Vérifier si le partenaire existe
+    const partenaire = await Partenaire.findByPk(partenaireId);
+    if (!partenaire) {
+      return res.status(404).json({ message: 'Partenaire introuvable.' });
+    }
+
+    // Récupérer les informations de l'utilisateur connecté
+    const utilisateur = await Utilisateur.findByPk(utilisateurId);
+    if (!utilisateur) {
+      return res.status(404).json({ message: 'Utilisateur introuvable.' });
+    }
+
+    // Vérifier si l'entrée est déjà annulée
+    if (entre.status === 'ANNULEE') {
+      return res.status(400).json({ message: "Cette entrée est déjà annulée." });
+    }
+
+    if (entre.status === 'PAYEE') {
+      // Mettre à jour le solde de l'utilisateur connecté
+      utilisateur.solde = (utilisateur.solde || 0) - entre.montant_gnf;
+      await utilisateur.save();
+      partenaire.montant_preter = (partenaire.montant_preter || 0) - montant_cfa;
+      await partenaire.save();
+    } else if (entre.status === 'EN COURS') {
+      // Mettre à jour le solde de l'utilisateur connecté
+      utilisateur.solde = (utilisateur.solde || 0) - entre.montant_payer;
+      await utilisateur.save();
+      partenaire.montant_preter = (partenaire.montant_preter || 0) - ((entre.montant_payer / entre.prix_2 ) * entre.prix_2);
+      await partenaire.save();
+    }
+
+    // Mettre à jour le statut de l'entrée à 'ANNULEE'
+    entre.status = 'ANNULEE';
+    await entre.save();
+
+    res.status(200).json({
+      message: "Entrée annulée avec succès.",
+      entre,
+    });
+  } catch (error) {
+    console.error("Erreur lors de l'annulation de l'entrée :", error);
+    res.status(500).json({ message: "Erreur interne du serveur." });
+  }
+};
+
+module.exports = { ajouterEntre, recupererEntreesAvecAssocies, compterEntreesDuJour, annulerEntre };

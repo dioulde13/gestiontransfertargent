@@ -101,7 +101,7 @@ const Entre = sequelize.define('Entre', {
     defaultValue: 'NON COMPLET', // Définir une valeur par défaut
   },
   status: {
-    type: DataTypes.ENUM('NON PAYEE', 'PAYEE','CREDIT', 'ANNULEE'),
+    type: DataTypes.ENUM('NON PAYEE', 'PAYEE','EN COURS', 'ANNULEE'),
     allowNull: false,
     defaultValue: 'NON PAYEE', // Définir une valeur par défaut
   },

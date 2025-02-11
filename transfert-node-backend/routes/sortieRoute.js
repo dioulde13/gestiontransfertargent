@@ -9,4 +9,7 @@ router.post('/create', sortieController.ajouterSortie);
 // Route pour récupérer la liste des sorties avec les informations des utilisateurs et des partenaires associés
 router.get('/liste', sortieController.recupererSortiesAvecAssocies);
 
+router.get('/compte', sortieController.compterSortieDuJour);
+
+
 module.exports = router;

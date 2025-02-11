@@ -2,6 +2,8 @@ const Sortie = require('../models/sorties');
 const Utilisateur = require('../models/utilisateurs');
 const Partenaire = require('../models/partenaires');
 const Devise = require('../models/devises');
+const { Sequelize} = require('sequelize');
+
 
 const recupererSortiesAvecAssocies = async (req, res) => {
   try {
@@ -32,6 +34,30 @@ const recupererSortiesAvecAssocies = async (req, res) => {
     res.status(500).json({ message: 'Erreur interne du serveur.' });
   }
 };
+
+// Compter le nombre d'entrées du jour actuel
+const compterSortieDuJour = async (req, res) => {
+  try {
+    // Obtenir la date actuelle au format YYYY-MM-DD
+    const dateActuelle = new Date().toISOString().slice(0, 10);
+
+    const nombreSortie = await Sortie.count({
+      where: Sequelize.where(
+        Sequelize.fn('DATE', Sequelize.col('date_creation')),
+        dateActuelle
+      )
+    });
+
+    res.status(200).json({
+      date: dateActuelle,
+      nombre_Sortie: nombreSortie
+    });
+  } catch (error) {
+    console.error('Erreur lors du comptage des sorties du jour :', error);
+    res.status(500).json({ message: 'Erreur interne du serveur.' });
+  }
+};
+
 
 const ajouterSortie = async (req, res) => {
   try {
@@ -129,4 +155,4 @@ const ajouterSortie = async (req, res) => {
   }
 };
 
-module.exports = { ajouterSortie, recupererSortiesAvecAssocies };
+module.exports = { ajouterSortie, recupererSortiesAvecAssocies, compterSortieDuJour };

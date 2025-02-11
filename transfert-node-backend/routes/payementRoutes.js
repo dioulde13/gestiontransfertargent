@@ -9,4 +9,7 @@ router.post('/create', payementController.ajouterPayement);
 // Route pour récupérer la liste des payements
 router.get('/liste', payementController.listerPayement);
 
+router.get('/compte', payementController.compterPayementDuJour);
+
+
 module.exports = router;

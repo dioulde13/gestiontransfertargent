@@ -11,6 +11,11 @@ export class SortieService {
      private apiUrl = 'http://localhost:3000'; 
    
      constructor(private http: HttpClient) { }
+
+      // Méthode pour récupérer les données de l'API
+    getCompteSortie(): Observable<any> {
+      return this.http.get(`${this.apiUrl}/api/sorties/compte`);
+    }
    
       // Méthode pour récupérer les données de l'API
       getAllSortie(): Observable<any> {

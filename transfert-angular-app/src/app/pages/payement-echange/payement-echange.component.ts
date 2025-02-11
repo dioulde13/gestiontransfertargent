@@ -5,7 +5,7 @@ import { ReactiveFormsModule } from '@angular/forms'; // Import du module des fo
 import { AuthService } from '../../services/auth/auth-service.service';
 import { Subject } from 'rxjs';
 import { DataTablesModule } from 'angular-datatables';
-import { PayementService } from '../../services/payementEchange/payement.service';
+import { PayementEchangeService } from '../../services/payementEchange/payement.service';
 
 @Component({
   selector: 'app-payement-echange',
@@ -30,7 +30,7 @@ export class PayementEchangeComponent implements OnInit{
   
     constructor(
       private fb: FormBuilder,
-      private payementService: PayementService,
+      private payementService: PayementEchangeService,
       private authService: AuthService,
     ) {}
   

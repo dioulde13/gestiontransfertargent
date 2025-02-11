@@ -1,5 +1,37 @@
 const Depense = require('../models/depense');
 const Utilisateur = require('../models/utilisateurs');
+const { Op } = require('sequelize');
+
+
+
+
+// API pour calculer la somme des dépenses du jour actuel
+const sommeDepenseAujourdHui = async (req, res) => {
+  try {
+    const aujourdHui = new Date();
+    const debutJour = new Date(aujourdHui.setHours(0, 0, 0, 0));   // Début de la journée
+    const finJour = new Date(aujourdHui.setHours(23, 59, 59, 999)); // Fin de la journée
+
+    // Calcul de la somme des dépenses pour aujourd'hui
+    const totalDepense = await Depense.sum('montant', {
+      where: {
+        createdAt: {
+          [Op.between]: [debutJour, finJour],
+        },
+      },
+    });
+
+    res.status(200).json({
+      date: debutJour.toISOString().split('T')[0], // Format : YYYY-MM-DD
+      totalDepense: totalDepense || 0, // Retourne 0 si aucune dépense n'est trouvée
+    });
+  } catch (error) {
+    console.error('Erreur lors du calcul des dépenses du jour :', error);
+    res.status(500).json({ message: 'Erreur interne du serveur.' });
+  }
+};
+
+
 
 const ajouterDepense = async (req, res) => {
   try {
@@ -63,4 +95,4 @@ const recupererDepense = async (req, res) => {
     }
   };
 
-module.exports = { ajouterDepense, recupererDepense};
+module.exports = { ajouterDepense, recupererDepense, sommeDepenseAujourdHui};

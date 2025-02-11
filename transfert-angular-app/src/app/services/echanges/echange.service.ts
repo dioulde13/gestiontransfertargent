@@ -10,6 +10,10 @@ export class EchangeService {
    private apiUrl = 'http://localhost:3000'; 
  
    constructor(private http: HttpClient) { }
+
+   getCompteEchange(): Observable<any> {
+    return this.http.get(`${this.apiUrl}/api/echange/compte`);
+  }
  
     // Méthode pour récupérer les données de l'API
     getAllEchange(): Observable<any> {

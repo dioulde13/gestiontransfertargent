@@ -11,6 +11,10 @@ export class PayementService {
     private apiUrl = 'http://localhost:3000'; 
   
     constructor(private http: HttpClient) { }
+
+    getComptePayement(): Observable<any> {
+      return this.http.get(`${this.apiUrl}/api/payement/compte`);
+    }
   
      // Méthode pour récupérer les données de l'API
      getAllPayement(): Observable<any> {

@@ -1,6 +1,8 @@
 const Utilisateur = require('../models/utilisateurs'); // Modèle Utilisateur
 const Echange = require('../models/echanger'); // Modèle Partenaire
 const PayementEchange = require('../models/payementEchange');
+const { Sequelize} = require('sequelize');
+
 
 const ajouterPayementEchange = async (req, res) => {
   try {
@@ -58,6 +60,30 @@ const ajouterPayementEchange = async (req, res) => {
 };
 
 
+// Compter le nombre d'entrées du jour actuel
+const compterPayementEchangeDuJour = async (req, res) => {
+  try {
+    // Obtenir la date actuelle au format YYYY-MM-DD
+    const dateActuelle = new Date().toISOString().slice(0, 10);
+
+    const nombrePayementEchange = await PayementEchange.count({
+      where: Sequelize.where(
+        Sequelize.fn('DATE', Sequelize.col('date_creation')),
+        dateActuelle
+      )
+    });
+
+    res.status(200).json({
+      date: dateActuelle,
+      nombre_Payement_echange: nombrePayementEchange
+    });
+  } catch (error) {
+    console.error('Erreur lors du comptage des sorties du jour :', error);
+    res.status(500).json({ message: 'Erreur interne du serveur.' });
+  }
+};
+
+
 
 // Lister toutes les entrées de la table Rembourser avec associations
 const listerPayementEchange = async (req, res) => {
@@ -86,4 +112,4 @@ const listerPayementEchange = async (req, res) => {
   }
 };
 
-module.exports = { ajouterPayementEchange, listerPayementEchange };
+module.exports = { ajouterPayementEchange, listerPayementEchange , compterPayementEchangeDuJour};
