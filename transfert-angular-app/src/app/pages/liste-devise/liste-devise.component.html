@@ -78,7 +78,7 @@
                                         <th class="border px-4 py-2">Pays arriver</th>
                                         <th class="border px-4 py-2">Prix devise</th>
                                         <th class="border px-4 py-2">Prix correspond</th>
-                                        
+                                        <th class="border px-4 py-2">Action</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -87,7 +87,11 @@
                                         <td class="border px-4 py-2">{{ result.paysArriver }}</td>
                                         <td class="border px-4 py-2">{{ (result.prix_1 | currency:'' :'' :'1.0-0') +" "+result.signe_2}}</td>
                                         <td class="border px-4 py-2">{{ (result.prix_2  | currency:'' :'' :'1.0-0') +" "+result.signe_1}}</td>
-                                    </tr>
+                                        <td>
+                                          <button class="btn btn-warning btn-sm" data-toggle="modal" data-target="#edit-project-modal"
+                                            (click)="onEdit(result)">Modifier</button>
+                                        </td>
+                                      </tr>
                             </table>
                         </div>
                     </div>
@@ -141,4 +145,25 @@
 
         </div>
     </div>
+</div>
+
+<!-- Modal de modification -->
+<div class="modal fade" id="edit-project-modal" tabindex="-1" role="dialog" aria-labelledby="editProjectModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header bg-warning text-white">
+        <h5 class="modal-title">Modifier la devise</h5>
+        <button type="button" class="close" data-dismiss="modal">&times;</button>
+      </div>
+      <div class="modal-body">
+        <form [formGroup]="editDeviseForm" (ngSubmit)="onUpdate()">
+          <div class="form-group" *ngFor="let field of ['paysDepart', 'paysArriver', 'signe_1', 'signe_2', 'prix_1', 'prix_2']">
+            <label [for]="'edit_' + field">{{ field | titlecase }}</label>
+            <input [id]="'edit_' + field" [formControlName]="field" class="form-control" [type]="field.includes('prix') ? 'number' : 'text'" />
+          </div>
+          <button type="submit" class="btn btn-primary" [disabled]="!editDeviseForm.valid">Enregistrer les modifications</button>
+        </form>
+      </div>
+    </div>
+  </div>
 </div>

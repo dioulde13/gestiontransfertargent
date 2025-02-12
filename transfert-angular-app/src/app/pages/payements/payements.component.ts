@@ -31,11 +31,16 @@ export class PayementsComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.dtoptions = {
-      paging: true,
       pagingType: 'full_numbers',
       pageLength: 10,
-      stateSave: true,
-      destroy: true
+      processing: true,
+      dom: "<'row'<'col-sm-6 dt-buttons-left'B><'col-sm-6 text-end dt-search-right'f>>" + 
+           "<'row'<'col-sm-12'tr>>" + 
+           "<'row'<'col-sm-5'i><'col-sm-7'p>>",
+      buttons: ['csv', 'excel', 'print'],
+      language: {
+          search: "Rechercher"
+      }
     };
 
     this.payementForm = this.fb.group({
@@ -60,12 +65,7 @@ export class PayementsComponent implements OnInit, OnDestroy {
 
         // Initialiser DataTable après un court délai
         setTimeout(() => {
-          let table = $('#transactions-table').DataTable({
-            pagingType: 'full_numbers',
-            pageLength: 10,
-            stateSave: true,
-            destroy: true,
-          });
+          let table = $('#transactions-table').DataTable(this.dtoptions);
 
           const calculateTotal = () => {
             let total = 0;

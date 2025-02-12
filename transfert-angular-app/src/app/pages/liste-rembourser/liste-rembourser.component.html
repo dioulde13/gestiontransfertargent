@@ -33,9 +33,60 @@
                 </div>
               </div>
 
-              <table  datatable [dtOptions]="dtoptions" [dtTrigger]="dtTrigger"
-              class="table data-table table-striped table-flush" style="width:100%">         
-                 <thead>
+
+
+              <div class="container">
+                <form (ngSubmit)="onCalculer()" class="form-benefice">
+                  <div class="row">
+                    <div class="col-lg-6">
+                      <div class="form-group">
+                        <label for="dateDebut">Date Début</label>
+                        <input type="date" id="dateDebut" [(ngModel)]="dateDebut" name="dateDebut" required>
+                      </div>
+                    </div>
+                    <div class="col-lg-6">
+                      <div class="form-group">
+                        <label for="dateFin">Date Fin</label>
+                        <input type="date" id="dateFin" [(ngModel)]="dateFin" name="dateFin" required>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="form-group">
+                    <label for="montant">Montant en devise</label>
+                    <input type="number" id="montant" [(ngModel)]="montant" name="montantCfa" required>
+                  </div>
+                  <div class="row">
+
+                    <div class="col-lg-6">
+                      <div class="form-group">
+                        <label for="prix_1">Prix en devise</label>
+                        <input type="number" id="prix_1" [(ngModel)]="prix_1" name="prix_1" required>
+                      </div>
+                    </div>
+                    <div class="col-lg-6">
+                      <div class="form-group">
+                        <label for="prix">Prix (en GNF)</label>
+                        <input type="number" id="prix" [(ngModel)]="prix" name="prix" required>
+                      </div>
+                    </div>
+                  </div>
+                  <button type="submit" class="btn-calculer">Calculer</button>
+                </form>
+
+                <div *ngIf="resultats" class="resultats">
+                  <p><strong>Montant achater en devise :</strong> {{ resultats.totalMontantCfa | currency:'' :''
+                    :'1.0-0'}}</p>
+                  <p><strong>Montant achater en GNF :</strong> {{ resultats.totalMontantGnf | currency:'' :'' :'1.0-0'}}
+                  </p>
+                  <p><strong>Montant vendu en GNF :</strong> {{ resultats.montantGnfSaisi | currency:'' :'' :'1.0-0'}}
+                  </p>
+                </div>
+              </div>
+
+
+              <table datatable [dtOptions]="dtoptions" [dtTrigger]="dtTrigger"
+                class="table data-table table-striped table-flush" style="width:100%">
+                <thead>
                   <tr class="text-muted">
                     <th class="border px-4 py-2">Date</th>
                     <th class="border px-4 py-2">Nom</th>
@@ -50,9 +101,12 @@
                   <tr *ngFor="let result of allresultat;" class="hover:bg-gray-100 even:bg-gray-50">
                     <td>{{ result.date_creation | date:'dd/MM/yyyy HH:mm' }}</td>
                     <td class="border px-4 py-2">{{ result.nom }}</td>
-                    <td class="border px-4 py-2">{{ (result.prix_2 | currency:'' :'' :'1.0-0')+" "+result.signe_1 }}</td>
-                    <td class="border px-4 py-2">{{ (result.montant | currency:'' :'' :'1.0-0') +" "+ result.signe_2}}</td>
-                    <td class="border px-4 py-2">{{ (result.montant_gnf | currency:'' :'' :'1.0-0') +" "+ result.signe_1}}</td>
+                    <td class="border px-4 py-2">{{ (result.prix_2 | currency:'' :'' :'1.0-0')+" "+result.signe_1 }}
+                    </td>
+                    <td class="border px-4 py-2">{{ (result.montant | currency:'' :'' :'1.0-0') +" "+ result.signe_2}}
+                    </td>
+                    <td class="border px-4 py-2">{{ (result.montant_gnf | currency:'' :'' :'1.0-0') +" "+
+                      result.signe_1}}</td>
                     <td class="border px-4 py-2">{{ result.Partenaire.prenom +" "+ result.Partenaire.nom}}</td>
                   </tr>
                 </tbody>
@@ -72,35 +126,30 @@
       <div class="container">
         <h2>Ajouter un Remboursement</h2>
         <form [formGroup]="rembourserForm" (ngSubmit)="onSubmit()">
-            <div class="form-group mb-3">
-              <label for="devise">Partenaire</label>
-              <select class="form-control" id="partenaire" formControlName="partenaireId" required>
-                <option value="" disabled selected>Sélectionnez un partenaire</option>
-                <option *ngFor="let partenaire of allPartenaire" [value]="partenaire.id">
-                  {{ partenaire.prenom+" "+ partenaire.nom+" "+ (partenaire.montant_preter | currency:'' :'' :'1.0-0')+"
-                  XOF"}}
-                </option>
-              </select>
-            </div>
-            <div class="form-group mb-3">
-              <label for="nom">Nom client</label>
-              <input type="text" class="form-control" id="nom" formControlName="nom"
-                placeholder="Nom du client" />
-            </div>
-              <div class="form-group mb-3">
-                <label for="devise">Prix</label>
-                <select
-                  class="form-control"
-                  id="devise"
-                  formControlName="deviseId"
-                  required
-                >
-                  <option value="" disabled selected>Sélectionnez un prix</option>
-                  <option *ngFor="let devise of allDevise" [value]="devise.id">
-                    {{ devise.paysArriver+" "+ (devise.prix_1 | currency:'' :'' :'1.0-0')+" "+ devise.signe_2 +"->"+ (devise.prix_2 | currency:'' :'' :'1.0-0') +" "+ devise.signe_1 }}
-                  </option>
-                </select>
-            </div>
+          <div class="form-group mb-3">
+            <label for="devise">Partenaire</label>
+            <select class="form-control" id="partenaire" formControlName="partenaireId" required>
+              <option value="" disabled selected>Sélectionnez un partenaire</option>
+              <option *ngFor="let partenaire of allPartenaire" [value]="partenaire.id">
+                {{ partenaire.prenom+" "+ partenaire.nom+" "+ (partenaire.montant_preter | currency:'' :'' :'1.0-0')+"
+                XOF"}}
+              </option>
+            </select>
+          </div>
+          <div class="form-group mb-3">
+            <label for="nom">Nom client</label>
+            <input type="text" class="form-control" id="nom" formControlName="nom" placeholder="Nom du client" />
+          </div>
+          <div class="form-group mb-3">
+            <label for="devise">Prix</label>
+            <select class="form-control" id="devise" formControlName="deviseId" required>
+              <option value="" disabled selected>Sélectionnez un prix</option>
+              <option *ngFor="let devise of allDevise" [value]="devise.id">
+                {{ devise.paysArriver+" "+ (devise.prix_1 | currency:'' :'' :'1.0-0')+" "+ devise.signe_2 +"->"+
+                (devise.prix_2 | currency:'' :'' :'1.0-0') +" "+ devise.signe_1 }}
+              </option>
+            </select>
+          </div>
           <div class="form-group">
             <label for="montant">Montant</label>
             <input id="montant" formControlName="montant" class="form-control" type="number" />

@@ -32,6 +32,26 @@
                     </div>
                   </div>
                 </div>
+
+                <div class="row mb-4">
+                  <div class="col-md-3 d-flex mb-3 mb-md-0">
+                    <input type="date" id="startDate" class="form-control" placeholder="Date Début"
+                      style="border-radius: 25px;">
+                  </div>
+                  <div class="col-md-3 d-flex mb-3 mb-md-0">
+                    <input type="date" id="endDate" class="form-control" placeholder="Date Fin"
+                      style="border-radius: 25px;">
+                  </div>
+                  <div class="col-md-3 d-flex">
+                    <button id="btnFilter" class="btn btn-primary"
+                      style="border-radius: 60px; padding: 5px 10px; font-size: 14px;">
+                      Filtrer
+                    </button>
+                  </div>
+                  <div class="col-md-3 d-flex">
+                    <div id="totalMontant" style="font-weight: bold; margin-top: 10px;">Total Montant GNF : 0 GNF</div>
+                  </div>
+                </div>
   
                 <table  datatable [dtOptions]="dtoptions" [dtTrigger]="dtTrigger"
                 class="table data-table table-striped table-flush" style="width:100%">

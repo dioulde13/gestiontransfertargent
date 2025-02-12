@@ -42,9 +42,16 @@ export class ListeSortieComponent implements OnInit {
   ngOnInit(): void {
 
     this.dtoptions = {
-      paging: true, // Activer la pagination
-      pagingType: 'full_numbers', // Type de pagination
-      pageLength: 10 // Nombre d'éléments par page
+      pagingType: 'full_numbers',
+      pageLength: 10,
+      processing: true,
+      dom: "<'row'<'col-sm-6 dt-buttons-left'B><'col-sm-6 text-end dt-search-right'f>>" + 
+           "<'row'<'col-sm-12'tr>>" + 
+           "<'row'<'col-sm-5'i><'col-sm-7'p>>",
+      buttons: ['csv', 'excel', 'print'],
+      language: {
+          search: "Rechercher"
+      }
     };
     // Initialisation du formulaire
     this.initForm();
@@ -126,6 +133,84 @@ export class ListeSortieComponent implements OnInit {
         // Mise à jour du tableau avec les résultats récupérés
         this.allresultat = response;
         console.log('Données récupérées avec succès:', this.allresultat);
+          // Détruire l'ancienne instance de DataTable si elle existe
+          if ($.fn.DataTable.isDataTable('#transactions-table')) {
+            $('#transactions-table').DataTable().clear().destroy();
+          }
+    
+          // Initialiser DataTable après un court délai
+          setTimeout(() => {
+            let table = $('#transactions-table').DataTable(this.dtoptions);
+    
+            const calculateTotal = () => {
+              let total = 0;
+              let visibleRows = table.rows(':visible').data().length; // Nombre de lignes visibles
+    
+              if (visibleRows > 0) {
+                table.rows(':visible').every(function () {
+                  let rowData = this.data();
+                  let montant = parseFloat(
+                    rowData[9].toString().replace(/\s/g, '').replace(/,/g, '')
+                  ) || 0;
+    
+                  total += montant;
+                });
+              }
+    
+              // Afficher le total uniquement si un filtre est actif
+              if (visibleRows > 0 && (startDateObj || endDateObj)) {
+                $('#totalMontant').html(
+                  `<strong>Total Montant GNF :</strong> ${total.toLocaleString()} GNF`
+                );
+              } else {
+                $('#totalMontant').html(`<strong>Total Montant GNF :</strong> 0 GNF`);
+              }
+            };
+    
+            let startDateObj: Date | null = null;
+            let endDateObj: Date | null = null;
+    
+            // Fonction de filtrage des dates
+            $('#btnFilter').on('click', function () {
+              let startDate = ($('#startDate').val() as string);
+              let endDate = ($('#endDate').val() as string);
+    
+              startDateObj = startDate ? new Date(startDate + 'T00:00:00') : null;
+              endDateObj = endDate ? new Date(endDate + 'T23:59:59') : null;
+    
+              table.rows().every(function () {
+                let rowData = this.data();
+                let dateStr = rowData[0];
+    
+                if (dateStr) {
+                  let [datePart, timePart] = dateStr.split(' ');
+                  let [day, month, year] = datePart.split('/').map(Number);
+                  let [hours, minutes] = timePart.split(':').map(Number);
+                  let rowDate = new Date(year, month - 1, day, hours, minutes);
+    
+                  if (
+                    (!startDateObj || rowDate >= startDateObj) &&
+                    (!endDateObj || rowDate <= endDateObj)
+                  ) {
+                    $(this.node()).show();
+                  } else {
+                    $(this.node()).hide();
+                  }
+                }
+              });
+    
+              table.draw();
+              calculateTotal();
+            });
+    
+            // Mettre à jour le total lors de la recherche
+            table.on('search.dt', function () {
+              calculateTotal();
+            });
+    
+            // Afficher 0 par défaut
+            $('#totalMontant').html(`<strong>Total Montant GNF :</strong> 0 GNF`);
+          }, 100);
       },
       error: (error) => {
         // Gestion des erreurs lors de l'appel API

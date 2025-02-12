@@ -9,4 +9,7 @@ router.post('/create', deviseController.ajouterDevise);
 // Route pour récupérer la liste des devises
 router.get('/liste', deviseController.recupererDevises);
 
+router.put('/devise/:id', deviseController.modifierDevise);
+
+
 module.exports = router;

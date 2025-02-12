@@ -46,9 +46,16 @@ export class ListeEntreComponent implements OnInit {
   // Initialisation du composant
   ngOnInit(): void {
     this.dtoptions = {
-      paging: true, // Activer la pagination
-      pagingType: 'full_numbers', // Type de pagination
-      pageLength: 10 // Nombre d'éléments par page
+      pagingType: 'full_numbers',
+      pageLength: 10,
+      processing: true,
+      dom: "<'row'<'col-sm-6 dt-buttons-left'B><'col-sm-6 text-end dt-search-right'f>>" + 
+           "<'row'<'col-sm-12'tr>>" + 
+           "<'row'<'col-sm-5'i><'col-sm-7'p>>",
+      buttons: ['csv', 'excel', 'print'],
+      language: {
+          search: "Rechercher"
+      }
     };
     this.initForm(); // Initialisation du formulaire
     this.fetchAllEntrees(); // Récupération des données existantes
@@ -83,6 +90,7 @@ export class ListeEntreComponent implements OnInit {
         next: (response) => {
           console.log('Entrée ajoutée avec succès:', response);
           this.fetchAllEntrees();
+          this.allresultat.unshift(response);  // Ajouter en haut du tableau (ou utilisez push pour le bas)
           // Réinitialiser le formulaire et mettre à jour la liste
           this.entreForm.patchValue({
             partenaireId: '',
@@ -149,70 +157,52 @@ export class ListeEntreComponent implements OnInit {
     );
   }
   private fetchAllEntrees(): void {
+    const tableElement = $('#transactions-table');
+  
+    if ($.fn.DataTable.isDataTable(tableElement)) {
+      tableElement.DataTable().clear().destroy();
+    }
+  
     this.entreService.getAllEntree().subscribe({
       next: (response) => {
         this.allresultat = response;
         console.log(this.allresultat);
   
-        // Détruire l'ancienne instance de DataTable si elle existe
-        if ($.fn.DataTable.isDataTable('#transactions-table')) {
-          $('#transactions-table').DataTable().clear().destroy();
-        }
-  
-        // Initialiser DataTable après un court délai
         setTimeout(() => {
-          let table = $('#transactions-table').DataTable({
-            pagingType: 'full_numbers',
-            pageLength: 10,
-            stateSave: true,
-            destroy: true,
-          });
-  
-          const calculateTotal = () => {
-            let total = 0;
-            let visibleRows = table.rows(':visible').data().length; // Nombre de lignes visibles
-  
-            if (visibleRows > 0) {
-              table.rows(':visible').every(function () {
-                let rowData = this.data();
-                let montant = parseFloat(
-                  rowData[8].toString().replace(/\s/g, '').replace(/,/g, '')
-                ) || 0;
-  
-                total += montant;
-              });
-            }
-  
-            // Afficher le total uniquement si un filtre est actif
-            if (visibleRows > 0 && (startDateObj || endDateObj)) {
-              $('#totalMontant').html(
-                `<strong>Total Montant GNF :</strong> ${total.toLocaleString()} GNF`
-              );
-            } else {
-              $('#totalMontant').html(`<strong>Total Montant GNF :</strong> 0 GNF`);
-            }
-          };
-  
+          const table = $('#transactions-table').DataTable(this.dtoptions);
           let startDateObj: Date | null = null;
           let endDateObj: Date | null = null;
   
-          // Fonction de filtrage des dates
-          $('#btnFilter').on('click', function () {
-            let startDate = ($('#startDate').val() as string);
-            let endDate = ($('#endDate').val() as string);
+          const calculateTotal = () => {
+            let total = 0;
+            table.rows(':visible').every(function () {
+              const rowData = this.data();
+              const montant = parseFloat(rowData[4]?.replace(/\s/g, '').replace(/,/g, '') || '0');
+              total += montant;
+            });
+  
+            $('#totalMontant').html(
+              `<strong>Total Montant GNF :</strong> ${total.toLocaleString()} GNF`
+            );
+          };
+  
+          // Gestion du filtre par date
+          $('#btnFilter').off('click').on('click', function () {
+            const startDate = ($('#startDate').val() as string);
+            const endDate = ($('#endDate').val() as string);
   
             startDateObj = startDate ? new Date(startDate + 'T00:00:00') : null;
             endDateObj = endDate ? new Date(endDate + 'T23:59:59') : null;
   
             table.rows().every(function () {
-              let rowData = this.data();
-              let dateStr = rowData[1];
+              const rowData = this.data();
+              const dateStr = rowData[1];
   
               if (dateStr) {
-                let [datePart, timePart] = dateStr.split(' ');
-                let [day, month, year] = datePart.split('/').map(Number);
-                let [hours, minutes] = timePart.split(':').map(Number);
-                let rowDate = new Date(year, month - 1, day, hours, minutes);
+                const [datePart, timePart] = dateStr.split(' ');
+                const [day, month, year] = datePart.split('/').map(Number);
+                const [hours, minutes] = timePart.split(':').map(Number);
+                const rowDate = new Date(year, month - 1, day, hours, minutes);
   
                 if (
                   (!startDateObj || rowDate >= startDateObj) &&
@@ -229,20 +219,18 @@ export class ListeEntreComponent implements OnInit {
             calculateTotal();
           });
   
-          // Mettre à jour le total lors de la recherche
-          table.on('search.dt', function () {
-            calculateTotal();
-          });
+          // Calcul du total lors de la recherche
+          table.on('search.dt', calculateTotal);
   
-          // Afficher 0 par défaut
           $('#totalMontant').html(`<strong>Total Montant GNF :</strong> 0 GNF`);
-        }, 100);
+        }, 200);
       },
       error: (error) => {
         console.error('Erreur lors de la récupération des données:', error);
       },
     });
   }
+  
   
 
 }

@@ -8,11 +8,14 @@ import { PartenaireServiceService } from '../../services/partenaire/partenaire-s
 import { DeviseService } from '../../services/devise/devise.service';
 import { Subject } from 'rxjs';
 import { DataTablesModule } from 'angular-datatables';
+import { CalculBeneficeService } from '../../services/calculBenefices/calcul-benefice.service';
+import { FormsModule } from '@angular/forms';
+
 
 @Component({
   selector: 'app-liste-rembourser',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, DataTablesModule],
+  imports: [CommonModule, ReactiveFormsModule, DataTablesModule, FormsModule],
   templateUrl: './liste-rembourser.component.html',
   styleUrl: './liste-rembourser.component.css'
 })
@@ -34,7 +37,8 @@ export class ListeRembourserComponent implements OnInit {
     private authService: AuthService,
     private deviseService: DeviseService,
     private partenaireService: PartenaireServiceService,
-    private rembourserService: RembourserService
+    private rembourserService: RembourserService,
+    private calculService: CalculBeneficeService
   ) { }
 
   ngOnInit(): void {
@@ -148,6 +152,25 @@ export class ListeRembourserComponent implements OnInit {
         console.error('Erreur lors de la récupération des données', error);
       },
     });
+  }
+
+  dateDebut: string = '';
+  dateFin: string = '';
+  montant: number = 0;
+  prix: number = 0;
+  prix_1: number = 0;  // Champ à saisir par l'utilisateur
+  resultats: any;
+
+  onCalculer() {
+    this.calculService.calculerBenefice(this.dateDebut, this.dateFin, this.montant, this.prix_1, this.prix).subscribe(
+      (response) => {
+        this.resultats = response;
+        console.log(this.resultats);
+      },
+      (error) => {
+        console.error('Erreur:', error);
+      }
+    );
   }
 
  }

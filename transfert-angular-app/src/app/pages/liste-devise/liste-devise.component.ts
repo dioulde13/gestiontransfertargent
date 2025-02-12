@@ -1,41 +1,41 @@
 import { Component, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';  // Remplacer BrowserModule par CommonModule
+import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { ReactiveFormsModule } from '@angular/forms'; // Import du module des formulaires réactifs
+import { ReactiveFormsModule } from '@angular/forms';
 import { DeviseService } from '../../services/devise/devise.service';
 import { AuthService } from '../../services/auth/auth-service.service';
 import { Subject } from 'rxjs';
 import { DataTablesModule } from 'angular-datatables';
 
-
 @Component({
   selector: 'app-liste-devise',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, DataTablesModule],  // Enlever BrowserModule
+  imports: [CommonModule, ReactiveFormsModule, DataTablesModule],
   templateUrl: './liste-devise.component.html',
   styleUrl: './liste-devise.component.css'
 })
 export class ListeDeviseComponent implements OnInit {
-  // Tableau pour stocker les résultats
   allresultat: any[] = [];
   deviseForm!: FormGroup;
+  editDeviseForm!: FormGroup;
 
   userInfo: any = null;
   idUser: string = '';
 
-    dtoptions: any = {};
-        
-    dtTrigger: Subject<any> = new Subject<any>();
+  dtoptions: any = {};
+  dtTrigger: Subject<any> = new Subject<any>();
 
-  // Injection du service ApiService
-  constructor(private devise: DeviseService, private fb: FormBuilder, private authService: AuthService) { }
+  selectedDevise: any = null; // Devise sélectionnée pour modification
 
-  // Méthode d'initialisation
+  isLoading: boolean = false;
+
+  constructor(private devise: DeviseService, private fb: FormBuilder, private authService: AuthService) {}
+
   ngOnInit(): void {
     this.dtoptions = {
-      paging: true, // Activer la pagination
-      pagingType: 'full_numbers', // Type de pagination
-      pageLength: 10 // Nombre d'éléments par page
+      paging: true,
+      pagingType: 'full_numbers',
+      pageLength: 10
     };
 
     this.deviseForm = this.fb.group({
@@ -47,66 +47,54 @@ export class ListeDeviseComponent implements OnInit {
       prix_1: ['', Validators.required],
       prix_2: ['', Validators.required],
     });
-    this.getAllDevise();
 
-    this.getUserInfo(); // Récupération des infos utilisateur
+    this.editDeviseForm = this.fb.group({
+      paysDepart: ['', Validators.required],
+      paysArriver: ['', Validators.required],
+      signe_1: ['', Validators.required],
+      signe_2: ['', Validators.required],
+      prix_1: ['', Validators.required],
+      prix_2: ['', Validators.required],
+    });
+
+    this.getAllDevise();
+    this.getUserInfo();
   }
 
-  getAllDevise(){
-    // Appel à l'API et gestion des réponses
+  getAllDevise() {
     this.devise.getAllDevise().subscribe({
       next: (response) => {
-        // Vérification du succès de la réponse
-        this.allresultat = response; // Assurez-vous que 'data' existe dans la réponse
+        this.allresultat = response;
         if (this.allresultat && this.allresultat.length > 0) {
-          this.dtTrigger.next(null); // Initialisation de DataTables
+          this.dtTrigger.next(null);
         }
-        console.log(this.allresultat);
       },
       error: (error) => {
-        // Gestion des erreurs lors de l'appel à l'API
         console.error('Erreur lors de la récupération des données', error);
       },
     });
   }
 
   getUserInfo() {
-    this.authService.getUserInfo().subscribe(
-      {
-        next: (response) => {
-          this.userInfo = response.user;
-          //   if (this.userInfo) {
-          this.idUser = this.userInfo.id;
-          console.log('Informations utilisateur:', this.userInfo);
-
-          // Mettre à jour le champ utilisateurId dans le formulaire
-          this.deviseForm.patchValue({ utilisateurId: this.idUser });
-        }
+    this.authService.getUserInfo().subscribe({
+      next: (response) => {
+        this.userInfo = response.user;
+        this.idUser = this.userInfo.id;
+        this.deviseForm.patchValue({ utilisateurId: this.idUser });
       }
-    );
+    });
   }
-
-  isLoading: boolean = false;
 
   onSubmit() {
     if (this.deviseForm.valid) {
       const formData = this.deviseForm.value;
       this.isLoading = true;
-      // Appeler le service pour ajouter le partenaire
       this.devise.ajouterDevise(formData).subscribe(
         response => {
-          console.log('Partenaire ajouté avec succès:', response);
           this.isLoading = false;
           this.getAllDevise();
-          this.deviseForm.patchValue({
-            paysDepart: '',
-            paysArriver: '',
-            signe_1: '',
-            signe_2: '',
-            prix_1: '',
-            prix_2: ''
-          });
-          alert('Devise ajouté avec succès!');
+          this.deviseForm.reset();
+          alert('Devise ajoutée avec succès!');
         },
         error => {
           console.error('Erreur lors de l\'ajout du devise:', error);
@@ -118,4 +106,31 @@ export class ListeDeviseComponent implements OnInit {
     }
   }
 
+  onEdit(devise: any) {
+    this.selectedDevise = devise;
+    this.editDeviseForm.patchValue({
+      paysDepart: devise.paysDepart,
+      paysArriver: devise.paysArriver,
+      signe_1: devise.signe_1,
+      signe_2: devise.signe_2,
+      prix_1: devise.prix_1,
+      prix_2: devise.prix_2,
+    });
+  }
+
+  onUpdate() {
+    if (this.editDeviseForm.valid && this.selectedDevise) {
+      const updatedData = this.editDeviseForm.value;
+      this.devise.modifierDevise(this.selectedDevise.id, updatedData).subscribe(
+        response => {
+          this.getAllDevise();
+          alert('Devise modifiée avec succès!');
+        },
+        error => {
+          console.error('Erreur lors de la modification du devise:', error);
+          alert('Erreur lors de la modification du devise.');
+        }
+      );
+    }
+  }
 }

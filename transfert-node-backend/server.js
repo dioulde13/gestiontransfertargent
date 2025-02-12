@@ -15,6 +15,9 @@ const creditRoute = require('./routes/creditRoute'); // Importer les routes des 
 const payementCreditRoute = require('./routes/payementCreditRoute'); // Importer les routes des entrées
 const echangeRoute = require('./routes/echangeRoute'); // Importer les routes des entrées
 const payementEchangeRoute = require('./routes/payementEchangeRoute'); // Importer les routes des entrées
+const beneficeRoute = require('./routes/beneficeRoute'); // Importer les routes des entrées
+const calculBeneficeRoute = require('./routes/calculBeneficeRoute'); // Importer les routes des entrées
+
 
 
 
@@ -67,6 +70,10 @@ app.use('/api/echange', echangeRoute);
 app.use('/api/payementEchange', payementEchangeRoute);
 
 app.use('/api/credit', creditRoute);
+
+app.use('/api/benefices', beneficeRoute);
+
+app.use('/api/calculBenefices', calculBeneficeRoute);
 
 app.use('/api/auth', authRoutes);
 

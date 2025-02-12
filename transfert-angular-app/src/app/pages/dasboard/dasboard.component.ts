@@ -7,20 +7,26 @@ import { EchangeService } from '../../services/echanges/echange.service';
 import { RembourserService } from '../../services/rembourser/rembourser.service';
 import { PayementEchangeService } from '../../services/payementEchange/payement.service';
 import { PayementService } from '../../services/payements/payement.service';
-import { response } from 'express';
 import { DepenseService } from '../../services/depenses/depense.service';
+import { FinanceService } from '../../services/benefices/finance.service';
+import { FormsModule } from '@angular/forms';
+
 
 
 @Component({
   selector: 'app-dasboard',
   standalone:true,
-  imports: [CommonModule],
+  imports: [CommonModule, FormsModule],
   templateUrl: './dasboard.component.html',
   styleUrl: './dasboard.component.css'
 })
 export class DasboardComponent implements OnInit {
 
   userInfo: any = null;
+  dateDebut: string = '';
+  dateFin: string = '';
+  resultat: any;
+  erreur: string = '';
 
   constructor(
     private authService: AuthService,
@@ -30,7 +36,8 @@ export class DasboardComponent implements OnInit {
      private payementEchange: PayementEchangeService,
      private rembourserService: RembourserService,
      private payementService: PayementService,
-     private depenseService: DepenseService
+     private depenseService: DepenseService,
+     private financeService: FinanceService
     ) { }
 
 
@@ -43,6 +50,24 @@ export class DasboardComponent implements OnInit {
     this.getComptePayementEchange();
     this.getCompteDuJour();
     this.getSommeMontantDepense();
+  }
+
+  calculerBenefice() {
+    if (this.dateDebut && this.dateFin) {
+      this.financeService.getBenefice(this.dateDebut, this.dateFin).subscribe({
+        next: (data) => {
+          this.resultat = data;
+          console.log(this.resultat);
+          this.erreur = '';
+        },
+        error: (err) => {
+          console.error('Erreur lors du calcul du bénéfice :', err);
+          this.erreur = 'Erreur lors de la récupération des données.';
+        },
+      });
+    } else {
+      this.erreur = 'Veuillez sélectionner les deux dates.';
+    }
   }
 
   getUserInfo() {

@@ -59,5 +59,39 @@ const ajouterDevise = async (req, res) => {
   }
 };
 
-module.exports = { ajouterDevise, recupererDevises};
+// Modifier une devise
+const modifierDevise = async (req, res) => {
+  try {
+    const { id } = req.params; // ID de la devise à modifier
+    const { utilisateurId, paysDepart, paysArriver, signe_1, signe_2, prix_1, prix_2 } = req.body;
+
+    // Vérifier si la devise existe
+    const devise = await Devise.findByPk(id);
+    if (!devise) {
+      return res.status(404).json({ message: 'Devise non trouvée.' });
+    }
+
+    // Mettre à jour les champs fournis
+    await devise.update({
+      utilisateurId: utilisateurId || devise.utilisateurId,
+      paysDepart: paysDepart || devise.paysDepart,
+      paysArriver: paysArriver || devise.paysArriver,
+      signe_1: signe_1 || devise.signe_1,
+      signe_2: signe_2 || devise.signe_2,
+      prix_1: prix_1 || devise.prix_1,
+      prix_2: prix_2 || devise.prix_2
+    });
+
+    res.status(200).json({
+      message: 'Devise mise à jour avec succès.',
+      devise,
+    });
+  } catch (error) {
+    console.error('Erreur lors de la mise à jour de la devise :', error);
+    res.status(500).json({ message: 'Erreur interne du serveur.' });
+  }
+};
+
+
+module.exports = { ajouterDevise, recupererDevises, modifierDevise};
 

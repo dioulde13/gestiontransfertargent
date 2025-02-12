@@ -1,132 +1,159 @@
-<div class="content-page">
-    <div class="container-fluid">
-       <div class="row">
-          <div class="col-lg-12">
-             <div class="card car-transparent">
-                <div class="card-body p-0">
-                   <div class="profile-image position-relative">
-                      <img src="/assets/images/top-header01.png" class="img-fluid rounded w-100" alt="profile-image">
-                   </div>
-                </div>
-             </div>
-          </div>
-       </div>
-       <div class="row m-sm-0 px-3">  
-           <div class="col-lg-3 card-profile">
-              <div class="card card-block card-stretch card-height">
-                  <div class="card-body">
-                      <div class="top-block d-flex align-items-center justify-content-center">
-                          <span style="font-size: 20px;">Caisse</span>
-                      </div>
-                      <div>
-                        <span class="d-flex align-items-center justify-content-center" style="font-size: 30px; color: black;"> 
-                            {{ userInfo.solde | currency:'' :'' :'1.0-0'}} GNF
-                        </span>
-                      </div>
-                  </div>
-              </div> 
-          </div>		 
-          <div class="col-lg-3 card-profile">
-              <div class="card card-block card-stretch card-height">
-                  <div class="card-body">
-                    <div class="top-block d-flex align-items-center justify-content-center">
-                        <span style="font-size: 20px;">Nombre entre par jours</span>
-                    </div>
-                    <div>
-                      <span class="d-flex align-items-center justify-content-center" style="font-size: 30px; color: black;"> 
-                          {{ entreDuJour | currency:'' :'' :'1.0-0'}}
-                      </span>
-                    </div>
-                  </div>
-              </div> 
-          </div>
-          <div class="col-lg-3 card-profile">
-              <div class="card card-block card-stretch card-height">
-                  <div class="card-body">
-                    <div class="top-block d-flex align-items-center justify-content-center">
-                        <span style="font-size: 20px;">Nombre sortie par jours</span>
-                    </div>
-                    <div>
-                      <span class="d-flex align-items-center justify-content-center" style="font-size: 30px; color: black;"> 
-                          {{ sortieDuJour | currency:'' :'' :'1.0-0'}}
-                      </span>
-                    </div>
-                  </div>
-              </div> 
-          </div>
-          <div class="col-lg-3 card-profile">
-              <div class="card card-block card-stretch card-height">
-                  <div class="card-body">
-                    <div class="top-block d-flex align-items-center justify-content-center">
-                        <span style="font-size: 20px;">Payement par jours</span>
-                    </div>
-                    <div>
-                      <span class="d-flex align-items-center justify-content-center" style="font-size: 30px; color: black;"> 
-                          {{ payementDuJour | currency:'' :'' :'1.0-0'}}
-                      </span>
-                    </div>
-                  </div>
-              </div> 
-          </div>
-          
-          
-          <div class="col-lg-3 card-profile">
-              <div class="card card-block card-stretch card-height">
-                  <div class="card-body">
-                    <div class="top-block d-flex align-items-center justify-content-center">
-                        <span style="font-size: 20px;">Echange par jours</span>
-                    </div>
-                    <div>
-                      <span class="d-flex align-items-center justify-content-center" style="font-size: 30px; color: black;"> 
-                          {{ echangeDuJour | currency:'' :'' :'1.0-0'}}
-                      </span>
-                    </div>
-                  </div>
-              </div> 
-          </div>		 
-          <div class="col-lg-3 card-profile">
-              <div class="card card-block card-stretch card-height">
-                  <div class="card-body">
-                    <div class="top-block d-flex align-items-center justify-content-center">
-                        <span style="font-size: 20px;">Payement echange par jours</span>
-                    </div>
-                    <div>
-                      <span class="d-flex align-items-center justify-content-center" style="font-size: 30px; color: black;"> 
-                          {{ echangePayementDuJour | currency:'' :'' :'1.0-0'}}
-                      </span>
-                    </div>
-                  </div>
-              </div> 
-          </div>	
-          <div class="col-lg-3 card-profile">
-              <div class="card card-block card-stretch card-height">
-                  <div class="card-body">
-                    <div class="top-block d-flex align-items-center justify-content-center">
-                        <span style="font-size: 20px;">Retour par jours</span>
-                    </div>
-                    <div>
-                      <span class="d-flex align-items-center justify-content-center" style="font-size: 30px; color: black;"> 
-                          {{ retourDuJour | currency:'' :'' :'1.0-0'}}
-                      </span>
-                    </div>
-                  </div>
-              </div> 
-          </div>	
-          <div class="col-lg-3 card-profile">
-              <div class="card card-block card-stretch card-height">
-                  <div class="card-body">
-                    <div class="top-block d-flex align-items-center justify-content-center">
-                        <span style="font-size: 20px;">Depenses par jours</span>
-                    </div>
-                    <div>
-                      <span class="d-flex align-items-center justify-content-center" style="font-size: 30px; color: black;"> 
-                          {{ montantDepenseDuJour | currency:'' :'' :'1.0-0'}} GNF
-                      </span>
-                    </div>
-                  </div>
-              </div> 
-          </div>
-          
+<div class="container">
+    <div class="row">
+        <div class="col-lg-4">
+            <input type="date" id="dateDebut" [(ngModel)]="dateDebut" class="form-control" />
+        </div>
+
+        <div class="col-lg-4">
+            <input type="date" id="dateFin" [(ngModel)]="dateFin" class="form-control" />
+        </div>
+        <div class="col-lg-4">
+
+            <button (click)="calculerBenefice()" class="btn btn-primary mt-3">
+                Calculer
+            </button>
         </div>
     </div>
+</div>
+<div class="content-page">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-lg-12">
+                <div class="card car-transparent">
+                    <div class="card-body p-0">
+                        <div class="profile-image position-relative">
+                            <img src="/assets/images/top-header01.png" class="img-fluid rounded w-100"
+                                alt="profile-image">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row m-sm-0 px-3">
+
+            <div class="col-lg-3 card-profile">
+                <div class="card card-block card-stretch card-height">
+                    <div class="card-body">
+                        <div class="top-block d-flex align-items-center justify-content-center">
+                            <span style="font-size: 20px;">Caisse</span>
+                        </div>
+                        <div>
+                            <span class="d-flex align-items-center justify-content-center"
+                                style="font-size: 30px; color: black;">
+                                {{ userInfo.solde | currency:'' :'' :'1.0-0'}} GNF
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-3 card-profile">
+                <div class="card card-block card-stretch card-height">
+                    <div class="card-body">
+                        <div class="top-block d-flex align-items-center justify-content-center">
+                            <span style="font-size: 20px;">Nombre entre par jours</span>
+                        </div>
+                        <div>
+                            <span class="d-flex align-items-center justify-content-center"
+                                style="font-size: 30px; color: black;">
+                                {{ entreDuJour | currency:'' :'' :'1.0-0'}}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-3 card-profile">
+                <div class="card card-block card-stretch card-height">
+                    <div class="card-body">
+                        <div class="top-block d-flex align-items-center justify-content-center">
+                            <span style="font-size: 20px;">Nombre sortie par jours</span>
+                        </div>
+                        <div>
+                            <span class="d-flex align-items-center justify-content-center"
+                                style="font-size: 30px; color: black;">
+                                {{ sortieDuJour | currency:'' :'' :'1.0-0'}}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-3 card-profile">
+                <div class="card card-block card-stretch card-height">
+                    <div class="card-body">
+                        <div class="top-block d-flex align-items-center justify-content-center">
+                            <span style="font-size: 20px;">Payement par jours</span>
+                        </div>
+                        <div>
+                            <span class="d-flex align-items-center justify-content-center"
+                                style="font-size: 30px; color: black;">
+                                {{ payementDuJour | currency:'' :'' :'1.0-0'}}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+
+            <div class="col-lg-3 card-profile">
+                <div class="card card-block card-stretch card-height">
+                    <div class="card-body">
+                        <div class="top-block d-flex align-items-center justify-content-center">
+                            <span style="font-size: 20px;">Echange par jours</span>
+                        </div>
+                        <div>
+                            <span class="d-flex align-items-center justify-content-center"
+                                style="font-size: 30px; color: black;">
+                                {{ echangeDuJour | currency:'' :'' :'1.0-0'}}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-3 card-profile">
+                <div class="card card-block card-stretch card-height">
+                    <div class="card-body">
+                        <div class="top-block d-flex align-items-center justify-content-center">
+                            <span style="font-size: 20px;">Payement echange par jours</span>
+                        </div>
+                        <div>
+                            <span class="d-flex align-items-center justify-content-center"
+                                style="font-size: 30px; color: black;">
+                                {{ echangePayementDuJour | currency:'' :'' :'1.0-0'}}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-3 card-profile">
+                <div class="card card-block card-stretch card-height">
+                    <div class="card-body">
+                        <div class="top-block d-flex align-items-center justify-content-center">
+                            <span style="font-size: 20px;">Retour par jours</span>
+                        </div>
+                        <div>
+                            <span class="d-flex align-items-center justify-content-center"
+                                style="font-size: 30px; color: black;">
+                                {{ retourDuJour | currency:'' :'' :'1.0-0'}}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-3 card-profile">
+                <div class="card card-block card-stretch card-height">
+                    <div class="card-body">
+                        <div class="top-block d-flex align-items-center justify-content-center">
+                            <span style="font-size: 20px;">Depenses par jours</span>
+                        </div>
+                        <div>
+                            <span class="d-flex align-items-center justify-content-center"
+                                style="font-size: 30px; color: black;">
+                                {{ montantDepenseDuJour | currency:'' :'' :'1.0-0'}} GNF
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
     </div>
+</div>

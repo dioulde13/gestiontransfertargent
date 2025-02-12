@@ -20,4 +20,9 @@ export class DeviseService {
     ajouterDevise(deviseData: any): Observable<any> {
       return this.http.post(`${this.apiUrl}/api/devises/create`, deviseData);
     }
+
+    // ✅ Méthode pour modifier une devise existante
+  modifierDevise(id: number, deviseData: any): Observable<any> {
+    return this.http.put(`${this.apiUrl}/api/devises/devise/${id}`, deviseData);
+  }
 }
