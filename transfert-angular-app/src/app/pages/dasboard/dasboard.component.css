@@ -1,7 +1,7 @@
 .container {
     max-width: 500px;
     margin: auto;
-    padding: 20px;
+    padding: 30px;
     margin-top: 20px;
     border: 1px solid #ddd;
     border-radius: 8px;
@@ -19,4 +19,9 @@
   .alert {
     padding: 15px;
   }
+
+  .content-page {
+    padding-top: 10px; /* Ajuste cette valeur selon tes besoins */
+}
+
   

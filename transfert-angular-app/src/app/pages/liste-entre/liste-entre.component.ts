@@ -8,16 +8,28 @@ import { PartenaireServiceService } from '../../services/partenaire/partenaire-s
 
 import { Subject } from 'rxjs';
 import { DataTablesModule } from 'angular-datatables';
+import { NgxPrintModule } from 'ngx-print';
+
 
 
 @Component({
   selector: 'app-liste-entre',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, FormsModule, DataTablesModule],
+  imports: [CommonModule, ReactiveFormsModule, FormsModule, DataTablesModule, NgxPrintModule],
   templateUrl: './liste-entre.component.html',
   styleUrls: ['./liste-entre.component.css']
 })
 export class ListeEntreComponent implements OnInit {
+
+  code: string = '';
+
+  selectedRowId: number | null = null;
+
+  // Sélectionner la ligne à imprimer
+  printRow(user: any) {
+    this.selectedRowId = user.id;
+  }
+
   // Informations de l'utilisateur connecté
   userInfo: any = null;
   idUser: string = '';
@@ -52,7 +64,7 @@ export class ListeEntreComponent implements OnInit {
       dom: "<'row'<'col-sm-6 dt-buttons-left'B><'col-sm-6 text-end dt-search-right'f>>" + 
            "<'row'<'col-sm-12'tr>>" + 
            "<'row'<'col-sm-5'i><'col-sm-7'p>>",
-      buttons: ['csv', 'excel', 'print'],
+      buttons: ['csv', 'excel', 'pdf', 'print', 'colvis'],
       language: {
           search: "Rechercher"
       }
@@ -62,6 +74,22 @@ export class ListeEntreComponent implements OnInit {
     this.fetchDevise();
     this.fetchPartenaire();
     this.getUserInfo(); // Récupération des infos utilisateur
+  }
+
+  annulerEntre(): void {
+    if (this.code) {
+      this.entreService.annulerEntreParCode(this.code).subscribe(
+        (response) => {
+          console.log('Informations utilisateur:', response);
+          alert('Entrée annulée avec succès !'+response.message);
+        },
+        (error) => {
+          alert('Entrée !'+error.message);
+        }
+      );
+    } else {
+      console.log('Veuillez fournir un code d\'entrée.');
+    }
   }
 
   getUserInfo() {

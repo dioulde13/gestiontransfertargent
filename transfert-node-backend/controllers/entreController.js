@@ -171,46 +171,51 @@ const compterEntreesDuJour = async (req, res) => {
 
 const annulerEntre = async (req, res) => {
   try {
-    const { id } = req.params; // Récupération de l'ID de l'entrée à annuler
+    const { code } = req.params; // Récupération du code de l'entrée à annuler
 
     // Vérifier si l'entrée existe
-    const entre = await Entre.findByPk(id);
+    const entre = await Entre.findOne({ where: { code } });
     if (!entre) {
       return res.status(404).json({ message: "Entrée introuvable." });
     }
+
     // Vérifier si le partenaire existe
-    const partenaire = await Partenaire.findByPk(partenaireId);
+    const partenaire = await Partenaire.findByPk(entre.partenaireId);
     if (!partenaire) {
-      return res.status(404).json({ message: 'Partenaire introuvable.' });
+      return res.status(404).json({ message: "Partenaire introuvable." });
     }
 
-    // Récupérer les informations de l'utilisateur connecté
-    const utilisateur = await Utilisateur.findByPk(utilisateurId);
+    // Vérifier si l'utilisateur existe
+    const utilisateur = await Utilisateur.findByPk(entre.utilisateurId);
     if (!utilisateur) {
-      return res.status(404).json({ message: 'Utilisateur introuvable.' });
+      return res.status(404).json({ message: "Utilisateur introuvable." });
     }
 
     // Vérifier si l'entrée est déjà annulée
-    if (entre.status === 'ANNULEE') {
+    if (entre.status === "ANNULEE") {
       return res.status(400).json({ message: "Cette entrée est déjà annulée." });
     }
 
-    if (entre.status === 'PAYEE') {
-      // Mettre à jour le solde de l'utilisateur connecté
+    // Mise à jour des soldes en fonction du statut de l'entrée
+    if (entre.status === "PAYEE") {
       utilisateur.solde = (utilisateur.solde || 0) - entre.montant_gnf;
       await utilisateur.save();
-      partenaire.montant_preter = (partenaire.montant_preter || 0) - montant_cfa;
+
+      partenaire.montant_preter = (partenaire.montant_preter || 0) - entre.montant_cfa;
       await partenaire.save();
-    } else if (entre.status === 'EN COURS') {
-      // Mettre à jour le solde de l'utilisateur connecté
+    } else if (entre.status === "EN COURS") {
       utilisateur.solde = (utilisateur.solde || 0) - entre.montant_payer;
       await utilisateur.save();
-      partenaire.montant_preter = (partenaire.montant_preter || 0) - ((entre.montant_payer / entre.prix_2 ) * entre.prix_2);
+      partenaire.montant_preter = (partenaire.montant_preter || 0) - entre.montant_cfa;
+      await partenaire.save();
+    } else if (entre.status === "NON PAYEE") {
+      partenaire.montant_preter = (partenaire.montant_preter || 0) - entre.montant_cfa;
       await partenaire.save();
     }
 
+
     // Mettre à jour le statut de l'entrée à 'ANNULEE'
-    entre.status = 'ANNULEE';
+    entre.status = "ANNULEE";
     await entre.save();
 
     res.status(200).json({
@@ -222,5 +227,6 @@ const annulerEntre = async (req, res) => {
     res.status(500).json({ message: "Erreur interne du serveur." });
   }
 };
+
 
 module.exports = { ajouterEntre, recupererEntreesAvecAssocies, compterEntreesDuJour, annulerEntre };

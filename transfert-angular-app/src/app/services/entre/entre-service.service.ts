@@ -12,6 +12,11 @@ export class EntreServiceService {
  
    constructor(private http: HttpClient) { }
  
+
+   annulerEntreParCode(code: string): Observable<any> {
+    console.log(code);
+    return this.http.put(`${this.apiUrl}/api/entrees/annuler/${code}`,{});
+  }
    // Méthode pour récupérer les données de l'API
    getData(): Observable<any> {
      return this.http.get(`${this.apiUrl}/api/devises/liste`);

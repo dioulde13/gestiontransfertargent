@@ -11,5 +11,7 @@ router.get('/liste', entreController.recupererEntreesAvecAssocies);
 
 router.get('/compte', entreController.compterEntreesDuJour);
 
+router.put("/annuler/:code", entreController.annulerEntre);
+
 
 module.exports = router;

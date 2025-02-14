@@ -154,6 +154,38 @@
                 </div>
             </div>
 
+            <div class="col-lg-3 card-profile">
+                <div class="card card-block card-stretch card-height">
+                    <div class="card-body">
+                        <div class="top-block d-flex align-items-center justify-content-center">
+                            <span style="font-size: 20px;">Montant total entre</span>
+                        </div>
+                        <div>
+                            <span class="d-flex align-items-center justify-content-center"
+                                style="font-size: 30px; color: black;">
+                                {{ resultat.totalVentes | currency:'' :'' :'1.0-0'}} GNF
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-3 card-profile">
+                <div class="card card-block card-stretch card-height">
+                    <div class="card-body">
+                        <div class="top-block d-flex align-items-center justify-content-center">
+                            <span style="font-size: 20px;">Montant total deposite</span>
+                        </div>
+                        <div>
+                            <span class="d-flex align-items-center justify-content-center"
+                                style="font-size: 30px; color: black;">
+                                {{ resultat.totalAchats | currency:'' :'' :'1.0-0'}} GNF
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+
         </div>
     </div>
 </div>

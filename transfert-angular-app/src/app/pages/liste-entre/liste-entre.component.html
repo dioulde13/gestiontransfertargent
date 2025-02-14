@@ -24,7 +24,10 @@
                 <div class="card">
                   <div class="card-body d-flex flex-wrap items-center justify-between breadcrumb-content">
                     <h5>Liste des entrées</h5>
-                    <div class="pl-3 btn-new border-left">
+                    <div >
+                      <a href="#" class="btn btn-primary" data-toggle="modal" data-target="#annuler-entre-modal">Annuler Entre</a>
+                    </div>
+                    <div class="pr-3 btn-new border-left">
                       <a href="#" class="btn btn-primary" data-toggle="modal" data-target="#new-project-modal">Ajouter
                         nouveau</a>
                     </div>
@@ -69,6 +72,7 @@
                     <th>Montant payé (GNF)</th>
                     <th>Montant restant (GNF)</th>
                     <th>Statut de paiement</th>
+                    <th>Action</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -85,6 +89,11 @@
                     <td>{{ result.montant_payer | currency:'' :'' :'1.0-0' }} GNF</td>
                     <td>{{ result.montant_restant | currency:'' :'' :'1.0-0' }} GNF</td>
                     <td>{{ result.status }}</td>
+                    <td class="td-name">
+                      <button (click)="printRow(result)" ngxPrint [printSectionId]="'print-section-' + result.id">
+                        <i class="las la-print"></i>
+                      </button>
+                    </td>
                   </tr>
                 </tbody>
               </table>
@@ -92,6 +101,98 @@
           </div>
         </div>
       </div>
+    </div>
+
+
+
+    <div class="container">
+      <div *ngFor="let result of allresultat" [id]="'print-section-' + result.id" class="print-section"
+        [hidden]="selectedRowId !== result.id">
+        <div style="display: flex; justify-content: space-between;">
+          <div>
+            <img src="assets/images/orange.png">
+          </div>
+          <div>
+            <img src="assets/images/lo.png">
+          </div>
+        </div>
+        <div style="display: flex; justify-content: space-between;">
+          <div>
+            <p><strong>Réf reçu :</strong> 001</p>
+            <p><strong>Matricule élève :</strong> 001</p>
+            <p><strong>Date :</strong> 11/12/2019</p>
+            <p><strong>Mode paiement :</strong> Orange Money</p>
+          </div>
+          <div>
+            <p><strong>Nom école :</strong> Ecole 1 </p>
+            <p><strong>Adresse :</strong> Conakry/Commune: Ratoma/Quartier </p>
+            <p><strong>Contact :</strong> +224 666000000 / 621000000 </p>
+            <p><strong>Email :</strong> exemplegmail.com </p>
+          </div>
+        </div>
+
+        <div style="margin-top: 20px;">
+          <div style="display: flex; justify-content: space-between;">
+            <p><strong>Nom et prenom: </strong></p>
+            <p>{{ result.expediteur }} {{ result.receveur }}</p>
+          </div>
+          <hr>
+          <div style="display: flex; justify-content: space-between;">
+            <p><strong>Classe: </strong></p>
+            <p></p>
+          </div>
+          <hr>
+          <div style="display: flex; justify-content: space-between;">
+            <p><strong>Nom parent: </strong></p>
+            <p></p>
+          </div>
+          <hr>
+          <div style="display: flex; justify-content: space-between;">
+            <p><strong>Tranche payer: </strong></p>
+            <p></p>
+          </div>
+          <hr style="font-weight: bold;">
+          <div style="display: flex; justify-content: space-between;">
+            <p><strong>Reste à Payer: </strong></p>
+            <p>{{ result.montant_restant | currency:'' :'' :'1.0-0' }} GNF</p>
+          </div>
+          <hr style="font-weight: bold;">
+        </div>
+      </div>
+    </div>
+
+
+    <div class="modal fade" id="annuler-entre-modal" tabindex="-1" role="dialog" aria-labelledby="modalTitle" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="modalTitle">Annuler une entrée</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+
+          <div class="modal-body">
+            <form (ngSubmit)="annulerEntre()">
+              <div class="form-row">
+                <div class="form-group col-md-12">
+                  <label for="code">Code</label>
+                  <input type="text" id="code" [(ngModel)]="code" name="code" class="form-control" placeholder="Entrez le code" required>
+                </div>
+              </div>
+
+              <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Annuler</button>
+                <button type="submit" class="btn btn-danger">
+                  <span *ngIf="isLoading">Création en cours...</span>
+                  <span *ngIf="!isLoading">Valuder</span>
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+   
     </div>
 
     <!-- Modal d'ajout -->
