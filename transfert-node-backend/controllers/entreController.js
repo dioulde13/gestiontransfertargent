@@ -2,7 +2,7 @@ const Entre = require('../models/entres');
 const Utilisateur = require('../models/utilisateurs');
 const Partenaire = require('../models/partenaires');
 const Devise = require('../models/devises');
-const { Sequelize} = require('sequelize');
+const { Sequelize } = require('sequelize');
 
 
 // Récupérer les entrées avec les associations
@@ -169,9 +169,67 @@ const compterEntreesDuJour = async (req, res) => {
   }
 };
 
+// const annulerEntre = async (req, res) => {
+//   try {
+//     const { code } = req.params; // Récupération du code de l'entrée à annuler
+
+//     // Vérifier si l'entrée existe
+//     const entre = await Entre.findOne({ where: { code } });
+//     if (!entre) {
+//       return res.status(404).json({ message: "Entrée introuvable." });
+//     }
+
+//     // Vérifier si le partenaire existe
+//     const partenaire = await Partenaire.findByPk(entre.partenaireId);
+//     if (!partenaire) {
+//       return res.status(404).json({ message: "Partenaire introuvable." });
+//     }
+
+//     // Vérifier si l'utilisateur existe
+//     const utilisateur = await Utilisateur.findByPk(entre.utilisateurId);
+//     if (!utilisateur) {
+//       return res.status(404).json({ message: "Utilisateur introuvable." });
+//     }
+
+//     // Vérifier si l'entrée est déjà annulée
+//     if (entre.status === "ANNULEE") {
+//       return res.status(400).json({ message: "Cette entrée est déjà annulée." });
+//     }
+
+//     // Mise à jour des soldes en fonction du statut de l'entrée
+//     if (entre.status === "PAYEE") {
+//       utilisateur.solde = (utilisateur.solde || 0) - entre.montant_gnf;
+//       await utilisateur.save();
+
+//       partenaire.montant_preter = (partenaire.montant_preter || 0) - entre.montant_cfa;
+//       await partenaire.save();
+//     } else if (entre.status === "EN COURS") {
+//       utilisateur.solde = (utilisateur.solde || 0) - entre.montant_payer;
+//       await utilisateur.save();
+//       partenaire.montant_preter = (partenaire.montant_preter || 0) - entre.montant_cfa;
+//       await partenaire.save();
+//     } else if (entre.status === "NON PAYEE") {
+//       partenaire.montant_preter = (partenaire.montant_preter || 0) - entre.montant_cfa;
+//       await partenaire.save();
+//     }
+
+//     entre.status = "ANNULEE";
+//     await entre.save();
+
+//     res.status(200).json({
+//       message: "Entrée annulée avec succès.",
+//       entre,
+//     });
+//   } catch (error) {
+//     console.error("Erreur lors de l'annulation de l'entrée :", error);
+//     res.status(500).json({ message: "Erreur interne du serveur." });
+//   }
+// };
+
 const annulerEntre = async (req, res) => {
   try {
-    const { code } = req.params; // Récupération du code de l'entrée à annuler
+    const { code } = req.params; // Récupération du code
+    const { type_annuler } = req.body; // Type d'annulation (Rembourser ou Non Rembourser)
 
     // Vérifier si l'entrée existe
     const entre = await Entre.findOne({ where: { code } });
@@ -191,31 +249,49 @@ const annulerEntre = async (req, res) => {
       return res.status(404).json({ message: "Utilisateur introuvable." });
     }
 
+    console.log(entre.status);
+    console.log(type_annuler);
+    console.log(entre.type_annuler);
+
+
     // Vérifier si l'entrée est déjà annulée
-    if (entre.status === "ANNULEE") {
+    if (entre.status === "ANNULEE" && entre.type_annuler === "Rembourser") {
       return res.status(400).json({ message: "Cette entrée est déjà annulée." });
     }
 
-    // Mise à jour des soldes en fonction du statut de l'entrée
-    if (entre.status === "PAYEE") {
-      utilisateur.solde = (utilisateur.solde || 0) - entre.montant_gnf;
+    // Gestion du remboursement uniquement si le type_annuler est "Rembourser"
+    if (type_annuler === "Rembourser") {
+      if (entre.status === "PAYEE") {
+        utilisateur.solde = (utilisateur.solde || 0) - entre.montant_gnf;
+      } else if (entre.status === "EN COURS") {
+        utilisateur.solde = (utilisateur.solde || 0) - entre.montant_payer;
+      }
       await utilisateur.save();
+    }
 
-      partenaire.montant_preter = (partenaire.montant_preter || 0) - entre.montant_cfa;
-      await partenaire.save();
-    } else if (entre.status === "EN COURS") {
-      utilisateur.solde = (utilisateur.solde || 0) - entre.montant_payer;
+    if (type_annuler === "Rembourser" && entre.status === "ANNULEE") {
+      if (entre.status === "PAYEE") {
+        utilisateur.solde = (utilisateur.solde || 0) - entre.montant_gnf;
+      } else if (entre.status === "EN COURS") {
+        utilisateur.solde = (utilisateur.solde || 0) - entre.montant_payer;
+      }
       await utilisateur.save();
-      partenaire.montant_preter = (partenaire.montant_preter || 0) - entre.montant_cfa;
-      await partenaire.save();
-    } else if (entre.status === "NON PAYEE") {
+    }
+
+    if (type_annuler === "Rembourser" && entre.type_annuler === "Non Rembourser" && entre.status === "ANNULEE") {
+        utilisateur.solde = (utilisateur.solde || 0) - entre.montant_payer;
+      await utilisateur.save();
+    }
+
+    if (entre.status !== "ANNULEE") {
       partenaire.montant_preter = (partenaire.montant_preter || 0) - entre.montant_cfa;
       await partenaire.save();
     }
 
 
-    // Mettre à jour le statut de l'entrée à 'ANNULEE'
+    // Mettre à jour le statut de l'entrée et le type d'annulation
     entre.status = "ANNULEE";
+    entre.type_annuler = type_annuler;
     await entre.save();
 
     res.status(200).json({
@@ -229,4 +305,42 @@ const annulerEntre = async (req, res) => {
 };
 
 
-module.exports = { ajouterEntre, recupererEntreesAvecAssocies, compterEntreesDuJour, annulerEntre };
+const payerEntrees = async (req, res) => {
+  try {
+    const { ids } = req.body; // Récupérer les IDs des entrées cochées
+
+    if (!ids || ids.length === 0) {
+      return res.status(400).json({ message: "Aucune entrée sélectionnée." });
+    }
+
+    // Vérifier si une des entrées a déjà le type "R"
+    const entreesExistantes = await Entre.findAll({
+      where: { id: ids },
+      attributes: ["id", "type"], // Sélectionner seulement les champs nécessaires
+    });
+
+    const dejaPayees = entreesExistantes.filter((entre) => entre.type === "R");
+
+    if (dejaPayees.length > 0) {
+      return res.status(400).json({
+        message: "Certaines entrées ont déjà été payées et ne peuvent être payées deux fois.",
+        entrees: dejaPayees.map((entre) => entre.id), // Retourne les IDs des entrées déjà payées
+      });
+    }
+
+    // Mettre à jour le statut des entrées sélectionnées
+    await Entre.update(
+      { type: "R" },
+      { where: { id: ids } }
+    );
+
+    res.status(200).json({ message: "Paiement effectué avec succès." });
+  } catch (error) {
+    console.error("Erreur lors du paiement des entrées :", error);
+    res.status(500).json({ message: "Erreur interne du serveur." });
+  }
+};
+
+
+
+module.exports = { ajouterEntre, recupererEntreesAvecAssocies, compterEntreesDuJour, annulerEntre, payerEntrees };

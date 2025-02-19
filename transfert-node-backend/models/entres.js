@@ -98,12 +98,22 @@ const Entre = sequelize.define('Entre', {
   payement_type: {
     type: DataTypes.ENUM('COMPLET', 'NON COMPLET'),
     allowNull: false,
-    defaultValue: 'NON COMPLET', // Définir une valeur par défaut
+    defaultValue: 'NON COMPLET', 
+  },
+  type_annuler: {
+    type: DataTypes.ENUM('Rembourser', 'Non Rembourser'),
+    allowNull: false,
+    defaultValue: 'Non Rembourser', 
+  },
+  type: {
+    type: DataTypes.ENUM('R', 'NON R'),
+    allowNull: false,
+    defaultValue: 'NON R', 
   },
   status: {
     type: DataTypes.ENUM('NON PAYEE', 'PAYEE','EN COURS', 'ANNULEE'),
     allowNull: false,
-    defaultValue: 'NON PAYEE', // Définir une valeur par défaut
+    defaultValue: 'NON PAYEE', 
   },
 });
 

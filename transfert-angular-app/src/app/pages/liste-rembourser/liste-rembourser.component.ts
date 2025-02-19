@@ -10,6 +10,10 @@ import { Subject } from 'rxjs';
 import { DataTablesModule } from 'angular-datatables';
 import { CalculBeneficeService } from '../../services/calculBenefices/calcul-benefice.service';
 import { FormsModule } from '@angular/forms';
+import { EntreServiceService } from '../../services/entre/entre-service.service';
+import { HttpClient} from '@angular/common/http';
+import { response } from 'express';
+
 
 
 @Component({
@@ -22,6 +26,7 @@ import { FormsModule } from '@angular/forms';
 export class ListeRembourserComponent implements OnInit {
   // Tableau pour stocker les résultats
   allresultat: any[] = [];
+  allEntre: any[] = [];
 
   userInfo: any = null;
   idUser: string = '';
@@ -38,7 +43,9 @@ export class ListeRembourserComponent implements OnInit {
     private deviseService: DeviseService,
     private partenaireService: PartenaireServiceService,
     private rembourserService: RembourserService,
-    private calculService: CalculBeneficeService
+    private calculService: CalculBeneficeService,
+    private entreService: EntreServiceService,
+    private http: HttpClient
   ) { }
 
   ngOnInit(): void {
@@ -60,6 +67,7 @@ export class ListeRembourserComponent implements OnInit {
     this.fetchPartenaire();
     this.fetchDevise();
     this.getUserInfo(); // Récupération des infos utilisateur
+    this.getAllEntre();
   }
 
   getUserInfo() {
@@ -140,6 +148,9 @@ export class ListeRembourserComponent implements OnInit {
 
 
 
+
+
+
  
   private getAllRemboursement(): void {
     // Appel à l'API et gestion des réponses
@@ -171,6 +182,81 @@ export class ListeRembourserComponent implements OnInit {
         console.error('Erreur:', error);
       }
     );
+  }
+
+  dateDebutPayer: string = '';  // Stocke la date de début
+  dateFinPayer: string = '';    // Stocke la date de fin
+  searchNom: string = '';  // Stocke la recherche par nom
+  
+  private getAllEntre(): void {
+    this.entreService.getAllEntree().subscribe({
+      next: (response) => {
+        // Appliquer le filtre de base (exclure "ANNULEE" et "R")
+        this.allEntre = response.filter((entre: any) => entre.status !== "ANNULEE" && entre.type !== "R");
+  
+        // Appliquer les filtres supplémentaires
+        this.filtrerEntre();
+      },
+      error: (error) => {
+        console.error("Erreur lors de la récupération des entrées :", error);
+      }
+    });
+  }
+
+  filteredEntre: any[] = []; // Liste filtrée affichée dans le tableau
+
+  
+  // Fonction pour filtrer selon la date et le nom
+  filtrerEntre() {
+    this.filteredEntre = this.allEntre.filter((entre: any) => {
+      const dateCreation = new Date(entre.date_creation); // Convertir la date en format Date JS
+      const debut = this.dateDebut ? new Date(this.dateDebut) : null;
+      const fin = this.dateFin ? new Date(this.dateFin) : null;
+  
+      // Vérifier si l'entrée est dans l'intervalle de dates
+      const estDansIntervalle = (!debut || dateCreation >= debut) && (!fin || dateCreation <= fin);
+  
+      // Vérifier si le nom du partenaire correspond à la recherche
+      const nomComplet = `${entre.Partenaire.prenom} ${entre.Partenaire.nom}`.toLowerCase();
+      const correspondNom = !this.searchNom || nomComplet.includes(this.searchNom.toLowerCase());
+  
+      return estDansIntervalle && correspondNom;
+    });
+  }
+  
+  
+
+
+ payerSelection() {
+    const selectedEntries = this.allEntre
+      .filter(entry => entry.selected)
+      .map(entry => entry.id);
+  
+    if (selectedEntries.length === 0) {
+      alert("Veuillez sélectionner au moins une ligne.");
+      return;
+    }
+  
+    this.http.post('http://localhost:3000/api/entrees/payer', { ids: selectedEntries }).subscribe({
+      next: (response: any) => {
+        alert(response.message); // Affiche le message du backend en cas de succès
+        this.getAllEntre();
+      },
+      error: (error) => {
+        // Vérifier si le serveur renvoie un message d'erreur et l'afficher
+        const errorMessage = error.error && error.error.message 
+          ? error.error.message 
+          : "Une erreur est survenue.";
+        
+        alert(errorMessage);
+      }
+    });
+  }
+  
+  
+  toggleAllSelection(event: any) {
+    const checked = event.target.checked;
+    this.allEntre.forEach(entry => entry.selected = checked);
   }
 
  }

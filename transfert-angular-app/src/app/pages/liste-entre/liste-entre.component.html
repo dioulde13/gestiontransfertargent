@@ -24,8 +24,9 @@
                 <div class="card">
                   <div class="card-body d-flex flex-wrap items-center justify-between breadcrumb-content">
                     <h5>Liste des entrées</h5>
-                    <div >
-                      <a href="#" class="btn btn-primary" data-toggle="modal" data-target="#annuler-entre-modal">Annuler Entre</a>
+                    <div>
+                      <a href="#" class="btn btn-primary" data-toggle="modal" data-target="#annuler-entre-modal">Annuler
+                        Entre</a>
                     </div>
                     <div class="pr-3 btn-new border-left">
                       <a href="#" class="btn btn-primary" data-toggle="modal" data-target="#new-project-modal">Ajouter
@@ -34,6 +35,20 @@
                   </div>
                 </div>
               </div>
+
+              <!-- <div class="row mb-4">
+                <div class="col-md-4 d-flex mb-3 mb-md-0">
+                  <input type="date" id="startDate" class="form-control" placeholder="Date Début" style="border-radius: 25px;">
+                </div>
+                <div class="col-md-4 d-flex mb-3 mb-md-0">
+                  <input type="date" id="endDate" class="form-control" placeholder="Date Fin" style="border-radius: 25px;">
+                </div>
+                <div class="col-md-4 d-flex">
+                  <button id="btnFilter" class="btn btn-primary" style="border-radius: 60px; padding: 5px 10px; font-size: 14px;">
+                    Filtrer
+                  </button>
+                </div>
+              </div> -->
 
               <div class="row mb-4">
                 <div class="col-md-3 d-flex mb-3 mb-md-0">
@@ -88,7 +103,7 @@
                     <td>{{ (result.montant_gnf) | currency:'' :'' :'1.0-0' }} GNF</td>
                     <td>{{ result.montant_payer | currency:'' :'' :'1.0-0' }} GNF</td>
                     <td>{{ result.montant_restant | currency:'' :'' :'1.0-0' }} GNF</td>
-                    <td>{{ result.status }}</td>
+                    <td>{{ result.status}}<span *ngIf="result.status === 'ANNULEE'">{{" ("+result.type_annuler+")" }}</span></td>
                     <td class="td-name">
                       <button (click)="printRow(result)" ngxPrint [printSectionId]="'print-section-' + result.id">
                         <i class="las la-print"></i>
@@ -102,7 +117,6 @@
         </div>
       </div>
     </div>
-
 
 
     <div class="container">
@@ -162,38 +176,53 @@
     </div>
 
 
-    <div class="modal fade" id="annuler-entre-modal" tabindex="-1" role="dialog" aria-labelledby="modalTitle" aria-hidden="true">
-      <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
-        <div class="modal-content">
-          <div class="modal-header">
-            <h5 class="modal-title" id="modalTitle">Annuler une entrée</h5>
-            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-              <span aria-hidden="true">&times;</span>
+    <!-- Modal d'annulation -->
+<div class="modal fade" id="annuler-entre-modal" tabindex="-1" role="dialog" aria-labelledby="modalTitle" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="modalTitle">Annuler une entrée</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+
+      <div class="modal-body">
+        <form [formGroup]="annulerEntreForm" (ngSubmit)="annulerEntre()">
+          <div class="form-row">
+            <!-- Champ Code -->
+            <div class="form-group col-md-6">
+              <label for="code">Code</label>
+              <input type="text" id="code" class="form-control" formControlName="codeAnnuler" placeholder="Entrez le code">
+              <div *ngIf="annulerEntreForm?.get('codeAnnuler')?.invalid && annulerEntreForm?.get('codeAnnuler')?.touched" class="text-danger">                Ce champ est obligatoire.
+                Ce champ est obligatoire.
+              </div>
+            </div>
+
+            <!-- Sélection du type d'annulation -->
+            <div class="form-group col-md-6">
+              <label for="typeAnnuler">Type d'annulation</label>
+              <select id="typeAnnuler" class="form-control" formControlName="typeAnnuler">
+                <option value="Rembourser">Rembourser</option>
+                <option value="Non Rembourser">Non Rembourser</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Footer -->
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-dismiss="modal">Annuler</button>
+            <button type="submit" class="btn btn-danger" [disabled]="annulerEntreForm.invalid || isLoadingAnnuler">
+              <span *ngIf="isLoadingAnnuler">Annulation en cours...</span>
+              <span *ngIf="!isLoadingAnnuler">Valider</span>
             </button>
           </div>
-
-          <div class="modal-body">
-            <form (ngSubmit)="annulerEntre()">
-              <div class="form-row">
-                <div class="form-group col-md-12">
-                  <label for="code">Code</label>
-                  <input type="text" id="code" [(ngModel)]="code" name="code" class="form-control" placeholder="Entrez le code" required>
-                </div>
-              </div>
-
-              <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-dismiss="modal">Annuler</button>
-                <button type="submit" class="btn btn-danger">
-                  <span *ngIf="isLoading">Création en cours...</span>
-                  <span *ngIf="!isLoading">Valuder</span>
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
+        </form>
       </div>
-   
     </div>
+  </div>
+</div>
+
 
     <!-- Modal d'ajout -->
     <div class="modal fade" id="new-project-modal" tabindex="-1" role="dialog" aria-labelledby="modalTitle"

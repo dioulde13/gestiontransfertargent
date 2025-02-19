@@ -25,6 +25,7 @@ export class ListeEntreComponent implements OnInit {
 
   selectedRowId: number | null = null;
 
+
   // Sélectionner la ligne à imprimer
   printRow(user: any) {
     this.selectedRowId = user.id;
@@ -40,6 +41,8 @@ export class ListeEntreComponent implements OnInit {
   // Formulaire pour ajouter une entrée
   entreForm!: FormGroup;
 
+  annulerEntreForm!: FormGroup;
+
   isLoading: boolean = false;
 
   dtoptions: any = {};
@@ -53,7 +56,8 @@ export class ListeEntreComponent implements OnInit {
     private deviseService: DeviseService,
     private partenaireService: PartenaireServiceService,
     private fb: FormBuilder
-  ) { }
+  ) {
+   }
 
   // Initialisation du composant
   ngOnInit(): void {
@@ -61,36 +65,52 @@ export class ListeEntreComponent implements OnInit {
       pagingType: 'full_numbers',
       pageLength: 10,
       processing: true,
-      dom: "<'row'<'col-sm-6 dt-buttons-left'B><'col-sm-6 text-end dt-search-right'f>>" + 
-           "<'row'<'col-sm-12'tr>>" + 
-           "<'row'<'col-sm-5'i><'col-sm-7'p>>",
+      dom: "<'row'<'col-sm-6 dt-buttons-left'B><'col-sm-6 text-end dt-search-right'f>>" +
+        "<'row'<'col-sm-12'tr>>" +
+        "<'row'<'col-sm-5'i><'col-sm-7'p>>",
       buttons: ['csv', 'excel', 'pdf', 'print', 'colvis'],
       language: {
-          search: "Rechercher"
+        search: "Rechercher"
       }
     };
     this.initForm(); // Initialisation du formulaire
-    this.fetchAllEntrees(); // Récupération des données existantes
+    this.fetchAllEntre(); // Récupération des données existantes
     this.fetchDevise();
     this.fetchPartenaire();
     this.getUserInfo(); // Récupération des infos utilisateur
+    this.initAnnulerEntreForm();
   }
 
-  annulerEntre(): void {
-    if (this.code) {
-      this.entreService.annulerEntreParCode(this.code).subscribe(
-        (response) => {
-          console.log('Informations utilisateur:', response);
-          alert('Entrée annulée avec succès !'+response.message);
-        },
-        (error) => {
-          alert('Entrée !'+error.message);
-        }
-      );
-    } else {
-      console.log('Veuillez fournir un code d\'entrée.');
-    }
+  private initAnnulerEntreForm(): void{
+    this.annulerEntreForm = this.fb.group({
+      codeAnnuler: ['', Validators.required],
+      typeAnnuler: ['', Validators.required]
+    });
   }
+
+  type_annuler: string = 'Non Rembourser'; // Valeur par défaut
+
+  isLoadingAnnuler: boolean = false;
+
+  annulerEntre(): void {
+
+    this.isLoadingAnnuler = true;
+    const { codeAnnuler, typeAnnuler } = this.annulerEntreForm.value;
+
+    this.entreService.annulerEntreParCode(codeAnnuler, typeAnnuler).subscribe(
+      (response) => {
+        console.log('Réponse du serveur:', response);
+        this.isLoadingAnnuler = false;
+        alert(response.message);
+      },
+      (error) => {
+        console.error('Erreur:', error);
+        this.isLoadingAnnuler = false;
+        alert(error.error.message);
+      }
+    );
+  }
+
 
   getUserInfo() {
     this.authService.getUserInfo().subscribe(
@@ -117,7 +137,7 @@ export class ListeEntreComponent implements OnInit {
       this.entreService.ajouterEntree(formData).subscribe({
         next: (response) => {
           console.log('Entrée ajoutée avec succès:', response);
-          this.fetchAllEntrees();
+          this.fetchAllEntre();
           this.allresultat.unshift(response);  // Ajouter en haut du tableau (ou utilisez push pour le bas)
           // Réinitialiser le formulaire et mettre à jour la liste
           this.entreForm.patchValue({
@@ -184,81 +204,64 @@ export class ListeEntreComponent implements OnInit {
       }
     );
   }
-  private fetchAllEntrees(): void {
-    const tableElement = $('#transactions-table');
-  
-    if ($.fn.DataTable.isDataTable(tableElement)) {
-      tableElement.DataTable().clear().destroy();
-    }
-  
+
+  private fetchAllEntre(): void {
     this.entreService.getAllEntree().subscribe({
       next: (response) => {
         this.allresultat = response;
-        console.log(this.allresultat);
-  
+
+        // Détruire l'ancienne instance de DataTable si elle existe
+        if ($.fn.DataTable.isDataTable('#transactions-table')) {
+          $('#transactions-table').DataTable().clear().destroy();
+        }
+
+        // Initialiser DataTable après un court délai
         setTimeout(() => {
-          const table = $('#transactions-table').DataTable(this.dtoptions);
-          let startDateObj: Date | null = null;
-          let endDateObj: Date | null = null;
-  
-          const calculateTotal = () => {
-            let total = 0;
-            table.rows(':visible').every(function () {
-              const rowData = this.data();
-              const montant = parseFloat(rowData[4]?.replace(/\s/g, '').replace(/,/g, '') || '0');
-              total += montant;
-            });
-  
-            $('#totalMontant').html(
-              `<strong>Total Montant GNF :</strong> ${total.toLocaleString()} GNF`
-            );
-          };
-  
-          // Gestion du filtre par date
-          $('#btnFilter').off('click').on('click', function () {
-            const startDate = ($('#startDate').val() as string);
-            const endDate = ($('#endDate').val() as string);
-  
-            startDateObj = startDate ? new Date(startDate + 'T00:00:00') : null;
-            endDateObj = endDate ? new Date(endDate + 'T23:59:59') : null;
-  
+          let table = $('#transactions-table').DataTable(this.dtoptions);
+
+          // Fonction de filtrage des dates
+          $('#btnFilter').on('click', function () {
+            let startDate = ($('#startDate').val() as string);
+            let endDate = ($('#endDate').val() as string);
+
+            // Convertir les dates en objets Date
+            let startDateObj = startDate ? new Date(startDate + 'T00:00:00') : null;
+            let endDateObj = endDate ? new Date(endDate + 'T23:59:59') : null;
+
+            // Filtrer les lignes du tableau
             table.rows().every(function () {
-              const rowData = this.data();
-              const dateStr = rowData[1];
-  
+              let rowData = this.data();
+              let dateStr = rowData[1]; // Date au format 'dd/MM/yyyy HH:mm'
+
               if (dateStr) {
-                const [datePart, timePart] = dateStr.split(' ');
-                const [day, month, year] = datePart.split('/').map(Number);
-                const [hours, minutes] = timePart.split(':').map(Number);
-                const rowDate = new Date(year, month - 1, day, hours, minutes);
-  
+                // Extraire la date et l'heure
+                let [datePart, timePart] = dateStr.split(' ');
+                let [day, month, year] = datePart.split('/').map(Number);
+                let [hours, minutes] = timePart.split(':').map(Number);
+
+                // Créer un objet Date
+                let rowDate = new Date(year, month - 1, day, hours, minutes);
+
+                // Vérifier si la date est dans la plage spécifiée
                 if (
                   (!startDateObj || rowDate >= startDateObj) &&
                   (!endDateObj || rowDate <= endDateObj)
                 ) {
-                  $(this.node()).show();
+                  $(this.node()).show(); // Afficher la ligne
                 } else {
-                  $(this.node()).hide();
+                  $(this.node()).hide(); // Cacher la ligne
                 }
               }
             });
-  
-            table.draw();
-            calculateTotal();
+
+            table.draw(); // Rafraîchir le tableau
           });
-  
-          // Calcul du total lors de la recherche
-          table.on('search.dt', calculateTotal);
-  
-          $('#totalMontant').html(`<strong>Total Montant GNF :</strong> 0 GNF`);
-        }, 200);
+        }, 100);
       },
       error: (error) => {
         console.error('Erreur lors de la récupération des données:', error);
       },
     });
   }
-  
-  
 
 }

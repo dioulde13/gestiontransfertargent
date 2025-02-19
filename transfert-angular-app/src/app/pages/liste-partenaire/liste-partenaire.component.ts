@@ -71,9 +71,9 @@ export class ListePartenaireComponent implements OnInit {
     this.partenaireService.getAllPartenaire().subscribe({
       next: (response) => {
         this.allresultat = response;
-        if (this.allresultat && this.allresultat.length > 0) {
-          this.dtTrigger.next(null); // Initialisation de DataTables
-        }
+        // if (this.allresultat && this.allresultat.length > 0) {
+        //   this.dtTrigger.next(null); // Initialisation de DataTables
+        // }
         console.log(this.allresultat);
       },
       error: (error) => {

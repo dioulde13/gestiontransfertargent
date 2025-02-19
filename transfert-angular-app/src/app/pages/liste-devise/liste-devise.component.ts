@@ -40,18 +40,14 @@ export class ListeDeviseComponent implements OnInit {
 
     this.deviseForm = this.fb.group({
       utilisateurId: ['', Validators.required],
-      paysDepart: ['', Validators.required],
       paysArriver: ['', Validators.required],
-      signe_1: ['', Validators.required],
       signe_2: ['', Validators.required],
       prix_1: ['', Validators.required],
       prix_2: ['', Validators.required],
     });
 
     this.editDeviseForm = this.fb.group({
-      paysDepart: ['', Validators.required],
       paysArriver: ['', Validators.required],
-      signe_1: ['', Validators.required],
       signe_2: ['', Validators.required],
       prix_1: ['', Validators.required],
       prix_2: ['', Validators.required],
@@ -65,9 +61,12 @@ export class ListeDeviseComponent implements OnInit {
     this.devise.getAllDevise().subscribe({
       next: (response) => {
         this.allresultat = response;
-        if (this.allresultat && this.allresultat.length > 0) {
-          this.dtTrigger.next(null);
+        if ($.fn.DataTable.isDataTable('#devise-table')) {
+          $('#devise-table').DataTable().clear().destroy();
         }
+        // if (this.allresultat && this.allresultat.length > 0) {
+        //   this.dtTrigger.next(null);
+        // }
       },
       error: (error) => {
         console.error('Erreur lors de la récupération des données', error);
@@ -109,9 +108,7 @@ export class ListeDeviseComponent implements OnInit {
   onEdit(devise: any) {
     this.selectedDevise = devise;
     this.editDeviseForm.patchValue({
-      paysDepart: devise.paysDepart,
       paysArriver: devise.paysArriver,
-      signe_1: devise.signe_1,
       signe_2: devise.signe_2,
       prix_1: devise.prix_1,
       prix_2: devise.prix_2,

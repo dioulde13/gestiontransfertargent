@@ -13,5 +13,8 @@ router.get('/compte', entreController.compterEntreesDuJour);
 
 router.put("/annuler/:code", entreController.annulerEntre);
 
+router.post('/payer', entreController.payerEntrees);
+
+
 
 module.exports = router;
