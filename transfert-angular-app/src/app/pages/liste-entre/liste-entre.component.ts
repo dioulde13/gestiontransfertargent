@@ -88,7 +88,6 @@ export class ListeEntreComponent implements OnInit {
     });
   }
 
-  type_annuler: string = 'Non Rembourser'; // Valeur par défaut
 
   isLoadingAnnuler: boolean = false;
 

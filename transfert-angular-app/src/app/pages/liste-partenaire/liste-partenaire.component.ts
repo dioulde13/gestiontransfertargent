@@ -27,6 +27,8 @@ export class ListePartenaireComponent implements OnInit {
 
   dtTrigger: Subject<any> = new Subject<any>();
 
+  selectPaye: string = '';
+
   constructor(
     private fb: FormBuilder,
     private authService: AuthService,
@@ -39,16 +41,21 @@ export class ListePartenaireComponent implements OnInit {
       pagingType: 'full_numbers', // Type de pagination
       pageLength: 10 // Nombre d'éléments par page
     };
-    // Initialisation du formulaire avec les validations
-    this.partenaireForm = this.fb.group({
-      utilisateurId: ['', Validators.required],
+
+   this.partenaireFormIntial();
+    this.getAllPartenaire();
+    this.getUserInfo(); // Récupération des infos utilisateur
+  }
+
+  private partenaireFormIntial(): void{
+     // Initialisation du formulaire avec les validations
+     this.partenaireForm = this.fb.group({
+      utilisateurId: [this.idUser], // Liaison utilisateurId
       nom: ['', Validators.required],
       prenom: ['', Validators.required],
       pays: ['', Validators.required],
       montant_preter: [0, [Validators.required, Validators.min(0)]],
     });
-    this.getAllPartenaire();
-    this.getUserInfo(); // Récupération des infos utilisateur
   }
 
   getUserInfo() {

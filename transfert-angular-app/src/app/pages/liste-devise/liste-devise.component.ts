@@ -39,7 +39,7 @@ export class ListeDeviseComponent implements OnInit {
     };
 
     this.deviseForm = this.fb.group({
-      utilisateurId: ['', Validators.required],
+      utilisateurId: [this.idUser],
       paysArriver: ['', Validators.required],
       signe_2: ['', Validators.required],
       prix_1: ['', Validators.required],

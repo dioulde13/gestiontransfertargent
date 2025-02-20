@@ -58,8 +58,8 @@
                    <thead>
                     <tr class="text-muted">
                       <th>Date</th>
-                      <th>Pays exp</th>
-                      <th>Pays dest</th>
+                      <!-- <th>Pays exp</th> -->
+                      <th>Pays</th>
                       <th>Code</th>
                       <th>Expéditeur</th>
                       <th>Receveur</th>
@@ -73,7 +73,7 @@
                     <tr *ngFor="let result of allresultat;">
                       <td>{{ result.date_creation | date:'dd/MM/yyyy HH:mm' }}</td>
                       <td class="text-center">{{ result.pays_exp }}</td>
-                      <td class="border px-4 py-2">{{ result.pays_dest }}</td>           
+                      <!-- <td class="border px-4 py-2">{{ result.pays_dest }}</td>            -->
                       <td class="text-center">{{ result.code }}</td>
                       <td class="text-center">{{ result.expediteur }}</td>
                       <td class="text-center">{{ result.receveur }}</td>

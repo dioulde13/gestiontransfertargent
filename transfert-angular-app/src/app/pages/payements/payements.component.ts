@@ -178,23 +178,25 @@ export class PayementsComponent implements OnInit, OnDestroy {
     if (this.payementForm.valid) {
       const formData = this.payementForm.value;
       this.loading = true;
-
+  
       this.payementService.ajouterPayement(formData).subscribe(
         response => {
           this.loading = false;
           this.payementForm.reset();
           this.getAllPayement();
-          alert('Paiement ajouté avec succès!');
+          alert(response.message); // Afficher le message retourné par l'API
         },
         error => {
           this.loading = false;
-          alert('Erreur lors de l\'ajout du paiement.');
+          const errorMessage = error.error?.message || "Erreur lors de l'ajout du paiement.";
+          alert(errorMessage); // Afficher le message d'erreur retourné par l'API
         }
       );
     } else {
       alert('Veuillez remplir tous les champs obligatoires.');
     }
   }
+  
 
   ngOnDestroy(): void {
     this.dtTrigger.unsubscribe(); // Nettoyage
