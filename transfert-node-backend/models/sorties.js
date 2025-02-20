@@ -26,6 +26,10 @@ const Sortie = sequelize.define('Sortie', {
     type: DataTypes.STRING,
     allowNull: false,
   },
+  codeEnvoyer: {
+    type: DataTypes.STRING,
+    allowNull: false,
+  },
   prix_1: {
     type: DataTypes.INTEGER,
     allowNull: false,
@@ -73,6 +77,11 @@ const Sortie = sequelize.define('Sortie', {
     allowNull: false,
     defaultValue: 0,
   },
+  montant_gnf: {
+    type: DataTypes.BIGINT,
+    allowNull: false,
+    defaultValue: 0,
+  },
   telephone_receveur: {
     type: DataTypes.STRING,
     allowNull: false,
@@ -83,9 +92,9 @@ const Sortie = sequelize.define('Sortie', {
     defaultValue: 'NON COMPLET', // Définir une valeur par défaut
   },
   status: {
-    type: DataTypes.ENUM('NON PAYEE', 'PAYEE', 'ANNULEE'),
+    type: DataTypes.ENUM('PAYEE', 'ANNULEE'),
     allowNull: false,
-    defaultValue: 'NON PAYEE', // Définir une valeur par défaut
+    defaultValue: 'PAYEE', // Définir une valeur par défaut
   },
 });
 

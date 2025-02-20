@@ -11,5 +11,6 @@ router.get('/liste', sortieController.recupererSortiesAvecAssocies);
 
 router.get('/compte', sortieController.compterSortieDuJour);
 
+router.put("/annuler/:code", sortieController.annulerSortie);
 
 module.exports = router;

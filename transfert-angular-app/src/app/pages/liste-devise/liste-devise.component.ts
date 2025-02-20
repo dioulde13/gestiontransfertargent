@@ -6,6 +6,7 @@ import { DeviseService } from '../../services/devise/devise.service';
 import { AuthService } from '../../services/auth/auth-service.service';
 import { Subject } from 'rxjs';
 import { DataTablesModule } from 'angular-datatables';
+import { sign } from 'crypto';
 
 @Component({
   selector: 'app-liste-devise',
@@ -29,7 +30,7 @@ export class ListeDeviseComponent implements OnInit {
 
   isLoading: boolean = false;
 
-  constructor(private devise: DeviseService, private fb: FormBuilder, private authService: AuthService) {}
+  constructor(private devise: DeviseService, private fb: FormBuilder, private authService: AuthService) { }
 
   ngOnInit(): void {
     this.dtoptions = {
@@ -92,7 +93,12 @@ export class ListeDeviseComponent implements OnInit {
         response => {
           this.isLoading = false;
           this.getAllDevise();
-          this.deviseForm.reset();
+          this.deviseForm.patchValue({
+            paysArriver: '',
+            signe_2: '',
+            prix_1: '',
+            prix_2: ''
+          });
           alert('Devise ajoutée avec succès!');
         },
         error => {

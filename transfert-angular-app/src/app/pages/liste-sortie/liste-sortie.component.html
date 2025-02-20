@@ -23,6 +23,10 @@
                     <div class="card-body">
                       <div class="d-flex flex-wrap items-center justify-between breadcrumb-content">
                         <h5>Liste des Sorties</h5>
+                        <div>
+                          <a href="#" class="btn btn-primary" data-toggle="modal" data-target="#annuler-entre-modal">Annuler
+                            Sortie</a>
+                        </div>
                         <div class="d-flex flex-wrap items-center justify-between">
                           <div class="pl-3 btn-new border-left">
                             <a href="#" class="btn btn-primary" data-target="#new-project-modal" data-toggle="modal">Ajouter nouveau</a>
@@ -57,30 +61,34 @@
                 class="table data-table table-striped table-flush" style="width:100%">
                    <thead>
                     <tr class="text-muted">
+                      <th>Code generer</th>
+                      <th>code</th>
                       <th>Date</th>
                       <!-- <th>Pays exp</th> -->
                       <th>Pays</th>
-                      <th>Code</th>
                       <th>Expéditeur</th>
                       <th>Receveur</th>
                       <th>Téléphone Recev</th>
                       <th>Montant XOF</th>
                       <th>Prix GNF</th>
                       <th>Montant GNF</th>  
+                      <th>Status</th>
                     </tr>
                   </thead>
                   <tbody>
                     <tr *ngFor="let result of allresultat;">
+                      <td class="text-center">{{ result.code }}</td>
+                      <td class="text-center">{{ result.codeEnvoyer }}</td>
                       <td>{{ result.date_creation | date:'dd/MM/yyyy HH:mm' }}</td>
                       <td class="text-center">{{ result.pays_exp }}</td>
                       <!-- <td class="border px-4 py-2">{{ result.pays_dest }}</td>            -->
-                      <td class="text-center">{{ result.code }}</td>
                       <td class="text-center">{{ result.expediteur }}</td>
                       <td class="text-center">{{ result.receveur }}</td>
                       <td class="text-center">{{ result.telephone_receveur }}</td>
-                      <td class="text-center">{{ result.montant | currency:'' :'' :'1.0-0' }} XOF</td>
-                      <td class="text-center">{{ result.prix_2 | currency:'' :'' :'1.0-0'}} GNF</td>
-                      <td>{{ (result.montant / result.prix_1)  * result.prix_2 | currency:'' :'' :'1.0-0' }} GNF</td>
+                      <td class="text-center">{{ result.montant | currency:'' :'' :'1.0-0' }} {{result.signe_2}}</td>
+                      <td class="text-center">{{ result.prix_2 | currency:'' :'' :'1.0-0'}} {{result.signe_1}}</td>
+                      <td>{{ result.montant_gnf | currency:'' :'' :'1.0-0' }} {{result.signe_1}}</td>
+                      <td>{{ result.status }}</td>
                     </tr>
                   </tbody>
                 </table>
@@ -91,18 +99,63 @@
       </div>
     </div>
   </div>
+
+  <div class="modal fade" id="annuler-entre-modal" tabindex="-1" role="dialog" aria-labelledby="modalTitle" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="modalTitle">Annuler une sortie</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+  
+        <div class="modal-body">
+          <form [formGroup]="annulerForm" (ngSubmit)="annulerSortie()">
+            <div class="form-row">
+              <!-- Champ Code -->
+              <div class="form-group col-lg-12">
+                <label for="code">Code</label>
+                <input type="text" id="code" class="form-control" formControlName="codeAnnuler" placeholder="Entrez le code">
+                <div *ngIf="annulerForm?.get('codeAnnuler')?.invalid && annulerForm?.get('codeAnnuler')?.touched" class="text-danger">                Ce champ est obligatoire.
+                  Ce champ est obligatoire.
+                </div>
+              </div>
+            </div>
+  
+            <!-- Footer -->
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-dismiss="modal">Annuler</button>
+              <button type="submit" class="btn btn-danger" [disabled]="annulerForm.invalid || isLoadingAnnuler">
+                <span *ngIf="isLoadingAnnuler">Annulation en cours...</span>
+                <span *ngIf="!isLoadingAnnuler">Valider</span>
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+  
   
   <div class="modal fade" id="new-project-modal" tabindex="-1" role="dialog" aria-labelledby="modalTitle" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
       <div class="modal-content">
         <div class="modal-header">
-          <h5 class="modal-title" id="modalTitle">Ajouter une nouvelle entrée</h5>
+          <h5 class="modal-title" id="modalTitle">Ajouter une nouvelle sortie</h5>
           <button type="button" class="close" data-dismiss="modal" aria-label="Close">
             <span aria-hidden="true">&times;</span>
           </button>
         </div>
         <div class="modal-body">
-          <form [formGroup]="sortieForm" (ngSubmit)="ajouterEntree()">
+          <form [formGroup]="sortieForm" (ngSubmit)="ajouterSortie()">
+            <div class="form-row">
+              <div class="form-group col-lg-12">
+                <label for="codeEnvoyer">Code</label>
+                <input type="text" class="form-control" id="codeEnvoyer" formControlName="codeEnvoyer"
+                  placeholder="Code du sortie" />
+              </div>
+            </div>
             <div class="form-row">
               <div class="form-group col-md-6">
                 <label for="expediteur">Expéditeur</label>

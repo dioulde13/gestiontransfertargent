@@ -140,7 +140,6 @@ export class ListeEntreComponent implements OnInit {
           this.allresultat.unshift(response);  // Ajouter en haut du tableau (ou utilisez push pour le bas)
           // Réinitialiser le formulaire et mettre à jour la liste
           this.entreForm.patchValue({
-            partenaireId: '',
             deviseId: '',
             expediteur: '',
             receveur: '',
@@ -152,8 +151,8 @@ export class ListeEntreComponent implements OnInit {
         },
         error: (error) => {
           this.isLoading = false;
-          console.error('Erreur lors de l\'ajout de l\'entrée:', error);
-          alert('Erreur lors de l\'ajout de l\'entrée.');
+          console.error(error.error.message);
+          alert(error.error.message);
         },
       });
     } else {

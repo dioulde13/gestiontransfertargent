@@ -7,6 +7,8 @@ import { DeviseService } from '../../services/devise/devise.service';
 import { PartenaireServiceService } from '../../services/partenaire/partenaire-service.service';
 import { Subject } from 'rxjs';
 import { DataTablesModule } from 'angular-datatables';
+import { response } from 'express';
+import { error } from 'console';
 
 @Component({
   selector: 'app-liste-sortie',
@@ -24,6 +26,7 @@ export class ListeSortieComponent implements OnInit {
 
   // Formulaire pour ajouter une entrée
   sortieForm!: FormGroup;
+  annulerForm!: FormGroup;
 
   dtoptions: any = {};
 
@@ -61,6 +64,30 @@ export class ListeSortieComponent implements OnInit {
     this.fetchAllEntrees(); // Récupération des données existantes
     this.fetchDevise();
     this.fetchPartenaire();
+    this.annulerFormInitial();
+  }
+
+  private annulerFormInitial(): void{
+    this.annulerForm = this.fb.group({
+      codeAnnuler: ['', Validators.required]
+    });
+  }
+
+  isLoadingAnnuler: boolean = false;
+
+  annulerSortie(): void{
+    this.isLoadingAnnuler = true;
+    const { codeAnnuler } = this.annulerForm.value;
+    this.sortieService.annulerSortie(codeAnnuler).subscribe({
+      next: (response) =>{
+        this.isLoadingAnnuler = false;
+         alert(response.message);
+      },
+      error: (error) => {
+        this.isLoadingAnnuler = false;
+        alert(error.error.message);
+      }
+    });
   }
 
   allPartenaire: any[] = [];
@@ -104,7 +131,6 @@ export class ListeSortieComponent implements OnInit {
           //   if (this.userInfo) {
           this.idUser = this.userInfo.id;
           console.log('Informations utilisateur:', this.userInfo);
-
           // Mettre à jour le champ utilisateurId dans le formulaire
           this.sortieForm.patchValue({ utilisateurId: this.idUser });
         }
@@ -120,6 +146,7 @@ export class ListeSortieComponent implements OnInit {
       partenaireId: ['', Validators.required],
       deviseId: ['', Validators.required], // Initialisé à vide
       expediteur: ['', Validators.required],
+      codeEnvoyer: ['', Validators.required],
       receveur: ['', Validators.required],
       montant: [0, Validators.required],
       telephone_receveur: ['', Validators.required],
@@ -222,30 +249,31 @@ export class ListeSortieComponent implements OnInit {
   loading: boolean = false;
 
   // Méthode pour soumettre le formulaire et ajouter une nouvelle entrée
-  ajouterEntree(): void {
+  ajouterSortie(): void {
     console.log(this.sortieForm.value);
     if (this.sortieForm.valid) {
       this.loading = true;
       const formData = this.sortieForm.value; // Récupérer les valeurs du formulaire
       this.sortieService.ajouterSortie(formData).subscribe({
         next: (response) => {
-          console.log('Entrée ajoutée avec succès:', response);
+          console.log('Sortie ajoutée avec succès:', response);
           this.fetchAllEntrees();
           // Réinitialiser le formulaire et mettre à jour la liste
           this.sortieForm.patchValue({
             partenaireId: '',
             deviseId: '',
             expediteur: '',
+            codeEnvoyer: '',
             receveur: '',
             montant: '',
             telephone_receveur: ''
           }); 
           this.loading = false;
-          alert('Entrée ajoutée avec succès !');
+          alert(response.message);
         },
         error: (error) => {
-          console.error('Erreur lors de l\'ajout de l\'entrée:', error);
-          alert('Erreur lors de l\'ajout de l\'entrée.');
+          alert(error.error.message);
+          this.loading = false;
         },
       });
     } else {

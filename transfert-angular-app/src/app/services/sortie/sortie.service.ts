@@ -27,4 +27,8 @@ export class SortieService {
       return this.http.post(`${this.apiUrl}/api/sorties/create`, data);
     }
 
+    annulerSortie(code: string): Observable<any> {
+      return this.http.put(`${this.apiUrl}/api/sorties/annuler/${code}`, {}); // Ajouter un corps vide
+    }
+    
 }

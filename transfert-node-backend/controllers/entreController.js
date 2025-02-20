@@ -169,62 +169,6 @@ const compterEntreesDuJour = async (req, res) => {
   }
 };
 
-// const annulerEntre = async (req, res) => {
-//   try {
-//     const { code } = req.params; // Récupération du code de l'entrée à annuler
-
-//     // Vérifier si l'entrée existe
-//     const entre = await Entre.findOne({ where: { code } });
-//     if (!entre) {
-//       return res.status(404).json({ message: "Entrée introuvable." });
-//     }
-
-//     // Vérifier si le partenaire existe
-//     const partenaire = await Partenaire.findByPk(entre.partenaireId);
-//     if (!partenaire) {
-//       return res.status(404).json({ message: "Partenaire introuvable." });
-//     }
-
-//     // Vérifier si l'utilisateur existe
-//     const utilisateur = await Utilisateur.findByPk(entre.utilisateurId);
-//     if (!utilisateur) {
-//       return res.status(404).json({ message: "Utilisateur introuvable." });
-//     }
-
-//     // Vérifier si l'entrée est déjà annulée
-//     if (entre.status === "ANNULEE") {
-//       return res.status(400).json({ message: "Cette entrée est déjà annulée." });
-//     }
-
-//     // Mise à jour des soldes en fonction du statut de l'entrée
-//     if (entre.status === "PAYEE") {
-//       utilisateur.solde = (utilisateur.solde || 0) - entre.montant_gnf;
-//       await utilisateur.save();
-
-//       partenaire.montant_preter = (partenaire.montant_preter || 0) - entre.montant_cfa;
-//       await partenaire.save();
-//     } else if (entre.status === "EN COURS") {
-//       utilisateur.solde = (utilisateur.solde || 0) - entre.montant_payer;
-//       await utilisateur.save();
-//       partenaire.montant_preter = (partenaire.montant_preter || 0) - entre.montant_cfa;
-//       await partenaire.save();
-//     } else if (entre.status === "NON PAYEE") {
-//       partenaire.montant_preter = (partenaire.montant_preter || 0) - entre.montant_cfa;
-//       await partenaire.save();
-//     }
-
-//     entre.status = "ANNULEE";
-//     await entre.save();
-
-//     res.status(200).json({
-//       message: "Entrée annulée avec succès.",
-//       entre,
-//     });
-//   } catch (error) {
-//     console.error("Erreur lors de l'annulation de l'entrée :", error);
-//     res.status(500).json({ message: "Erreur interne du serveur." });
-//   }
-// };
 
 const annulerEntre = async (req, res) => {
   try {
@@ -248,10 +192,6 @@ const annulerEntre = async (req, res) => {
     if (!utilisateur) {
       return res.status(404).json({ message: "Utilisateur introuvable." });
     }
-
-    console.log(entre.status);
-    console.log(type_annuler);
-    console.log(entre.type_annuler);
 
 
     // Vérifier si l'entrée est déjà annulée

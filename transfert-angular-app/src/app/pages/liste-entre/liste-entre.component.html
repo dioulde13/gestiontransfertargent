@@ -81,7 +81,7 @@
                     <th>Expéditeur</th>
                     <th>Receveur</th>
                     <th>Téléphone</th>
-                    <th>Montant en CFA</th>
+                    <th>Montant</th>
                     <th>Prix</th>
                     <th>Montant en GNF</th>
                     <th>Montant payé (GNF)</th>
@@ -98,7 +98,7 @@
                     <td>{{ result.expediteur }}</td>
                     <td>{{ result.receveur }}</td>
                     <td>{{ result.telephone_receveur }}</td>
-                    <td>{{ result.montant_cfa | currency:'' :'' :'1.0-0' }} XOF</td>
+                    <td>{{ result.montant_cfa | currency:'' :'' :'1.0-0' }} {{result.signe_2}}</td>
                     <td>{{ result.prix_2 | currency:'' :'' :'1.0-0' }} GNF</td>
                     <td>{{ (result.montant_gnf) | currency:'' :'' :'1.0-0' }} GNF</td>
                     <td>{{ result.montant_payer | currency:'' :'' :'1.0-0' }} GNF</td>

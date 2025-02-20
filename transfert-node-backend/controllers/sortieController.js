@@ -2,7 +2,7 @@ const Sortie = require('../models/sorties');
 const Utilisateur = require('../models/utilisateurs');
 const Partenaire = require('../models/partenaires');
 const Devise = require('../models/devises');
-const { Sequelize} = require('sequelize');
+const { Sequelize } = require('sequelize');
 
 
 const recupererSortiesAvecAssocies = async (req, res) => {
@@ -66,6 +66,7 @@ const ajouterSortie = async (req, res) => {
       partenaireId,
       deviseId,
       expediteur,
+      codeEnvoyer,
       receveur,
       montant,
       telephone_receveur
@@ -76,6 +77,7 @@ const ajouterSortie = async (req, res) => {
       !partenaireId ||
       !deviseId ||
       !expediteur ||
+      !codeEnvoyer ||
       !receveur ||
       !montant ||
       !telephone_receveur
@@ -88,11 +90,11 @@ const ajouterSortie = async (req, res) => {
       return res.status(404).json({ message: 'Partenaire introuvable.' });
     }
 
-     // Récupérer les informations de l'utilisateur connecté
-     const utilisateur = await Utilisateur.findByPk(utilisateurId);
-     if (!utilisateur) {
-       return res.status(404).json({ message: 'Utilisateur introuvable.' });
-     }
+    // Récupérer les informations de l'utilisateur connecté
+    const utilisateur = await Utilisateur.findByPk(utilisateurId);
+    if (!utilisateur) {
+      return res.status(404).json({ message: 'Utilisateur introuvable.' });
+    }
 
     const devise = await Devise.findByPk(deviseId);
     if (!devise) {
@@ -109,31 +111,39 @@ const ajouterSortie = async (req, res) => {
 
 
     const lastEntry = await Sortie.findOne({ order: [['id', 'DESC']] });
+
     let newCode = 'ABS0001';
-    if (lastEntry) {
-      const numericPart = parseInt(lastEntry.code?.slice(2), 10);
+    
+    if (lastEntry && lastEntry.code) {
+      const numericPart = parseInt(lastEntry.code.slice(3), 10); // Extraire la partie numérique après "ABS"
       if (!isNaN(numericPart)) {
-        newCode = `AB${(numericPart + 1).toString().padStart(4, '0')}`;
+        newCode = `ABS${(numericPart + 1).toString().padStart(4, '0')}`;
       }
     }
 
-    const sortie = await Sortie.create({
-      utilisateurId,
-      partenaireId,
-      deviseId,
-      pays_exp: devise.paysArriver,
-      pays_dest: devise.paysDepart,
-      code: newCode,
-      expediteur,
-      telephone_receveur,
-      receveur,
-      montant_gnf: montant_due,
-      signe_1: Sign1,
-      signe_2: Sign2,
-      prix_1: Prix1, // Utiliser le prix_1 de Devise par défaut si non fourni
-      prix_2: Prix2,
-      montant: montant,
-    });
+    // console.log(devise.paysDepart);
+    // console.log(devise.paysArriver);
+    // console.log(partenaire.pays);
+
+    if (devise.paysArriver === partenaire.pays) {
+      const sortie = await Sortie.create({
+        utilisateurId,
+        partenaireId,
+        deviseId,
+        pays_exp: devise.paysArriver,
+        pays_dest: devise.paysDepart,
+        code: newCode,
+        expediteur,
+        codeEnvoyer,
+        telephone_receveur,
+        receveur,
+        montant_gnf: montant_due,
+        signe_1: Sign1,
+        signe_2: Sign2,
+        prix_1: Prix1, // Utiliser le prix_1 de Devise par défaut si non fourni
+        prix_2: Prix2,
+        montant: montant,
+      });
 
       // Mettre à jour le solde de l'utilisateur connecté
       utilisateur.solde = (utilisateur.solde || 0) - soldeCaise;
@@ -143,11 +153,14 @@ const ajouterSortie = async (req, res) => {
       partenaire.montant_preter = (partenaire.montant_preter || 0) - montant;
       await partenaire.save();
 
-    return res.status(201).json({
-      message: 'Sortie créée avec succès.',
-      sortie,
-      // montant_preter: partenaire.montant_preter,
-    });
+      return res.status(201).json({
+        message: 'Sortie créée avec succès.',
+        sortie,
+        // montant_preter: partenaire.montant_preter,
+      });
+    } else {
+      res.status(400).json({ message: 'Le pays de destination ne correspond pas au pays du partenaire.' });
+    }
 
   } catch (error) {
     console.error("Erreur lors de l'ajout de la sortie :", error);
@@ -155,4 +168,62 @@ const ajouterSortie = async (req, res) => {
   }
 };
 
-module.exports = { ajouterSortie, recupererSortiesAvecAssocies, compterSortieDuJour };
+const annulerSortie = async (req, res) => {
+  try {
+    const { code } = req.params; // Récupération du code
+
+    // Vérifier si l'entrée existe
+    const sortie = await Sortie.findOne({ where: { code } });
+    if (!sortie) {
+      return res.status(404).json({ message: "Sortie introuvable." });
+    }
+
+    // Vérifier si le partenaire existe
+    const partenaire = await Partenaire.findByPk(sortie.partenaireId);
+    if (!partenaire) {
+      return res.status(404).json({ message: "Partenaire introuvable." });
+    }
+
+    // Vérifier si l'utilisateur existe
+    const utilisateur = await Utilisateur.findByPk(sortie.utilisateurId);
+    if (!utilisateur) {
+      return res.status(404).json({ message: "Utilisateur introuvable." });
+    }
+
+
+    // Vérifier si l'entrée est déjà annulée
+    if (sortie.status === "ANNULEE") {
+      return res.status(400).json({ message: "Cette sortie est déjà annulée." });
+    }
+
+    if (sortie.status === "PAYEE") {
+      if(utilisateur.solde < 0){
+        utilisateur.solde = (utilisateur.solde || 0) - ( - sortie.montant_gnf);
+      }else{
+        utilisateur.solde = (utilisateur.solde || 0) - sortie.montant_gnf;
+      }
+      await utilisateur.save();
+    }
+
+    if(partenaire.montant_preter < 0){
+      partenaire.montant_preter = (partenaire.montant_preter || 0) - ( - sortie.montant);
+    }else{
+      partenaire.montant_preter = (partenaire.montant_preter || 0) - sortie.montant;
+    }
+    await partenaire.save();
+
+    // Mettre à jour le statut de l'entrée et le type d'annulation
+    sortie.status = "ANNULEE";
+    await sortie.save();
+
+    res.status(200).json({
+      message: "Sortie annulée avec succès.",
+      sortie,
+    });
+  } catch (error) {
+    console.error("Erreur lors de l'annulation de la sortie :", error);
+    res.status(500).json({ message: "Erreur interne du serveur." });
+  }
+};
+
+module.exports = { ajouterSortie, recupererSortiesAvecAssocies, compterSortieDuJour , annulerSortie};
