@@ -275,16 +275,16 @@
                   <select class="form-control" id="partenaire" formControlName="partenaireId" required>
                     <option value="" disabled selected>Sélectionnez un partenaire</option>
                     <option *ngFor="let partenaire of allPartenaire" [value]="partenaire.id">
-                      {{ partenaire.prenom }} {{ partenaire.nom }} ({{ partenaire.pays }}) - {{
+                      {{ partenaire.prenom }} {{ partenaire.nom }} ({{ partenaire.pays }}) -> {{
                       partenaire.montant_preter | currency:'' :'' :'1.0-0' }} XOF
                     </option>
                   </select>
                 </div>
 
                 <div class="form-group col-md-6">
-                  <label for="montant_cfa">Montant CFA</label>
+                  <label for="montant_cfa">Montant</label>
                   <input type="number" class="form-control" id="montant_cfa" formControlName="montant_cfa"
-                    placeholder="Montant en CFA" />
+                    placeholder="Montant" />
                 </div>
               </div>
 

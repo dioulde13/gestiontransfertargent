@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common'; 
 import { FormsModule } from '@angular/forms'; 
 import { MatSnackBar } from '@angular/material/snack-bar';
@@ -28,7 +28,7 @@ interface User {
   templateUrl: './liste-utilisateurs.component.html',
   styleUrl: './liste-utilisateurs.component.css',
 })
-export class ListeUtilisateursComponent implements OnInit {
+export class ListeUtilisateursComponent implements OnInit , OnDestroy{
   user: User = this.getEmptyUser();
   users: any[] = [];
   errorMessage: string = '';
@@ -40,7 +40,7 @@ export class ListeUtilisateursComponent implements OnInit {
   dtoptions: any = {};
 
   dtTrigger: Subject<any> = new Subject<any>();
-
+  
   // Gestion des modales
   isAddUserModalOpen: boolean = false; // Modale d'ajout
   isEditStatusModalOpen: boolean = false; // Modale de modification de statut
@@ -55,13 +55,42 @@ export class ListeUtilisateursComponent implements OnInit {
 
   ngOnInit(): void {
     this.dtoptions = {
-      paging: true, // Activer la pagination
-      pagingType: 'full_numbers', // Type de pagination
-      pageLength: 10 // Nombre d'éléments par page
+      pagingType: 'full_numbers',
+      pageLength: 10,
+      columns: [
+        { title: 'Nom', data: 'nom' },
+        { title: 'Prenom', data: 'prenom' },
+        { title: 'Email', data: 'email' },
+        { title: 'Telephone', data: 'telephone' },
+        { title: 'Role', data: 'role' },
+      ]
     };
     this.fetchUsers();
     this.userInfo = this.authService.getUserInfo();
     console.log('Informations utilisateur:', this.userInfo);
+  }
+
+  ngOnDestroy(): void {
+    // Déclenchement de la destruction de DataTables
+    this.dtTrigger.unsubscribe();
+  }
+
+  /** Récupérer les utilisateurs */
+  fetchUsers(): void {
+    this.utilisateurService.getUsers().subscribe({
+      next: (response) => {
+        this.users = response
+        console.log(this.users);
+        if (this.users && this.users.length > 0) {
+          this.dtTrigger.next(null); // Initialisation de DataTables
+        }
+
+      },
+      error: (error) => {
+        this.errorMessage = `Erreur : ${error.message}`;
+        console.error('Erreur lors de la récupération des utilisateurs :', error);
+      },
+    });
   }
 
   // Récupérer un utilisateur vide
@@ -90,23 +119,8 @@ export class ListeUtilisateursComponent implements OnInit {
 
  
 
-  /** Récupérer les utilisateurs */
-  fetchUsers(): void {
-    this.utilisateurService.getUsers().subscribe({
-      next: (response) => {
-        this.users = response
-        console.log(this.users);
-        if (this.users && this.users.length > 0) {
-          this.dtTrigger.next(null); // Initialisation de DataTables
-        }
 
-      },
-      error: (error) => {
-        this.errorMessage = `Erreur : ${error.message}`;
-        console.error('Erreur lors de la récupération des utilisateurs :', error);
-      },
-    });
-  }
+
 
   /** Modale d'ajout d'utilisateur */
   openAddUserModal(): void {
@@ -125,12 +139,14 @@ export class ListeUtilisateursComponent implements OnInit {
       this.utilisateurService.addUser(this.user).subscribe({
         next: () => {
           this.loading = false;
-          this.showNotification('Utilisateur ajouté avec succès !');
+          // this.showNotification('Utilisateur ajouté avec succès !');
+          alert('Utilisateur ajouté avec succès !');
           this.fetchUsers();
           this.closeAddUserModal();
         },
         error: (error) => {
-          this.showNotification('Erreur lors de l\'ajout de l\'utilisateur.');
+          alert(error.error.message);
+          // this.showNotification('Erreur lors de l\'ajout de l\'utilisateur.');
           console.error('Erreur :', error);
         },
       });

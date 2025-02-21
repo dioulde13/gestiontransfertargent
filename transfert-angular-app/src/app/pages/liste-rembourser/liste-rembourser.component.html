@@ -21,10 +21,10 @@
                 <div class="card">
                   <div class="card-body d-flex flex-wrap items-center justify-between breadcrumb-content">
                     <h5>Liste des entrées</h5>
-                    <div>
+                    <!-- <div>
                       <a href="#" class="btn btn-primary" data-toggle="modal"
                         data-target="#payer-partenaire-modal">Payer partenaire</a>
-                    </div>
+                    </div> -->
                     <div>
                       <a href="#" class="btn btn-primary" data-toggle="modal"
                         data-target="#calculer-rembourser-modal">Calcul</a>
@@ -181,13 +181,30 @@
           </div>
           <button type="submit" class="btn-calculer">Calculer</button>
         </form>
-        <div *ngIf="resultats" class="resultats">
-          <p><strong>Montant achater en devise :</strong> {{ resultats.totalMontantCfa | currency:'' :''
-            :'1.0-0'}}</p>
-          <p><strong>Montant achater en GNF :</strong> {{ resultats.totalMontantGnf | currency:'' :'' :'1.0-0'}}
-          </p>
-          <p><strong>Montant vendu en GNF :</strong> {{ resultats.montantGnfSaisi | currency:'' :'' :'1.0-0'}}
-          </p>
+        <div *ngIf="resultats" class="resultats" style="display: flex; justify-content: space-between;">
+          <div>
+            <p><strong>Montant achater en devise :</strong> {{ resultats.totalMontantCfa | currency:'' :''
+              :'1.0-0'}}</p>
+            <p><strong>Montant achater :</strong> {{ resultats.totalMontantGnf | currency:'' :'' :'1.0-0'}} GNF
+            </p>
+            <p><strong>Montant vendu :</strong> {{ resultats.montantGnfSaisi | currency:'' :'' :'1.0-0'}} GNF
+            </p>
+          </div>
+          <div>
+            <ng-container *ngIf="benefice > 0; else noBenefice">
+              <strong>Bénéfice</strong>
+            </ng-container>
+            <ng-template #noBenefice>
+              <strong>Pas de bénéfice</strong>
+            </ng-template>
+            :
+            <ng-container *ngIf="resultats.montantGnfSaisi">
+              <strong [ngStyle]="{ color: benefice <= 0 ? 'red' : 'inherit' }">
+                {{ benefice | currency: '' : '' : '1.0-0' }}
+              </strong>
+              GNF
+            </ng-container>
+          </div>
         </div>
       </div>
     </div>
@@ -198,9 +215,10 @@
   aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
     <div class="modal-content">
-
-      <div class="container">
-        <h2>Ajouter un Remboursement</h2>
+      <div class="modal-header">
+        <h5 class="modal-title" id="modalTitle">Ajouter un Remboursement</h5>
+      </div>
+      <div class="modal-body">
         <form [formGroup]="rembourserForm" (ngSubmit)="onSubmit()">
           <div class="form-group mb-3">
             <label for="devise">Partenaire</label>
@@ -230,8 +248,16 @@
             <label for="montant">Montant</label>
             <input id="montant" formControlName="montant" class="form-control" type="number" />
           </div>
-          <button type="submit" [disabled]="!rembourserForm.valid" class="btn btn-primary">Ajouter
-            remboursement</button>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-dismiss="modal">Annuler</button>
+            <button type="submit" class="btn btn-primary" [disabled]="!rembourserForm.valid">
+              <span *ngIf="isLoading">Création en cours...</span>
+              <span *ngIf="!isLoading">Valider</span>
+            </button>
+          </div>
+          <!-- <button type="submit" [disabled]="!rembourserForm.valid" class="btn btn-primary">Ajouter
+            remboursement
+          </button> -->
         </form>
       </div>
     </div>

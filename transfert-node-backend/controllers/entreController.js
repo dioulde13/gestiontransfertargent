@@ -126,6 +126,8 @@ const ajouterEntre = async (req, res) => {
         telephone_receveur
       });
 
+      // utilisateur.solde = (utilisateur.solde || 0) + montant_due;
+      // await utilisateur.save();
 
       // Mettre à jour le montant_prêter du partenaire
       partenaire.montant_preter = (partenaire.montant_preter || 0) + montant_cfa;

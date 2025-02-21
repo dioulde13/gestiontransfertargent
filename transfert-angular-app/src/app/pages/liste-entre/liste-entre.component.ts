@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit , ViewChild} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { EntreServiceService } from '../../services/entre/entre-service.service';
 import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
@@ -6,7 +6,7 @@ import { AuthService } from '../../services/auth/auth-service.service';
 import { DeviseService } from '../../services/devise/devise.service';
 import { PartenaireServiceService } from '../../services/partenaire/partenaire-service.service';
 
-import { Subject } from 'rxjs';
+import { Subject , Subscription} from 'rxjs';
 import { DataTablesModule } from 'angular-datatables';
 import { NgxPrintModule } from 'ngx-print';
 
@@ -25,6 +25,7 @@ export class ListeEntreComponent implements OnInit {
 
   selectedRowId: number | null = null;
 
+  @ViewChild('transactionsTable') table: any;
 
   // Sélectionner la ligne à imprimer
   printRow(user: any) {
@@ -36,7 +37,7 @@ export class ListeEntreComponent implements OnInit {
   idUser: string = '';
 
   // Tableau pour stocker les résultats des entrées
-  allresultat: any[] = [];
+  
 
   // Formulaire pour ajouter une entrée
   entreForm!: FormGroup;
@@ -65,6 +66,7 @@ export class ListeEntreComponent implements OnInit {
       pagingType: 'full_numbers',
       pageLength: 10,
       processing: true,
+      order: [1,'desc'],
       dom: "<'row'<'col-sm-6 dt-buttons-left'B><'col-sm-6 text-end dt-search-right'f>>" +
         "<'row'<'col-sm-12'tr>>" +
         "<'row'<'col-sm-5'i><'col-sm-7'p>>",
@@ -73,6 +75,7 @@ export class ListeEntreComponent implements OnInit {
         search: "Rechercher"
       }
     };
+ 
     this.initForm(); // Initialisation du formulaire
     this.fetchAllEntre(); // Récupération des données existantes
     this.fetchDevise();
@@ -127,25 +130,27 @@ export class ListeEntreComponent implements OnInit {
     );
   }
 
+  allresultat: any[] = [];
+
   // Méthode pour soumettre le formulaire et ajouter une nouvelle entrée
   ajouterEntree(): void {
     console.log(this.entreForm.value);
-    if (this.entreForm.valid) {
+    // if (this.entreForm.valid) {
       this.isLoading = true;
       const formData = this.entreForm.value; // Récupérer les valeurs du formulaire
+      console.log(formData);
       this.entreService.ajouterEntree(formData).subscribe({
         next: (response) => {
           console.log('Entrée ajoutée avec succès:', response);
-          this.fetchAllEntre();
-          this.allresultat.unshift(response);  // Ajouter en haut du tableau (ou utilisez push pour le bas)
-          // Réinitialiser le formulaire et mettre à jour la liste
           this.entreForm.patchValue({
             deviseId: '',
+            partenaireId:'',
             expediteur: '',
             receveur: '',
             montant_cfa: '',
             telephone_receveur: ''
           });
+          window.location.reload();
           this.isLoading = false;
           alert('Entrée ajoutée avec succès !');
         },
@@ -155,9 +160,9 @@ export class ListeEntreComponent implements OnInit {
           alert(error.error.message);
         },
       });
-    } else {
-      alert('Veuillez remplir tous les champs obligatoires.');
-    }
+    // } else {
+    //   alert('Veuillez remplir tous les champs obligatoires.');
+    // }
   }
 
   // Initialisation du formulaire avec des validations
@@ -207,7 +212,8 @@ export class ListeEntreComponent implements OnInit {
     this.entreService.getAllEntree().subscribe({
       next: (response) => {
         this.allresultat = response;
-
+        console.log(this.allresultat);
+        // this.dtTrigger.next(null);
         // Détruire l'ancienne instance de DataTable si elle existe
         if ($.fn.DataTable.isDataTable('#transactions-table')) {
           $('#transactions-table').DataTable().clear().destroy();

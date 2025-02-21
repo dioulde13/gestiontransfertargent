@@ -104,14 +104,22 @@
                 <small *ngIf="creditForm.get('montant')?.hasError('min')">Le montant doit être supérieur ou égal à 0.</small>
               </div>
             </div>
+
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-dismiss="modal">Annuler</button>
+              <button type="submit" [disabled]="!creditForm.valid" class="btn btn-primary">
+                <span *ngIf="loading">Création en cours...</span>
+                <span *ngIf="!loading">Ajouter</span>
+              </button>
+            </div>
           
             <!-- Bouton de soumission -->
-            <button 
+            <!-- <button 
               type="submit" 
               [disabled]="creditForm.invalid" 
               class="btn btn-primary mt-3">
               <span *ngIf="loading">Création en cours...</span>
-              <span *ngIf="!loading">Ajouter</span></button>    
+              <span *ngIf="!loading">Ajouter</span></button>     -->
           </form>
                     
         </div>

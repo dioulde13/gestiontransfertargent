@@ -86,12 +86,16 @@ export class ListeRembourserComponent implements OnInit {
     );
   }
 
+  isLoading: boolean = false;
+
   onSubmit() {
+    this.isLoading = true;
     if (this.rembourserForm.valid) {
       const formData = this.rembourserForm.value;
       // Appeler le service pour ajouter le partenaire
       this.rembourserService.ajouterRembourser(formData).subscribe(
         response => {
+          this.isLoading = false;
           console.log('Partenaire ajouté avec succès:', response);
           this.getAllRemboursement();
           this.rembourserForm.patchValue({
@@ -103,8 +107,9 @@ export class ListeRembourserComponent implements OnInit {
           alert('Partenaire ajouté avec succès!');
         },
         error => {
+          this.isLoading = false;
           console.error('Erreur lors de l\'ajout du partenaire:', error);
-          alert('Erreur lors de l\'ajout du partenaire.');
+          alert(error.error.message);
         }
       );
     } else {
@@ -171,11 +176,13 @@ export class ListeRembourserComponent implements OnInit {
   prix: number = 0;
   prix_1: number = 0;  // Champ à saisir par l'utilisateur
   resultats: any;
+  benefice: any;
 
   onCalculer() {
     this.calculService.calculerBenefice(this.dateDebut, this.dateFin, this.montant, this.prix_1, this.prix).subscribe(
       (response) => {
         this.resultats = response;
+        this.benefice = (response.totalMontantGnf - response.montantGnfSaisi)
         console.log(this.resultats);
       },
       (error) => {
