@@ -34,6 +34,31 @@ const Partenaire = sequelize.define('Partenaire', {
     allowNull: false,
     defaultValue: 0,
   },
+  montant_credit: {
+    type: DataTypes.BIGINT,
+    allowNull: false,
+    defaultValue: 0,
+  },
+  montant_credit_dollar: {
+    type: DataTypes.BIGINT,
+    allowNull: false,
+    defaultValue: 0,
+  },
+  montant_credit_euro: {
+    type: DataTypes.BIGINT,
+    allowNull: false,
+    defaultValue: 0,
+  },
+  status: {
+    type: DataTypes.ENUM('CODE', 'ECHANGE'),
+    allowNull: false,
+    defaultValue: 'CODE', 
+  },
+  type: {
+    type: DataTypes.ENUM('NON PAYEE', 'PAYEE'),
+    allowNull: false,
+    defaultValue: 'NON PAYEE', 
+  },
 });
 
 // Définir l'association : Un partenaire appartient à un utilisateur

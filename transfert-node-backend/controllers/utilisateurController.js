@@ -6,7 +6,7 @@ const sequelize = require('../models/sequelize');
 // Ajouter un utilisateur
 exports.ajouterUtilisateur = async (req, res) => {
   try {
-    const { nom, prenom, telephone, email, password, role } = req.body;
+    const { nom, prenom, sign, telephone, email, password, role } = req.body;
 
     if (!nom || !prenom || !telephone || !email || !password || !role) {
       return res.status(400).json({ message: 'Tous les champs sont obligatoires.' });
@@ -18,6 +18,7 @@ exports.ajouterUtilisateur = async (req, res) => {
       nom,
       prenom,
       telephone,
+      sign,
       email,
       password: hashedPassword,
       role,

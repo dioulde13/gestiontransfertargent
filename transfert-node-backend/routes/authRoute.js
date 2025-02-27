@@ -12,5 +12,7 @@ router.get('/all', utilisateurController.getAllUser);
 
 router.get('/infoUser', utilisateurController.getUserInfo);
 
+router.put('/utilisateurs/:id', utilisateurController.modifier);
+
 
 module.exports = router;

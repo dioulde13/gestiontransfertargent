@@ -75,7 +75,7 @@ const findAllPayements = async (req, res) => {
                 },
                 {
                     model: Credit,
-                    attributes: ['id', 'montant', 'montantPaye', 'montantRestant'] // Infos du crédit
+                    attributes: ['id', 'nom', 'montant', 'montantPaye', 'montantRestant'] // Infos du crédit
                 }
             ],
             order: [['date_creation', 'DESC']] // Trier par date décroissante

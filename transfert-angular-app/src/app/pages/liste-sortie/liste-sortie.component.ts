@@ -1,25 +1,45 @@
-import { Component, OnInit } from '@angular/core';
+import { AfterViewInit, ChangeDetectorRef, Component, OnDestroy, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { FormBuilder, FormGroup,FormsModule,  ReactiveFormsModule, Validators } from '@angular/forms';
 import { SortieService } from '../../services/sortie/sortie.service';
 import { AuthService } from '../../services/auth/auth-service.service';
 import { DeviseService } from '../../services/devise/devise.service';
 import { PartenaireServiceService } from '../../services/partenaire/partenaire-service.service';
 import { Subject } from 'rxjs';
-import { DataTablesModule } from 'angular-datatables';
-import { response } from 'express';
-import { error } from 'console';
+
+
+interface Result {
+  code: string;
+  date_creation: string;
+  pays_dest: string;
+  pays_exp:string;
+  codeEnvoyer:string;
+  expediteur: string;
+  receveur: string;
+  telephone_receveur: string;
+  montant_cfa: number;
+  signe_2: string;
+  signe_1: string;
+  prix_2: number;
+  montant: number;
+  montant_gnf: number;
+  montant_payer: number;
+  montant_restant: number;
+  status: string;
+  type_annuler?: string;
+  id: number;
+}
 
 @Component({
   selector: 'app-liste-sortie',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, DataTablesModule],
+  imports: [CommonModule, ReactiveFormsModule, FormsModule],
   templateUrl: './liste-sortie.component.html',
   styleUrl: './liste-sortie.component.css'
 })
-export class ListeSortieComponent implements OnInit {
+export class ListeSortieComponent implements OnInit, AfterViewInit, OnDestroy {
   // Tableau pour stocker les résultats des entrées
-  allresultat: any[] = [];
+  allresultat: Result[] = [];
 
   userInfo: any = null;
   idUser: string = '';
@@ -27,8 +47,7 @@ export class ListeSortieComponent implements OnInit {
   // Formulaire pour ajouter une entrée
   sortieForm!: FormGroup;
   annulerForm!: FormGroup;
-
-  dtoptions: any = {};
+  
 
   dtTrigger: Subject<any> = new Subject<any>();
 
@@ -38,30 +57,217 @@ export class ListeSortieComponent implements OnInit {
     private authService: AuthService,
     private deviseService: DeviseService,
     private partenaireService: PartenaireServiceService,
+    private cd: ChangeDetectorRef,
     private fb: FormBuilder
   ) { }
+
+
+  private dataTable: any;
+
+  selectedDevise: any = null; // Devise sélectionnée pour modification
+ 
+  onUpdate() {
+    if (this.editDeviseForm.valid && this.selectedDevise) {
+      const updatedData = this.editDeviseForm.value;
+      this.deviseService.modifierDevise(this.selectedDevise.id, updatedData).subscribe(
+        response => {
+          this.fetchDevise();
+          alert('Devise modifiée avec succès!');
+        },
+        error => {
+          console.error('Erreur lors de la modification du devise:', error);
+          alert('Erreur lors de la modification du devise.');
+        }
+      );
+    }
+  }
+
+  editDeviseForm!: FormGroup;
+  onEdit(devise: any) {
+    this.selectedDevise = devise;
+    this.editDeviseForm.patchValue({
+      paysArriver: devise.paysArriver,
+      signe_2: devise.signe_2,
+      prix_1: devise.prix_1,
+      prix_2: devise.prix_2,
+    });
+  }
+
+  startDate: Date | null = null;
+  endDate: Date | null = null;
+
+  totalMontant: number = 0; // Initialisation
+
+  filtrerSortieDates(): void {
+    const startDateInput = (document.getElementById('startDate') as HTMLInputElement).value;
+    const endDateInput = (document.getElementById('endDate') as HTMLInputElement).value;
+  
+    this.startDate = startDateInput ? new Date(startDateInput) : null;
+    this.endDate = endDateInput ? new Date(endDateInput) : null;
+  
+    // Réinitialiser le total
+    this.totalMontant = 0;
+  
+    // Filtrer d'abord par date
+    let filteredResults = this.allresultat.filter((result: { date_creation: string }) => {
+      const resultDate = new Date(result.date_creation);
+      return (!this.startDate || resultDate >= this.startDate) && 
+             (!this.endDate || resultDate <= this.endDate);
+    });
+  
+    // Mettre à jour DataTable avec les résultats filtrés par date
+    this.dataTable.clear().rows.add(filteredResults).draw();
+  
+    // Attendre que DataTable applique son propre filtre (search)
+    setTimeout(() => {
+      const filteredDataTable: { montant_gnf: number }[] = this.dataTable
+        .rows({ search: 'applied' })
+        .data()
+        .toArray();
+  
+      // Recalculer le total avec des types explicitement définis
+      this.totalMontant = filteredDataTable.reduce((sum: number, row: { montant_gnf: number }) => {
+        return sum + row.montant_gnf;
+      }, 0);
+  
+      console.log('Total Montant après filtre et recherche :', this.totalMontant);
+    }, 200); // Timeout pour attendre la mise à jour de DataTable
+  }
+
+
+    // Méthode pour récupérer toutes les entrées via l'API
+    private fetchAllSortie(): void {
+      this.sortieService.getAllSortie().subscribe({
+        next: (response) => {
+          this.allresultat = response;
+          console.log(this.allresultat);
+          this.initDataTable();
+        this.cd.detectChanges();
+        },
+        error: (error) => {
+          // Gestion des erreurs lors de l'appel API
+          console.error('Erreur lors de la récupération des données:', error);
+        },
+      });
+    }
+
+    private initDataTable(): void {
+      setTimeout(() => {
+        if (this.dataTable) {
+          this.dataTable.destroy(); // Détruire l'ancienne instance avant d'en créer une nouvelle
+        }
+        this.dataTable = ($('#datatable') as any).DataTable({
+          dom: "<'row'<'col-sm-6 dt-buttons-left'B><'col-sm-6 text-end dt-search-right'f>>" +
+            "<'row'<'col-sm-12'tr>>" +
+            "<'row'<'col-sm-5'i><'col-sm-7'p>>",
+          buttons: ['csv', 'excel', 'pdf', 'print'],
+          paging: true,
+          searching: true,
+          pageLength: 10,
+          lengthMenu: [10, 25, 50],
+          data: this.allresultat,
+          order: [0, 'desc'],
+          columns: [
+            { title: "Code generer", data: "codeEnvoyer" },
+            { title: "Code", data: "code" },
+            {
+              title: "Date du jour", data: "date_creation",
+              render: (data: string) => {
+                const date = new Date(data);
+                const day = String(date.getDate()).padStart(2, '0'); // Jour
+                const month = String(date.getMonth() + 1).padStart(2, '0'); // Mois
+                const year = date.getFullYear(); // Année
+                const hours = String(date.getHours()).padStart(2, '0'); // Heures
+                const minutes = String(date.getMinutes()).padStart(2, '0'); // Minutes
+  
+                return `${day}/${month}/${year} ${hours}:${minutes}`; // Format final
+              }
+            }, // Formatage de la date
+            { title: "Pays", data: "pays_dest" },
+            { title: "Expéditeur", data: "expediteur" },
+            { title: "Receveur", data: "receveur" },
+            { title: "Téléphone", data: "telephone_receveur" },
+            {
+              title: "Montant",
+              data: "montant",
+              render: (data: number, type: string, row: any) => {
+                const formattedAmount = new Intl.NumberFormat('fr-FR', {
+                  style: 'decimal',
+                  minimumFractionDigits: 0,
+                  maximumFractionDigits: 0
+                }).format(data); // Format le montant sans symbole de devise
+  
+                // Si vous avez besoin d'utiliser `signe_2`, vous pouvez l'ajouter ici
+                const signe = row.signe_2; // Récupérer la valeur de `signe_2`
+                console.log(signe);
+
+                // Retourner le montant et le signe, par exemple
+                return `${formattedAmount} ${signe}`; // Exemple de retour
+              }
+            },
+            { title: "Prix", data: "prix_2",
+              render: (data: number, type: string, row: any) => {
+                const formattedAmount = new Intl.NumberFormat('fr-FR', {
+                  style: 'decimal',
+                  minimumFractionDigits: 0,
+                  maximumFractionDigits: 0
+                }).format(data); // Format le montant sans symbole de devise
+  
+                // Si vous avez besoin d'utiliser `signe_2`, vous pouvez l'ajouter ici
+                const signe = row.signe_1; // Récupérer la valeur de `signe_2`
+  
+                // Retourner le montant et le signe, par exemple
+                return `${formattedAmount} ${signe}`; // Exemple de retour
+              }
+             },
+            { title: "Montant en GNF", data: "montant_gnf",
+              render: (data: number, type: string, row: any) => {
+                const formattedAmount = new Intl.NumberFormat('fr-FR', {
+                  style: 'decimal',
+                  minimumFractionDigits: 0,
+                  maximumFractionDigits: 0
+                }).format(data); // Format le montant sans symbole de devise
+  
+                // Si vous avez besoin d'utiliser `signe_2`, vous pouvez l'ajouter ici
+                const signe = row.signe_1; // Récupérer la valeur de `signe_2`
+  
+                // Retourner le montant et le signe, par exemple
+                return `${formattedAmount} ${signe}`; // Exemple de retour
+              }
+             },
+            { title: "Statut de paiement", data: "status", render: (data: string, row: Result) => data + (row.status === 'ANNULEE' ? ` (${row.type_annuler})` : '') },
+          ]
+        });
+        this.cd.detectChanges(); 
+      }, 100);
+    }
+
+    ngAfterViewInit(): void {
+      this.dtTrigger.next(null);
+    }
+  
+    ngOnDestroy(): void {
+      if (this.dataTable) {
+        this.dataTable.destroy();
+      }
+      this.dtTrigger.unsubscribe();
+    }
+  
 
   // Initialisation du composant
   ngOnInit(): void {
 
-    this.dtoptions = {
-      pagingType: 'full_numbers',
-      pageLength: 10,
-      processing: true,
-      dom: "<'row'<'col-sm-6 dt-buttons-left'B><'col-sm-6 text-end dt-search-right'f>>" + 
-           "<'row'<'col-sm-12'tr>>" + 
-           "<'row'<'col-sm-5'i><'col-sm-7'p>>",
-      buttons: ['csv', 'excel', 'print'],
-      language: {
-          search: "Rechercher"
-      }
-    };
+    this.editDeviseForm = this.fb.group({
+      paysArriver: ['', Validators.required],
+      signe_2: ['', Validators.required],
+      prix_1: ['', Validators.required],
+      prix_2: ['', Validators.required],
+    });
     // Initialisation du formulaire
     this.initForm();
     // Récupération des données existantes via l'API
-    this.fetchAllEntrees();
     this.getUserInfo(); // Récupération des infos utilisateur
-    this.fetchAllEntrees(); // Récupération des données existantes
+    this.fetchAllSortie(); // Récupération des données existantes
     this.fetchDevise();
     this.fetchPartenaire();
     this.annulerFormInitial();
@@ -153,98 +359,7 @@ export class ListeSortieComponent implements OnInit {
     });
   }
 
-  // Méthode pour récupérer toutes les entrées via l'API
-  private fetchAllEntrees(): void {
-    this.sortieService.getAllSortie().subscribe({
-      next: (response) => {
-        // Mise à jour du tableau avec les résultats récupérés
-        this.allresultat = response;
-        console.log('Données récupérées avec succès:', this.allresultat);
-          // Détruire l'ancienne instance de DataTable si elle existe
-          if ($.fn.DataTable.isDataTable('#transactions-table')) {
-            $('#transactions-table').DataTable().clear().destroy();
-          }
-    
-          // Initialiser DataTable après un court délai
-          setTimeout(() => {
-            let table = $('#transactions-table').DataTable(this.dtoptions);
-    
-            const calculateTotal = () => {
-              let total = 0;
-              let visibleRows = table.rows(':visible').data().length; // Nombre de lignes visibles
-    
-              if (visibleRows > 0) {
-                table.rows(':visible').every(function () {
-                  let rowData = this.data();
-                  let montant = parseFloat(
-                    rowData[9].toString().replace(/\s/g, '').replace(/,/g, '')
-                  ) || 0;
-    
-                  total += montant;
-                });
-              }
-    
-              // Afficher le total uniquement si un filtre est actif
-              if (visibleRows > 0 && (startDateObj || endDateObj)) {
-                $('#totalMontant').html(
-                  `<strong>Total Montant GNF :</strong> ${total.toLocaleString()} GNF`
-                );
-              } else {
-                $('#totalMontant').html(`<strong>Total Montant GNF :</strong> 0 GNF`);
-              }
-            };
-    
-            let startDateObj: Date | null = null;
-            let endDateObj: Date | null = null;
-    
-            // Fonction de filtrage des dates
-            $('#btnFilter').on('click', function () {
-              let startDate = ($('#startDate').val() as string);
-              let endDate = ($('#endDate').val() as string);
-    
-              startDateObj = startDate ? new Date(startDate + 'T00:00:00') : null;
-              endDateObj = endDate ? new Date(endDate + 'T23:59:59') : null;
-    
-              table.rows().every(function () {
-                let rowData = this.data();
-                let dateStr = rowData[0];
-    
-                if (dateStr) {
-                  let [datePart, timePart] = dateStr.split(' ');
-                  let [day, month, year] = datePart.split('/').map(Number);
-                  let [hours, minutes] = timePart.split(':').map(Number);
-                  let rowDate = new Date(year, month - 1, day, hours, minutes);
-    
-                  if (
-                    (!startDateObj || rowDate >= startDateObj) &&
-                    (!endDateObj || rowDate <= endDateObj)
-                  ) {
-                    $(this.node()).show();
-                  } else {
-                    $(this.node()).hide();
-                  }
-                }
-              });
-    
-              table.draw();
-              calculateTotal();
-            });
-    
-            // Mettre à jour le total lors de la recherche
-            table.on('search.dt', function () {
-              calculateTotal();
-            });
-    
-            // Afficher 0 par défaut
-            $('#totalMontant').html(`<strong>Total Montant GNF :</strong> 0 GNF`);
-          }, 100);
-      },
-      error: (error) => {
-        // Gestion des erreurs lors de l'appel API
-        console.error('Erreur lors de la récupération des données:', error);
-      },
-    });
-  }
+
 
   loading: boolean = false;
 
@@ -257,7 +372,7 @@ export class ListeSortieComponent implements OnInit {
       this.sortieService.ajouterSortie(formData).subscribe({
         next: (response) => {
           console.log('Sortie ajoutée avec succès:', response);
-          this.fetchAllEntrees();
+          this.fetchAllSortie();
           // Réinitialiser le formulaire et mettre à jour la liste
           this.sortieForm.patchValue({
             partenaireId: '',

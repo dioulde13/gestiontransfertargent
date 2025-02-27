@@ -20,4 +20,7 @@ export class PartenaireServiceService {
   ajouterPartenaire(partenaireData: any): Observable<any> {
     return this.http.post(`${this.apiUrl}/api/partenaires/create`, partenaireData);
   }
+  rembourserDevise(id:number, dataRembourser:any): Observable<any>{
+    return this.http.put(`${this.apiUrl}/api/partenaires/rembourserDevise/${id}`, dataRembourser);
+  }
 }

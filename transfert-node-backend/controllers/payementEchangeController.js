@@ -96,7 +96,7 @@ const listerPayementEchange = async (req, res) => {
         },
         {
           model: Echange,
-          attributes: ['id', 'montant_payer', 'montant_restant'], // Champs à inclure pour le partenaire
+          attributes: ['id', 'nom', 'montant_payer', 'montant_restant'], // Champs à inclure pour le partenaire
         },
       ],
     });

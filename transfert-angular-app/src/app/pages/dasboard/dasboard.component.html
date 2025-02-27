@@ -154,21 +154,23 @@
                 </div>
             </div>
 
-            <!-- <div class="col-lg-3 card-profile">
+            <div class="col-lg-3 card-profile">
                 <div class="card card-block card-stretch card-height">
                     <div class="card-body">
                         <div class="top-block d-flex align-items-center justify-content-center">
-                            <span style="font-size: 20px;">Montant total entre</span>
+                            <span style="font-size: 20px;">Solde echange</span>
                         </div>
                         <div>
-                            <span class="d-flex align-items-center justify-content-center"
-                                style="font-size: 30px; color: black;">
-                                {{ resultat.totalVentes | currency:'' :'' :'1.0-0'}} GNF
+                            <span
+                                style="font-size: 30px; color: black; text-align: center;">
+                                <p>{{ userInfo.solde_echange | currency:'' :'' :'1.0-0'}} {{userInfo.sign}} </p>
+                                <p>{{ userInfo.solde_echange_dollar | currency:'' :'' :'1.0-0'}} {{userInfo.sign_dollar}} </p>
+                                <p>{{ userInfo.solde_echange_euro | currency:'' :'' :'1.0-0'}} {{userInfo.sign_euro}}</p>
                             </span>
                         </div>
                     </div>
                 </div>
-            </div> -->
+            </div>
             <!-- <div class="col-lg-3 card-profile">
                 <div class="card card-block card-stretch card-height">
                     <div class="card-body">

@@ -34,39 +34,43 @@
               </div>
 
               <div class="row mb-4">
-                <div class="col-md-3">
-                  <input type="date" id="startDate" class="form-control" placeholder="Date Début">
+                <div class="col-md-3 d-flex mb-3 mb-md-0">
+                  <input type="date" id="startDate" class="form-control" placeholder="Date Début"
+                    style="border-radius: 25px;">
                 </div>
-                <div class="col-md-3">
-                  <input type="date" id="endDate" class="form-control" placeholder="Date Fin">
+                <div class="col-md-3 d-flex mb-3 mb-md-0">
+                  <input type="date" id="endDate" class="form-control" placeholder="Date Fin"
+                    style="border-radius: 25px;">
                 </div>
                 <div class="col-md-3 d-flex">
                   <button id="btnFilter" class="btn btn-primary"
+                  (click)="filtrerEntreDates()"
                     style="border-radius: 60px; padding: 5px 10px; font-size: 14px;">
                     Filtrer
                   </button>
                 </div>
                 <div class="col-md-3 d-flex">
-                  <div id="totalMontant" style="font-weight: bold; margin-top: 10px;">Total Montant GNF : 0 GNF</div>
+                  <div style="font-weight: bold; margin-top: 10px;">Total Montant : {{ totalMontant | number }} GNF</div>
                 </div>
               </div>
 
-              <table id="transactions-table" datatable [dtOptions]="dtoptions" [dtTrigger]="dtTrigger"
+              <table id="datatable"
                 class="table table-striped">
                 <thead>
-                  <tr>
+                  <tr class="bg-blue-500 text-white">
                     <th>Date paiement</th>
                     <th>Montant</th>
                   </tr>
                 </thead>
                 <tbody>
-                  <tr *ngFor="let result of allresultat">
-                    <td class="border px-4 py-2">{{" "+result.Entre.pays_dest+" / "+""+result.Entre.code+" / "+
-                      ""+result.Entre.expediteur+" / "}}{{ result.date_creation | date:'dd/MM/yyyy HH:mm'}}</td>
-                    <!-- <td>{{ result.date_creation | date: 'dd/MM/yyyy HH:mm' }}</td> -->
-                    <td>{{ result.montant | currency: '' :'' : '1.0-0' }} GNF</td>
+                  <tr *ngFor="let result of filteredResults">
+                    <td class="border px-4 py-2">
+                      {{ result.Entre?.pays_dest }} / {{ result.Entre?.code }} / {{ result.Entre?.expediteur }} /
+                      {{ result.date_creation | date:'dd/MM/yyyy HH:mm' }}
+                    </td>
+                    <td>{{ result.montant | number:'1.0-0' }} GNF</td>
                   </tr>
-                </tbody>
+                </tbody>                
               </table>
             </div>
           </div>

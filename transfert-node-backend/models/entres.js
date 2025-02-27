@@ -43,6 +43,10 @@ const Entre = sequelize.define('Entre', {
     type: DataTypes.STRING,
     allowNull: false,
   },
+  nomCLient: {
+    type: DataTypes.STRING,
+    allowNull: false,
+  },
   expediteur: {
     type: DataTypes.STRING,
     allowNull: false,
@@ -60,6 +64,11 @@ const Entre = sequelize.define('Entre', {
     allowNull: false,
     defaultValue: 0,
   },
+  montant: {
+    type: DataTypes.BIGINT,
+    allowNull: false,
+    defaultValue: 0,
+  },
   montant_gnf: {
     type: DataTypes.BIGINT,
     allowNull: false,
@@ -70,6 +79,11 @@ const Entre = sequelize.define('Entre', {
     allowNull: false,
     defaultValue: 0,
   }, 
+  montant_rembourser: {
+    type: DataTypes.BIGINT,
+    allowNull: false,
+    defaultValue: 0,
+  },
   montant_restant: {
     type: DataTypes.BIGINT,
     allowNull: false,

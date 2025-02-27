@@ -11,5 +11,8 @@ router.get('/liste', echangeController.recupererEchange);
 
 router.get('/compte', echangeController.compterEchangeDuJour);
 
+router.put('/soldePartenaire', echangeController.ajoutSoldePartenaire);
+
+router.put('/modifier/:id', echangeController.modifier)
 
 module.exports = router;

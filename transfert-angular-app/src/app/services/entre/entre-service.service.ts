@@ -13,9 +13,9 @@ export class EntreServiceService {
    constructor(private http: HttpClient) { }
  
 
-   annulerEntreParCode(code: string, type_annuler: string): Observable<any> {
-    console.log(code, type_annuler);
-    return this.http.put(`${this.apiUrl}/api/entrees/annuler/${code}`, { type_annuler });
+   annulerEntreParCode(code: string, type_annuler: string, montant_rembourser: number): Observable<any> {
+    const body = { type_annuler, montant_rembourser };
+    return this.http.put(`${this.apiUrl}/api/entrees/annuler/${code}`, body);
   }
   
    // Méthode pour récupérer les données de l'API

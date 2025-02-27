@@ -24,4 +24,10 @@ export class EchangeService {
   ajouterEchange(data: any): Observable<any> {
     return this.http.post(`${this.apiUrl}/api/echange/create`, data);
   }
+
+  ajouterSoldePartenaire(data: any): Observable<any> {
+    return this.http.put(`${this.apiUrl}/api/echange/soldePartenaire`, data);
+  }
+
+  
 }

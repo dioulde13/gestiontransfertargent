@@ -174,72 +174,55 @@ const compterEntreesDuJour = async (req, res) => {
 
 const annulerEntre = async (req, res) => {
   try {
-    const { code } = req.params; // Récupération du code
-    const { type_annuler } = req.body; // Type d'annulation (Rembourser ou Non Rembourser)
+    const { code } = req.params;
+    const { type_annuler, montant_rembourser } = req.body;
 
     // Vérifier si l'entrée existe
     const entre = await Entre.findOne({ where: { code } });
-    if (!entre) {
-      return res.status(404).json({ message: "Entrée introuvable." });
+    if (!entre) return res.status(404).json({ message: "Entrée introuvable." });
+
+    // Vérifier si le partenaire et l'utilisateur existent
+    const [partenaire, utilisateur] = await Promise.all([
+      Partenaire.findByPk(entre.partenaireId),
+      Utilisateur.findByPk(entre.utilisateurId),
+    ]);
+
+    if (!partenaire) return res.status(404).json({ message: "Partenaire introuvable." });
+    if (!utilisateur) return res.status(404).json({ message: "Utilisateur introuvable." });
+
+    // Vérification du remboursement
+    const montantEnCoursPayement = (Number(entre.montant_rembourser) || 0) + Number(montant_rembourser);
+    
+    if (entre.montant_payer === entre.montant_rembourser) {
+      return res.status(400).json({ message: `Aucun remboursement possible, tout a été payé.` });
     }
 
-    // Vérifier si le partenaire existe
-    const partenaire = await Partenaire.findByPk(entre.partenaireId);
-    if (!partenaire) {
-      return res.status(404).json({ message: "Partenaire introuvable." });
+    if (montantEnCoursPayement > entre.montant_payer) {
+      return res.status(400).json({ 
+        message: `Le montant restant à rembourser est de : ${(Number(entre.montant_payer) || 0) - Number(entre.montant_rembourser)}` 
+      });
     }
 
-    // Vérifier si l'utilisateur existe
-    const utilisateur = await Utilisateur.findByPk(entre.utilisateurId);
-    if (!utilisateur) {
-      return res.status(404).json({ message: "Utilisateur introuvable." });
-    }
-
-
-    // Vérifier si l'entrée est déjà annulée
-    if (entre.status === "ANNULEE" && entre.type_annuler === "Rembourser") {
-      return res.status(400).json({ message: "Cette entrée est déjà annulée." });
-    }
-
-    // Gestion du remboursement uniquement si le type_annuler est "Rembourser"
-    if (type_annuler === "Rembourser") {
-      if (entre.status === "PAYEE") {
-        utilisateur.solde = (utilisateur.solde || 0) - entre.montant_gnf;
-      } else if (entre.status === "EN COURS") {
-        utilisateur.solde = (utilisateur.solde || 0) - entre.montant_payer;
-      }
+    // Gestion du remboursement
+    if (type_annuler === "Rembourser" && ["PAYEE", "EN COURS", "ANNULEE"].includes(entre.status)) {
+      entre.montant_rembourser = montantEnCoursPayement;
+      utilisateur.solde = (utilisateur.solde || 0) - Number(montant_rembourser);
       await utilisateur.save();
     }
 
-    if (type_annuler === "Rembourser" && entre.status === "ANNULEE") {
-      if (entre.status === "PAYEE") {
-        utilisateur.solde = (utilisateur.solde || 0) - entre.montant_gnf;
-      } else if (entre.status === "EN COURS") {
-        utilisateur.solde = (utilisateur.solde || 0) - entre.montant_payer;
-      }
-      await utilisateur.save();
-    }
-
-    if (type_annuler === "Rembourser" && entre.type_annuler === "Non Rembourser" && entre.status === "ANNULEE") {
-        utilisateur.solde = (utilisateur.solde || 0) - entre.montant_payer;
-      await utilisateur.save();
-    }
-
+    // Mise à jour du montant prêté par le partenaire si l'entrée n'était pas annulée
     if (entre.status !== "ANNULEE") {
       partenaire.montant_preter = (partenaire.montant_preter || 0) - entre.montant_cfa;
       await partenaire.save();
     }
 
-
-    // Mettre à jour le statut de l'entrée et le type d'annulation
+    // Mettre à jour le statut et le type d'annulation
     entre.status = "ANNULEE";
     entre.type_annuler = type_annuler;
     await entre.save();
 
-    res.status(200).json({
-      message: "Entrée annulée avec succès.",
-      entre,
-    });
+    res.status(200).json({ message: "Entrée annulée avec succès.", entre });
+
   } catch (error) {
     console.error("Erreur lors de l'annulation de l'entrée :", error);
     res.status(500).json({ message: "Erreur interne du serveur." });

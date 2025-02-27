@@ -40,7 +40,9 @@
                     <th class="border px-4 py-2">Nom</th>
                     <th class="border px-4 py-2">Prenom</th>
                     <th class="border px-4 py-2">Pays</th>
-                    <th class="border px-4 py-2">Montant</th>
+                    <th class="border px-4 py-2">Solde avec code</th>
+                    <th class="border px-4 py-2">Solde avec echange </th>
+                    <th>Action</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -48,8 +50,16 @@
                     <td class="border px-4 py-2">{{ result.nom }}</td>
                     <td class="border px-4 py-2">{{ result.prenom }}</td>
                     <td class="border px-4 py-2">{{ result.pays }}</td>
-                    <td class="border px-4 py-2">{{ result.montant_preter | currency:'' :'' :'1.0-0' }} XOF</td>
-
+                    <td class="border px-4 py-2">{{ result.montant_preter | currency:'' :'' :'1.0-0' }}</td>
+                    <td class="border px-4 py-2">
+                      <p>{{ result.montant_credit | currency:'' :'' :'1.0-0' }} {{userInfo.sign}}</p>
+                      <p>{{ result.montant_credit_dollar | currency:'' :'' :'1.0-0' }} {{userInfo.sign_dollar}}</p>
+                      <p>{{ result.montant_credit_euro | currency:'' :'' :'1.0-0' }} {{userInfo.sign_euro}}</p>
+                    </td>
+                    <td>
+                      <button class="btn btn-warning btn-sm" data-toggle="modal" data-target="#edit-rembourser-modal"
+                        (click)="onPartenaireEdit(result)">rembourser</button>
+                    </td>
                   </tr>
                 </tbody>
               </table>
@@ -60,6 +70,36 @@
     </div>
   </div>
 </div>
+
+<div class="modal fade" id="edit-rembourser-modal" tabindex="-1" role="dialog" aria-labelledby="editProjectModalLabel"
+  aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header bg-warning text-white">
+        <h5 class="modal-title">Rembourser un partenaire</h5>
+        <button type="button" class="close" data-dismiss="modal">&times;</button>
+      </div>
+      <div class="modal-body">
+        <form [formGroup]="editPartenaireForm" (ngSubmit)="onPartenaireUpdate()">
+          <div class="form-group col-lg-12">
+            <label for="deviseId">Devise</label>
+            <select class="form-control" id="deviseId" formControlName="deviseId">
+                <option value="" disabled selected>Sélectionnez une devise</option>
+                <option *ngFor="let devise of uniqueDevise" [value]="devise.id">
+                    <span>{{ devise.signe_2 }}</span>
+                </option>
+            </select>
+        </div>
+          <div class="modal-footer">
+            <button type="submit" class="btn btn-primary" [disabled]="!editPartenaireForm.valid">Valider</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+
 <div class="modal fade" id="new-project-modal" tabindex="-1" role="dialog" aria-labelledby="modalTitle"
   aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered modal-lg" role="document">

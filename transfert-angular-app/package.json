@@ -23,6 +23,7 @@
     "@angular/platform-server": "^19.0.0",
     "@angular/router": "^19.0.0",
     "@angular/ssr": "^19.0.2",
+    "@types/datatables.net": "^1.10.28",
     "angular-datatables": "^19.0.0",
     "datatables.net": "^2.0.3",
     "datatables.net-buttons": "^3.2.2",

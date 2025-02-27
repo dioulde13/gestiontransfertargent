@@ -6,6 +6,7 @@ import { ReactiveFormsModule } from '@angular/forms'; // Import du module des fo
 import { AuthService } from '../../services/auth/auth-service.service';
 import { Subject } from 'rxjs';
 import { DataTablesModule } from 'angular-datatables';
+import { DeviseService } from '../../services/devise/devise.service';
 
 @Component({
   selector: 'app-liste-partenaire',
@@ -23,6 +24,7 @@ export class ListePartenaireComponent implements OnInit {
 
   partenaireForm!: FormGroup;
 
+
   dtoptions: any = {};
 
   dtTrigger: Subject<any> = new Subject<any>();
@@ -32,7 +34,8 @@ export class ListePartenaireComponent implements OnInit {
   constructor(
     private fb: FormBuilder,
     private authService: AuthService,
-    private partenaireService: PartenaireServiceService
+    private partenaireService: PartenaireServiceService,
+    private deviseService: DeviseService,
   ) { }
 
   ngOnInit(): void {
@@ -41,15 +44,18 @@ export class ListePartenaireComponent implements OnInit {
       pagingType: 'full_numbers', // Type de pagination
       pageLength: 10 // Nombre d'éléments par page
     };
-
-   this.partenaireFormIntial();
+    this.initPartenaire();
+    this.partenaireFormIntial();
     this.getAllPartenaire();
     this.getUserInfo(); // Récupération des infos utilisateur
+    this.fetchDevise();
   }
 
-  private partenaireFormIntial(): void{
-     // Initialisation du formulaire avec les validations
-     this.partenaireForm = this.fb.group({
+ 
+
+  private partenaireFormIntial(): void {
+    // Initialisation du formulaire avec les validations
+    this.partenaireForm = this.fb.group({
       utilisateurId: [this.idUser], // Liaison utilisateurId
       nom: ['', Validators.required],
       prenom: ['', Validators.required],
@@ -57,6 +63,36 @@ export class ListePartenaireComponent implements OnInit {
       montant_preter: [0, [Validators.required, Validators.min(0)]],
     });
   }
+
+
+
+
+  allDevise: any[] = [];
+  uniqueDevise: any[] = [];
+  
+  fetchDevise(): void {
+    this.deviseService.getAllDevise().subscribe(
+      (response) => {
+        this.allDevise = response;
+  
+        // Utilisation d'un Set pour garder les devises uniques par `signe_2`
+        const seen = new Set();
+        this.uniqueDevise = this.allDevise.filter(devise => {
+          if (!seen.has(devise.signe_2)) {
+            seen.add(devise.signe_2);
+            return true; // Garder cette devise
+          }
+          return false; // Ignorer les doublons
+        });
+  
+        console.log('Liste des devises uniques:', this.uniqueDevise);
+      },
+      (error) => {
+        console.error('Erreur lors de la récupération des devises:', error);
+      }
+    );
+  }
+  
 
   getUserInfo() {
     this.authService.getUserInfo().subscribe(
@@ -69,10 +105,42 @@ export class ListePartenaireComponent implements OnInit {
 
           // Mettre à jour le champ utilisateurId dans le formulaire
           this.partenaireForm.patchValue({ utilisateurId: this.idUser });
+
+          this.initPartenaire();
+
         }
       }
     );
   }
+
+  editPartenaireForm!: FormGroup;
+
+  private initPartenaire(): void {
+    this.editPartenaireForm = this.fb.group({
+      deviseId: ['', Validators.required],
+      utilisateurId: [this.idUser], 
+    });
+  }
+
+  selectedPartenaire: any = null;
+
+  onPartenaireEdit(partenaire: any) {
+    this.selectedPartenaire = partenaire;
+  }
+
+  onPartenaireUpdate() {
+    const updatedData = this.editPartenaireForm.value;
+    console.log(updatedData);
+    console.log(this.selectedPartenaire.id);
+   this.partenaireService.rembourserDevise(this.selectedPartenaire.id, updatedData).subscribe({
+    next(response) {
+      alert(response.message);
+    },
+   });
+  }
+
+
+
   getAllPartenaire() {
     // Appel à l'API et gestion des réponses
     this.partenaireService.getAllPartenaire().subscribe({

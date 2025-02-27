@@ -2,12 +2,17 @@ const { DataTypes } = require('sequelize');
 const sequelize = require('./sequelize');
 const Utilisateur = require('./utilisateurs'); 
 const Devise = require('./devises'); 
+const Partenaire = require('./partenaires'); 
 
 const Echange = sequelize.define('Echange', {
   id: {
     type: DataTypes.INTEGER,
     autoIncrement: true,
     primaryKey: true,
+  },
+  partenaireId: {
+    type: DataTypes.INTEGER,
+    allowNull: false, // Ou true si facultatif
   },
   utilisateurId: {
     type: DataTypes.INTEGER,
@@ -69,6 +74,10 @@ const Echange = sequelize.define('Echange', {
     defaultValue: DataTypes.NOW, // Définit la date et l'heure actuelles par défaut
   },
 });
+
+
+
+Echange.belongsTo(Partenaire, { foreignKey: 'utilisateurId' });
 
 // Définir l'association : Une Entree appartient à un 
 Echange.belongsTo(Utilisateur, { foreignKey: 'utilisateurId' });

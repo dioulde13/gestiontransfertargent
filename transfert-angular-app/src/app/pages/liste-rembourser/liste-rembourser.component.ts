@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { AfterViewInit, ChangeDetectorRef, Component, OnDestroy, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';  // Remplacer BrowserModule par CommonModule
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ReactiveFormsModule } from '@angular/forms'; // Import du module des formulaires réactifs
@@ -12,8 +12,18 @@ import { CalculBeneficeService } from '../../services/calculBenefices/calcul-ben
 import { FormsModule } from '@angular/forms';
 import { EntreServiceService } from '../../services/entre/entre-service.service';
 import { HttpClient} from '@angular/common/http';
-import { response } from 'express';
 
+
+interface Result { 
+  date_creation: string;
+  nom: string;
+  signe_1: string;
+  signe_2: string;
+  prix_2: number;
+  montant_gnf: number;
+  montant: number;
+  id: number;
+}
 
 
 @Component({
@@ -23,17 +33,165 @@ import { response } from 'express';
   templateUrl: './liste-rembourser.component.html',
   styleUrl: './liste-rembourser.component.css'
 })
-export class ListeRembourserComponent implements OnInit {
+export class ListeRembourserComponent implements OnInit, AfterViewInit {
   // Tableau pour stocker les résultats
-  allresultat: any[] = [];
+  allresultat: Result[] = [];
   allEntre: any[] = [];
 
   userInfo: any = null;
   idUser: string = '';
+  private dataTable: any;
 
   rembourserForm!: FormGroup;
 
-  dtoptions: any = {};
+  editDeviseForm!: FormGroup;
+
+
+  filteredResults: any[] = [];
+
+  startDate: Date | null = null;
+  endDate: Date | null = null;
+
+  totalMontant: number = 0; // Initialisation
+  filtrerEntreDates(): void {
+    const startDateInput = (document.getElementById('startDate') as HTMLInputElement).value;
+    const endDateInput = (document.getElementById('endDate') as HTMLInputElement).value;
+  
+    this.startDate = startDateInput ? new Date(startDateInput) : null;
+    this.endDate = endDateInput ? new Date(endDateInput) : null;
+
+      // Filtrer d'abord par date
+    let filteredResults = this.allresultat.filter((result: { date_creation: string }) => {
+      const resultDate = new Date(result.date_creation);
+      return (!this.startDate || resultDate >= this.startDate) && 
+             (!this.endDate || resultDate <= this.endDate);
+    });
+  
+    // Mettre à jour DataTable avec les résultats filtrés par date
+    this.dataTable.clear().rows.add(filteredResults).draw();
+  
+    // Attendre que DataTable applique son propre filtre (search)
+    setTimeout(() => {
+      const filteredDataTable: { montant_gnf: number }[] = this.dataTable
+        .rows({ search: 'applied' })
+        .data()
+        .toArray();
+  
+      // Recalculer le total avec des types explicitement définis
+      this.totalMontant = filteredDataTable.reduce((sum: number, row: { montant_gnf: number }) => {
+        return sum + row.montant_gnf;
+      }, 0);
+  
+      console.log('Total Montant après filtre et recherche :', this.totalMontant);
+    }, 200); // Timeout pour attendre la mise à jour de DataTable
+
+  }
+
+  
+
+  private initDataTable(): void {
+    setTimeout(() => {
+      if (this.dataTable) {
+        this.dataTable.destroy();
+      }
+      this.dataTable = ($('#datatable') as any).DataTable({
+        dom: "<'row'<'col-sm-6 dt-buttons-left'B><'col-sm-6 text-end dt-search-right'f>>" +
+          "<'row'<'col-sm-12'tr>>" +
+          "<'row'<'col-sm-5'i><'col-sm-7'p>>",
+        buttons: ['csv', 'excel', 'pdf', 'print'],
+        paging: true,
+        searching: true,
+        pageLength: 10,
+        lengthMenu: [10, 25, 50],
+        data: this.allresultat,
+        order: [[0, 'desc']],
+        columns: [
+          {
+            title: "Date paiement",
+            data: "date_creation",
+            render: (data: string) => {
+              const date = new Date(data);
+              const formattedDate = date.toLocaleString('fr-FR', {
+                day: '2-digit',
+                month: '2-digit',
+                year: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+              });
+              return `${formattedDate}`;
+            }
+          },
+          { title: "Nom", data: "nom" },
+          {
+            title: "Prix",
+            data: "prix_2",
+            render: (data: number,  type: any, row: any) => {
+              const formattedAmount = new Intl.NumberFormat('fr-FR', {
+                style: 'decimal',
+                minimumFractionDigits: 0,
+                maximumFractionDigits: 0
+              }).format(data); // Format le montant sans symbole de devise
+
+              // Si vous avez besoin d'utiliser `signe_2`, vous pouvez l'ajouter ici
+              const signe = row.signe_1; // Récupérer la valeur de `signe_2`
+
+              // Retourner le montant et le signe, par exemple
+              return `${formattedAmount} ${signe}`;
+            }
+          },
+          {
+            title: "Montant",
+            data: "montant",
+            render: (data: number,  type: any, row: any) => {
+              const formattedAmount = new Intl.NumberFormat('fr-FR', {
+                style: 'decimal',
+                minimumFractionDigits: 0,
+                maximumFractionDigits: 0
+              }).format(data); // Format le montant sans symbole de devise
+
+              // Si vous avez besoin d'utiliser `signe_2`, vous pouvez l'ajouter ici
+              const signe = row.signe_2; // Récupérer la valeur de `signe_2`
+
+              // Retourner le montant et le signe, par exemple
+              return `${formattedAmount} ${signe}`;
+            }
+          },
+          {
+            title: "Montant GNF",
+            data: "montant_gnf",
+            render: (data: number,  type: any, row: any) => {
+              const formattedAmount = new Intl.NumberFormat('fr-FR', {
+                style: 'decimal',
+                minimumFractionDigits: 0,
+                maximumFractionDigits: 0
+              }).format(data); // Format le montant sans symbole de devise
+
+              // Si vous avez besoin d'utiliser `signe_2`, vous pouvez l'ajouter ici
+              const signe = row.signe_1; // Récupérer la valeur de `signe_2`
+              // Retourner le montant et le signe, par exemple
+              return `${formattedAmount} ${signe}`;
+            }
+          },
+          {
+            title: "Partenaire",
+            data: null, 
+            render: (data: number,  type: any, row: any) => {
+              if (!data || !row.Partenaire) return '';
+              return ` ${row.Partenaire.prenom} ${row.Partenaire.nom}`;
+            }
+          },
+        ]
+      });
+      this.cd.detectChanges(); // Force la détection des changements
+    }, 100);
+  }
+  
+
+  ngAfterViewInit(): void {
+    this.dtTrigger.next(null);
+  }
+
+
 
   dtTrigger: Subject<any> = new Subject<any>();
 
@@ -45,17 +203,48 @@ export class ListeRembourserComponent implements OnInit {
     private rembourserService: RembourserService,
     private calculService: CalculBeneficeService,
     private entreService: EntreServiceService,
+    private cd: ChangeDetectorRef,
     private http: HttpClient
   ) { }
 
+  selectedDevise: any = null; // Devise sélectionnée pour modification
+ 
+  onUpdate() {
+    if (this.editDeviseForm.valid && this.selectedDevise) {
+      const updatedData = this.editDeviseForm.value;
+      this.deviseService.modifierDevise(this.selectedDevise.id, updatedData).subscribe(
+        response => {
+          this.fetchDevise();
+          alert('Devise modifiée avec succès!');
+        },
+        error => {
+          console.error('Erreur lors de la modification du devise:', error);
+          alert('Erreur lors de la modification du devise.');
+        }
+      );
+    }
+  }
+
+  onEdit(devise: any) {
+    this.selectedDevise = devise;
+    this.editDeviseForm.patchValue({
+      paysArriver: devise.paysArriver,
+      signe_2: devise.signe_2,
+      prix_1: devise.prix_1,
+      prix_2: devise.prix_2,
+    });
+  }
+
   ngOnInit(): void {
 
-    this.dtoptions = {
-      paging: true, // Activer la pagination
-      pagingType: 'full_numbers', // Type de pagination
-      pageLength: 10 // Nombre d'éléments par page
-    };
+    this.editDeviseForm = this.fb.group({
+      paysArriver: ['', Validators.required],
+      signe_2: ['', Validators.required],
+      prix_1: ['', Validators.required],
+      prix_2: ['', Validators.required],
+    });
     this.getAllRemboursement();
+    this.filteredResults = [...this.allresultat];
     // Initialisation du formulaire avec les validations
     this.rembourserForm = this.fb.group({
       utilisateurId: [this.idUser],
@@ -151,11 +340,6 @@ export class ListeRembourserComponent implements OnInit {
     );
   }
 
-
-
-
-
-
  
   private getAllRemboursement(): void {
     // Appel à l'API et gestion des réponses
@@ -163,6 +347,8 @@ export class ListeRembourserComponent implements OnInit {
       next: (response) => {
         this.allresultat = response;
         console.log(this.allresultat);
+        this.initDataTable();
+        this.cd.detectChanges(); 
       },
       error: (error) => {
         console.error('Erreur lors de la récupération des données', error);

@@ -29,6 +29,10 @@ Credit.belongsTo(PayementCreadit, { foreignKey: 'payementCreditId' });
 PayementEchange.hasMany(Echange, { foreignKey: 'payementEchangeId' });
 Echange.belongsTo(PayementEchange, { foreignKey: 'payementEchangeId' });
 
+
+Partenaire.hasMany(Echange, { foreignKey: 'partenaireId' });
+Echange.belongsTo(Partenaire, { foreignKey: 'partenaireId' });
+
 // Relation One-to-Many : Un Partenaire peut avoir plusieurs Sorties
 Partenaire.hasMany(Sortie, { foreignKey: 'partenaireId' });
 Sortie.belongsTo(Partenaire, { foreignKey: 'partenaireId' });

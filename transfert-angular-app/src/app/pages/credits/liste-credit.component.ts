@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';  // Remplacer BrowserModule par CommonModule
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ReactiveFormsModule } from '@angular/forms'; // Import du module des formulaires réactifs
@@ -6,6 +6,18 @@ import { CreditService } from '../../services/credits/credit.service';
 import { AuthService } from '../../services/auth/auth-service.service';
 import { Subject } from 'rxjs';
 import { DataTablesModule } from 'angular-datatables';
+
+
+interface Result {
+  reference: string;
+  date_creation: string;
+  nom: string;
+  montant: number;
+  montantPaye: number;
+  montantRestant: number;
+  montant_plus: number;
+  id: number;
+}
 
 @Component({
   selector: 'app-liste-credit',
@@ -17,31 +29,68 @@ import { DataTablesModule } from 'angular-datatables';
 export class ListeCreditComponent implements OnInit {
 
   // Tableau pour stocker les résultats
-  allresultat: any[] = [];
+  allresultat: Result[] = [];
 
   userInfo: any = null;
   idUser: string = '';
 
+  private dataTable: any;
+
+
   creditForm!: FormGroup;
 
-  dtoptions: any = {};
+  startDate: Date | null = null;
+  endDate: Date | null = null;
+
+  totalMontant: number = 0; // Initialisation
+
+  filtrerEntreDates(): void {
+    const startDateInput = (document.getElementById('startDate') as HTMLInputElement).value;
+    const endDateInput = (document.getElementById('endDate') as HTMLInputElement).value;
+  
+    this.startDate = startDateInput ? new Date(startDateInput) : null;
+    this.endDate = endDateInput ? new Date(endDateInput) : null;
+  
+    // Réinitialiser le total
+    this.totalMontant = 0;
+  
+    // Filtrer d'abord par date
+    let filteredResults = this.allresultat.filter((result: { date_creation: string }) => {
+      const resultDate = new Date(result.date_creation);
+      return (!this.startDate || resultDate >= this.startDate) && 
+             (!this.endDate || resultDate <= this.endDate);
+    });
+  
+    // Mettre à jour DataTable avec les résultats filtrés par date
+    this.dataTable.clear().rows.add(filteredResults).draw();
+  
+    // Attendre que DataTable applique son propre filtre (search)
+    setTimeout(() => {
+      const filteredDataTable: { montant: number }[] = this.dataTable
+        .rows({ search: 'applied' })
+        .data()
+        .toArray();
+  
+      // Recalculer le total avec des types explicitement définis
+      this.totalMontant = filteredDataTable.reduce((sum: number, row: { montant: number }) => {
+        return sum + row.montant;
+      }, 0);
+  
+      console.log('Total Montant après filtre et recherche :', this.totalMontant);
+    }, 200); // Timeout pour attendre la mise à jour de DataTable
+  }
     
   dtTrigger: Subject<any> = new Subject<any>();
 
   constructor(
     private fb: FormBuilder,
     private creditService: CreditService,
+    private cd: ChangeDetectorRef,
     private authService: AuthService
   ) { }
 
   ngOnInit(): void {
-    this.dtoptions = {
-      paging: true, // Activer la pagination
-      pagingType: 'full_numbers', // Type de pagination
-      pageLength: 10 // Nombre d'éléments par page
-    };
-    // Initialisation du formulaire avec les validations
-    // Initialisation du formulaire
+   
     this.creditForm = this.fb.group({
       // Champ pour l'identifiant de l'utilisateur (pré-rempli avec l'ID de l'utilisateur courant)
       utilisateurId: [this.idUser],
@@ -74,20 +123,118 @@ export class ListeCreditComponent implements OnInit {
     );
   }
 
+
+
   getAllCredit() {
     // Appel à l'API et gestion des réponses
     this.creditService.getAllCredit().subscribe({
       next: (response) => {
         this.allresultat = response;
-        if (this.allresultat && this.allresultat.length > 0) {
-          this.dtTrigger.next(null); // Initialisation de DataTables
-        }
+        this.initDataTable();
+        this.cd.detectChanges(); 
         console.log(this.allresultat);
       },
       error: (error) => {
         console.error('Erreur lors de la récupération des données', error);
       },
     });
+  }
+
+  private initDataTable(): void {
+    setTimeout(() => {
+      if (this.dataTable) {
+        this.dataTable.destroy(); // Détruire l'ancienne instance avant d'en créer une nouvelle
+      }
+      this.dataTable = ($('#datatable') as any).DataTable({
+        dom: "<'row'<'col-sm-6 dt-buttons-left'B><'col-sm-6 text-end dt-search-right'f>>" +
+          "<'row'<'col-sm-12'tr>>" +
+          "<'row'<'col-sm-5'i><'col-sm-7'p>>",
+        buttons: ['csv', 'excel', 'pdf', 'print'],
+        paging: true,
+        searching: true,
+        pageLength: 10,
+        lengthMenu: [10, 25, 50],
+        data: this.allresultat,
+        order: [0, 'desc'],
+        columns: [
+          { title: "Reference", data: "reference" },
+          {
+            title: "Date du jour", data: "date_creation",
+            render: (data: string) => {
+              const date = new Date(data);
+              const day = String(date.getDate()).padStart(2, '0'); // Jour
+              const month = String(date.getMonth() + 1).padStart(2, '0'); // Mois
+              const year = date.getFullYear(); // Année
+              const hours = String(date.getHours()).padStart(2, '0'); // Heures
+              const minutes = String(date.getMinutes()).padStart(2, '0'); // Minutes
+
+              return `${day}/${month}/${year} ${hours}:${minutes}`; // Format final
+            }
+          },
+          { title: "Nom", data: "nom" },
+          {
+            title: "Montant",
+            data: "montant",
+            render: (data: number) => {
+              const formattedAmount = new Intl.NumberFormat('fr-FR', {
+                style: 'decimal',
+                minimumFractionDigits: 0,
+                maximumFractionDigits: 0
+              }).format(data); 
+
+
+              return `${formattedAmount}`; 
+            }
+          },
+          { title: "Montant Payer", data: "montantPaye",
+            render: (data: number) => {
+              const formattedAmount = new Intl.NumberFormat('fr-FR', {
+                style: 'decimal',
+                minimumFractionDigits: 0,
+                maximumFractionDigits: 0
+              }).format(data); 
+
+              return `${formattedAmount}`; 
+            }
+           },
+           { title: "Montant Restant GNF", data: "montantRestant" ,
+            render: (data: number) => {
+              const formattedAmount = new Intl.NumberFormat('fr-FR', {
+                style: 'decimal',
+                minimumFractionDigits: 0,
+                maximumFractionDigits: 0
+              }).format(data); 
+          
+
+              return `${formattedAmount}`; 
+            }
+          }, 
+          { title: "Montant surPlus", data: "montant_plus" ,
+            render: (data: number) => {
+              const formattedAmount = new Intl.NumberFormat('fr-FR', {
+                style: 'decimal',
+                minimumFractionDigits: 0,
+                maximumFractionDigits: 0
+              }).format(data); 
+
+              return `${formattedAmount}`; 
+            }
+          }, 
+        ]
+      });
+      this.cd.detectChanges(); 
+    }, 100);
+  }
+
+  ngAfterViewInit(): void {
+    this.dtTrigger.next(null);
+  }
+
+  ngOnDestroy(): void {
+    if (this.dataTable) {
+      this.dataTable.destroy();
+    }
+    this.dtTrigger.unsubscribe();
   }
 
   loading: boolean = false;

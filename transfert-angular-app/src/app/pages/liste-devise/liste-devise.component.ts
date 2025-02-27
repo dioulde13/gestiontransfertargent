@@ -62,12 +62,7 @@ export class ListeDeviseComponent implements OnInit {
     this.devise.getAllDevise().subscribe({
       next: (response) => {
         this.allresultat = response;
-        if ($.fn.DataTable.isDataTable('#devise-table')) {
-          $('#devise-table').DataTable().clear().destroy();
-        }
-        // if (this.allresultat && this.allresultat.length > 0) {
-        //   this.dtTrigger.next(null);
-        // }
+       
       },
       error: (error) => {
         console.error('Erreur lors de la récupération des données', error);

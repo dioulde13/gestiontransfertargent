@@ -58,14 +58,47 @@ const getUserInfo = async (req, res) => {
   }
 };
 
+const modifier = async (req, res) => {
+  const { id } = req.params;
+  const {
+    solde,
+    encien_solde,
+    solde_echange,
+    solde_echange_dollar,
+    solde_echange_euro
+  } = req.body;
 
-// Ajouter un utilisateur
+  try {
+    // Trouver l'utilisateur par ID
+    const utilisateur = await Utilisateur.findByPk(id);
+    if (!utilisateur) {
+      return res.status(404).json({ message: 'Utilisateur non trouvé' });
+    }
+
+    // Mettre à jour les informations de l'utilisateur
+    await utilisateur.update({
+      solde,
+      encien_solde,
+      solde_echange,
+      solde_echange_dollar,
+      solde_echange_euro
+    });
+
+    return res.status(200).json({ message: 'Utilisateur mis à jour avec succès', utilisateur });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ message: 'Erreur lors de la mise à jour de l\'utilisateur', error });
+  }
+};
+
+
+
 const ajouterUtilisateur = async (req, res) => {
   try {
-    const { nom, prenom, telephone, email, password } = req.body;
+    const { nom, prenom, telephone, email, sign, password } = req.body;
 
     // Validation des champs
-    if (!nom || !prenom || !telephone || !email || !password) {
+    if (!nom || !prenom || !telephone || !sign || !email || !password) {
       return res.status(400).json({
         success: false,
         message: 'Les champs nom, prénom, numéro de téléphone, email, mot de passe sont requis.',
@@ -80,7 +113,8 @@ const ajouterUtilisateur = async (req, res) => {
       nom,
       prenom,
       telephone,
-      email,
+      email, // Assurez-vous d'inclure email
+      sign,
       password: hashedPassword,
     });
 
@@ -90,6 +124,7 @@ const ajouterUtilisateur = async (req, res) => {
       userId: utilisateur.id,
     });
   } catch (err) {
+    console.error('Erreur lors de l\'ajout de l\'utilisateur :', err);
     if (err instanceof ValidationError) {
       res.status(400).json({
         success: false,
@@ -105,6 +140,7 @@ const ajouterUtilisateur = async (req, res) => {
     }
   }
 };
+
 
 const getAllUser = async (req, res) => {
   try {
@@ -188,4 +224,4 @@ const login = async (req, res) => {
   }
 };
 
-module.exports = { ajouterUtilisateur, login , getAllUser, getUserInfo};
+module.exports = { ajouterUtilisateur, login , getAllUser, getUserInfo, modifier};

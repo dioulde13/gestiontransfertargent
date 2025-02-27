@@ -23,6 +23,16 @@
                                     <div class="card-body">
                                         <div class="d-flex flex-wrap items-center justify-between breadcrumb-content">
                                             <h5>Liste des echanges</h5>
+                                            <div>
+                                                <a href="#" class="btn btn-primary" data-toggle="modal"
+                                                    data-target="#modifier-devise-modal">Devise</a>
+                                            </div>
+                                            <div class="d-flex flex-wrap items-center justify-between">
+                                                <div class="pl-3 btn-new border-left">
+                                                    <a href="#" class="btn btn-primary" data-target="#partenaire-modal"
+                                                        data-toggle="modal">partenaire</a>
+                                                </div>
+                                            </div>
                                             <div class="d-flex flex-wrap items-center justify-between">
                                                 <div class="pl-3 btn-new border-left">
                                                     <a href="#" class="btn btn-primary" data-target="#new-project-modal"
@@ -35,52 +45,200 @@
                             </div>
 
                             <div class="row mb-4">
-                                <div class="col-md-4 d-flex mb-3 mb-md-0">
-                                  <input type="date" id="startDate" class="form-control" placeholder="Date Début" style="border-radius: 25px;">
+                                <div class="col-md-3 d-flex mb-3 mb-md-0">
+                                    <input type="date" id="startDate" class="form-control" placeholder="Date Début"
+                                        style="border-radius: 25px;">
                                 </div>
-                                <div class="col-md-4 d-flex mb-3 mb-md-0">
-                                  <input type="date" id="endDate" class="form-control" placeholder="Date Fin" style="border-radius: 25px;">
+                                <div class="col-md-3 d-flex mb-3 mb-md-0">
+                                    <input type="date" id="endDate" class="form-control" placeholder="Date Fin"
+                                        style="border-radius: 25px;">
                                 </div>
-                                <div class="col-md-4 d-flex">
-                                  <button id="btnFilter" class="btn btn-primary" style="border-radius: 60px; padding: 5px 10px; font-size: 14px;">
-                                    Filtrer
-                                  </button>
+                                <div class="col-md-3 d-flex">
+                                    <button id="btnFilter" class="btn btn-primary" (click)="filtrerEntreDates()"
+                                        style="border-radius: 60px; padding: 5px 10px; font-size: 14px;">
+                                        Filtrer
+                                    </button>
                                 </div>
-                              </div>
-                              
-                              <div class="table-responsive">
-                                <table id="transactions-table" class="table data-table table-striped table-flush" style="width:100%">
-                                  <thead>
-                                    <tr>
-                                      <th>Code</th>
-                                      <th>Date du jour</th>
-                                      <th>Nom client</th>
-                                      <th>Montant En Cfa</th>
-                                      <th>Prix</th>
-                                      <th>Montant En GNF</th>
-                                      <th>Montant payé GNF</th>
-                                      <th>Montant restant GNF</th>
-                                      <th>Statut Paiement</th>
-                                    </tr>
-                                  </thead>
-                                  <tbody>
-                                    <tr *ngFor="let result of allresultat">
-                                      <td>{{ result.code }}</td>
-                                      <td>{{ result.date_creation | date: 'dd/MM/yyyy HH:mm' }}</td>
-                                      <td>{{ result.nom }}</td>
-                                      <td>{{ result.montant_devise | currency: '' : '' : '1.0-0' }} XOF</td>
-                                      <td>{{ result.prix_2 | currency: '' : '' : '1.0-0' }} GNF</td>
-                                      <td>{{ (result.montant_devise / result.prix_1) * result.prix_2 | currency: '' : '' : '1.0-0' }} GNF</td>
-                                      <td>{{ result.montant_payer | currency: '' : '' : '1.0-0' }} GNF</td>
-                                      <td>{{ result.montant_restant | currency: '' : '' : '1.0-0' }} GNF</td>
-                                      <td>{{ result.payement_type }}</td>
-                                    </tr>
-                                  </tbody>
+                                <div class="col-md-3 d-flex">
+                                    <div style="font-weight: bold; margin-top: 10px;">Total Montant : {{ totalMontant |
+                                        number }} GNF</div>
+                                </div>
+                            </div>
+
+                            <div class="table-responsive">
+                                <table id="datatable" class="w-full border-collapse border border-gray-300">
+                                    <thead>
+                                        <tr class="bg-blue-500 text-white">
+                                            <th>Code</th>
+                                            <th>Date du jour</th>
+                                            <th>Nom client</th>
+                                            <th>Montant</th>
+                                            <th>Montant en GNF</th>
+                                            <th>Prix</th>
+                                            <th>Montant payé GNF</th>
+                                            <th>Montant restant GNF</th>
+                                            <!-- <th>Statut Paiement</th> -->
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr *ngFor="let result of allresultat">
+                                            <td>{{ result.code }}</td>
+                                            <td>{{ result.date_creation | date: 'dd/MM/yyyy HH:mm' }}</td>
+                                            <td>{{ result.nom }}</td>
+                                            <td>{{ result.montant_devise | currency: '' : '' : '1.0-0' }}</td>
+                                            <td>{{ result.prix_2 | currency: '' : '' : '1.0-0' }} GNF</td>
+                                            <td>{{ result.montant_gnf | currency: '' : '' : '1.0-0' }} GNF</td>
+                                            <td>{{ result.montant_payer | currency: '' : '' : '1.0-0' }} GNF</td>
+                                            <td>{{ result.montant_restant | currency: '' : '' : '1.0-0' }} GNF</td>
+                                            <!-- <td>{{ result.payement_type }}</td> -->
+                                        </tr>
+                                    </tbody>
                                 </table>
-                              </div>
-                          </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<div class="modal fade" id="modifier-devise-modal" tabindex="-1" role="dialog" aria-labelledby="modalTitle"
+    aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-xl" role="document">
+        <div class="modal-content">
+            <div class="modal-body">
+                <table class="table data-table table-striped table-flush" style="width:100%">
+                    <thead>
+                        <tr class="text-muted">
+                            <th class="border px-4 py-2">Pays depart</th>
+                            <th class="border px-4 py-2">Pays arriver</th>
+                            <th class="border px-4 py-2">Prix devise</th>
+                            <th class="border px-4 py-2">Prix correspond</th>
+                            <th class="border px-4 py-2">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr *ngFor="let result of allDevise;">
+                            <td class="border px-4 py-2">{{ result.paysDepart }}</td>
+                            <td class="border px-4 py-2">{{ result.paysArriver }}</td>
+                            <td class="border px-4 py-2">{{ (result.prix_1 | currency:'' :'' :'1.0-0') +"
+                                "+result.signe_2}}
+                            </td>
+                            <td class="border px-4 py-2">{{ (result.prix_2 | currency:'' :'' :'1.0-0') +"
+                                "+result.signe_1}}
+                            </td>
+                            <td>
+                                <button class="btn btn-warning btn-sm" data-toggle="modal"
+                                    data-target="#edit-modifier-modal" (click)="onEdit(result)">Modifier
+                                </button>
+                            </td>
+                        </tr>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="edit-modifier-modal" tabindex="-1" role="dialog" aria-labelledby="editProjectModalLabel"
+    aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header bg-warning text-white">
+                <h5 class="modal-title">Modifier la devise</h5>
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form [formGroup]="editDeviseForm" (ngSubmit)="onUpdate()">
+                    <div class="form-group">
+                        <label for="edit_paysArriver">Pays Arriver</label>
+                        <input id="edit_paysArriver" formControlName="paysArriver" class="form-control" type="text" />
+                    </div>
+                    <div class="form-group">
+                        <label for="edit_signe_2">Signe 2</label>
+                        <input id="edit_signe_2" formControlName="signe_2" class="form-control" type="text" />
+                    </div>
+                    <div class="form-group">
+                        <label for="edit_prix_1">Prix 1</label>
+                        <input id="edit_prix_1" formControlName="prix_1" class="form-control" type="number" />
+                    </div>
+                    <div class="form-group">
+                        <label for="edit_prix_2">Prix 2</label>
+                        <input id="edit_prix_2" formControlName="prix_2" class="form-control" type="number" />
+                    </div>
+                    <div class="modal-footer">
+                        <button type="submit" class="btn btn-primary"
+                            [disabled]="!editDeviseForm.valid">Modifications</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+<div class="modal fade" id="partenaire-modal" tabindex="-1" role="dialog" aria-labelledby="modalTitle"
+    aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalTitle">Ajouter un échange</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form [formGroup]="partenaireForm" (ngSubmit)="onSoldeUpdate()">
+                    <div class="form-row">
+                        <div class="form-group col-md-6">
+                            <label for="partenaireId">Partenaire</label>
+                            <select class="form-control" id="partenaireId" formControlName="partenaireId">
+                                <option value="" disabled selected>Sélectionnez un partenaire</option>
+                                <option *ngFor="let partenaire of allPartenaire" [value]="partenaire.id">
+                                    {{ partenaire.prenom }} {{ partenaire.nom }} ({{ partenaire.pays }})
+                                </option>
+                            </select>
+                            <!-- <div *ngIf="partenaireForm.controls.partenaireId.invalid && partenaireForm.controls.partenaireId.touched"
+                                class="text-danger">
+                                Sélectionnez un partenaire.
+                            </div> -->
+                        </div>
+
+                        <div class="form-group col-md-6">
+                            <label for="deviseId">Devise</label>
+                            <select class="form-control" id="deviseId" formControlName="deviseId">
+                                <option value="" disabled selected>Sélectionnez une devise</option>
+                                <option *ngFor="let devise of allDevise" [value]="devise.id">
+                                    {{ devise.paysArriver }} - {{ devise.prix_1 | currency }} {{ devise.signe_2 }} →
+                                    {{ devise.prix_2 | currency }} {{ devise.signe_1 }}
+                                </option>
+                            </select>
+                          
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group col-lg-12">
+                            <label for="montant">Montant</label>
+                            <input type="number" class="form-control" id="montant" formControlName="montant"
+                                placeholder="Montant" />
+                            <!-- <div *ngIf="partenaireForm.controls.montant.invalid && partenaireForm.controls.montant.touched"
+                                class="text-danger">
+                                Le montant est requis et doit être supérieur à 0.
+                            </div> -->
+                        </div>
+                    </div>
+
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Annuler</button>
+                        <button type="submit" class="btn btn-primary" [disabled]="partenaireForm.invalid || isLoading">
+                            <span *ngIf="isLoading">Création en cours...</span>
+                            <span *ngIf="!isLoading">Ajouter</span>
+                        </button>
+                    </div>
+                </form>
             </div>
         </div>
     </div>
@@ -91,7 +249,7 @@
     <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="modalTitle">Ajouter une nouvelle entrée</h5>
+                <h5 class="modal-title" id="modalTitle">Ajouter</h5>
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                     <span aria-hidden="true">&times;</span>
                 </button>
@@ -102,7 +260,7 @@
                         <div class="form-group col-md-6">
                             <label for="nom">Nom</label>
                             <input type="text" class="form-control" id="nom" formControlName="nom"
-                                placeholder="Nom de l'expéditeur" />
+                                placeholder="Nom du client" />
                         </div>
                         <div class="form-group col-md-6">
 

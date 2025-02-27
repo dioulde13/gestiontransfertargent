@@ -32,11 +32,31 @@
                     </div>
                   </div>
                 </div>
+
+                <div class="row mb-4">
+                  <div class="col-md-3 d-flex mb-3 mb-md-0">
+                      <input type="date" id="startDate" class="form-control" placeholder="Date Début"
+                          style="border-radius: 25px;">
+                  </div>
+                  <div class="col-md-3 d-flex mb-3 mb-md-0">
+                      <input type="date" id="endDate" class="form-control" placeholder="Date Fin"
+                          style="border-radius: 25px;">
+                  </div>
+                  <div class="col-md-3 d-flex">
+                      <button id="btnFilter" class="btn btn-primary" (click)="filtrerEntreDates()"
+                          style="border-radius: 60px; padding: 5px 10px; font-size: 14px;">
+                          Filtrer
+                      </button>
+                  </div>
+                  <div class="col-md-3 d-flex">
+                      <div style="font-weight: bold; margin-top: 10px;">Total Montant : {{ totalMontant |
+                          number }} GNF</div>
+                  </div>
+              </div>
   
-                <table  datatable [dtOptions]="dtoptions" [dtTrigger]="dtTrigger"
-                class="table data-table table-striped table-flush" style="width:100%"> 
+                <table id="datatable" class="w-full border-collapse border border-gray-300">
                   <thead>
-                    <tr class="text-muted">
+                    <tr class="bg-blue-500 text-white">
                       <th class="border px-4 py-2">Reference</th>
                       <th class="border px-4 py-2">Nom</th>
                       <th class="border px-4 py-2">Date</th>

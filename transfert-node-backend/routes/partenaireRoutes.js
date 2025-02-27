@@ -9,4 +9,7 @@ router.post('/create', partenaireController.ajouterPartenaire);
 // Route pour récupérer la liste des partenaires
 router.get('/liste', partenaireController.recupererPartenaires);
 
+router.put('/rembourserDevise/:id', partenaireController.rembourserDevise);
+
+
 module.exports = router;
