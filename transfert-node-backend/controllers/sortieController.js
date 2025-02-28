@@ -85,15 +85,15 @@ const ajouterSortie = async (req, res) => {
       return res.status(400).json({ message: 'Tous les champs obligatoires doivent être remplis.' });
     }
 
-    const partenaire = await Partenaire.findByPk(partenaireId);
-    if (!partenaire) {
-      return res.status(404).json({ message: 'Partenaire introuvable.' });
-    }
-
     // Récupérer les informations de l'utilisateur connecté
     const utilisateur = await Utilisateur.findByPk(utilisateurId);
     if (!utilisateur) {
       return res.status(404).json({ message: 'Utilisateur introuvable.' });
+    }
+
+    const partenaire = await Partenaire.findByPk(partenaireId);
+    if (!partenaire) {
+      return res.status(404).json({ message: 'Partenaire introuvable.' });
     }
 
     const devise = await Devise.findByPk(deviseId);
@@ -107,23 +107,18 @@ const ajouterSortie = async (req, res) => {
     const Sign2 = devise.signe_2;
 
     const montant_due = (montant / Prix1) * Prix2; // Calcul du montant dû
-    const soldeCaise = montant_due; // Solde ajouté à l'utilisateur connecté
 
 
     const lastEntry = await Sortie.findOne({ order: [['id', 'DESC']] });
 
     let newCode = 'ABS0001';
-    
+
     if (lastEntry && lastEntry.code) {
       const numericPart = parseInt(lastEntry.code.slice(3), 10); // Extraire la partie numérique après "ABS"
       if (!isNaN(numericPart)) {
         newCode = `ABS${(numericPart + 1).toString().padStart(4, '0')}`;
       }
     }
-
-    // console.log(devise.paysDepart);
-    // console.log(devise.paysArriver);
-    // console.log(partenaire.pays);
 
     if (devise.paysArriver === partenaire.pays) {
       const sortie = await Sortie.create({
@@ -146,12 +141,12 @@ const ajouterSortie = async (req, res) => {
       });
 
       // Mettre à jour le solde de l'utilisateur connecté
-      utilisateur.solde = (utilisateur.solde || 0) - soldeCaise;
-      await utilisateur.save();
+      // utilisateur.solde = (utilisateur.solde || 0) - soldeCaise;
+      // await utilisateur.save();
 
-      // Mettre à jour le montant_prêter du partenaire
-      partenaire.montant_preter = (partenaire.montant_preter || 0) - montant;
-      await partenaire.save();
+      // // Mettre à jour le montant_prêter du partenaire
+      // partenaire.montant_preter = (partenaire.montant_preter || 0) - montant;
+      // await partenaire.save();
 
       return res.status(201).json({
         message: 'Sortie créée avec succès.',
@@ -167,6 +162,75 @@ const ajouterSortie = async (req, res) => {
     res.status(500).json({ message: 'Erreur interne du serveur.' });
   }
 };
+
+const validerSortie = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { utilisateurId, partenaireId, prix_2 } = req.body;
+
+    // Vérifier si la sortie existe
+    const sortie = await Sortie.findByPk(id);
+    if (!sortie) {
+      console.log("Sortie non trouvée pour l'ID :", id); // Ajoute ce log pour voir l'ID reçu
+      return res.status(404).json({ message: 'Sortie non trouvée.' });
+    }
+
+    // Vérifier si l'utilisateur existe
+    const utilisateur = await Utilisateur.findByPk(utilisateurId);
+    if (!utilisateur) {
+      return res.status(404).json({ message: 'Utilisateur introuvable.' });
+    }
+
+    // Vérifier si le partenaire existe
+    const partenaire = await Partenaire.findByPk(partenaireId);
+    if (!partenaire) {
+      return res.status(404).json({ message: 'Partenaire introuvable.' });
+    }
+
+    if (sortie.status === "PAYEE") {
+      return res.status(400).json({ message: `On ne peut valider deux fois une sortie` });
+    }
+
+    if (sortie.status === "ANNULEE") {
+      return res.status(400).json({ message: `On ne peut valider une sortie ANNULEE` });
+    }
+
+    // Recalculer le montant en fonction du prix_2 s'il est fourni
+    let montant_due = sortie.montant_gnf; // Valeur par défaut (ancienne valeur)
+    if (prix_2 !== undefined) {
+      montant_due = (sortie.montant / sortie.prix_1) * prix_2;
+    }
+
+    // Mise à jour de la sortie
+    await sortie.update({
+      utilisateurId: utilisateurId || sortie.utilisateurId,
+      partenaireId: partenaireId || sortie.partenaireId,
+      prix_2: prix_2 || sortie.prix_2,
+      montant_gnf: montant_due
+    });
+
+    // Mise à jour du solde de l'utilisateur
+    utilisateur.solde = (utilisateur.solde || 0) - montant_due;
+    await utilisateur.save();
+
+    // Mise à jour du montant_prêter du partenaire
+    partenaire.montant_preter = (partenaire.montant_preter || 0) - sortie.montant;
+    await partenaire.save();
+
+    sortie.status = "PAYEE";
+    await sortie.save();
+
+
+    res.status(200).json({
+      message: 'Sortie mise à jour avec succès.',
+      sortie,
+    });
+  } catch (error) {
+    console.error('Erreur lors de la mise à jour de la sortie :', error);
+    res.status(500).json({ message: 'Erreur interne du serveur.' });
+  }
+};
+
 
 const annulerSortie = async (req, res) => {
   try {
@@ -197,18 +261,18 @@ const annulerSortie = async (req, res) => {
     }
 
     if (sortie.status === "PAYEE") {
-      if(utilisateur.solde < 0){
-        utilisateur.solde = (utilisateur.solde || 0) - ( - sortie.montant_gnf);
-      }else{
-        utilisateur.solde = (utilisateur.solde || 0) - sortie.montant_gnf;
+      if (utilisateur.solde < 0) {
+        utilisateur.solde = (utilisateur.solde || 0) - (- sortie.montant_gnf);
+      } else {
+        utilisateur.solde = (utilisateur.solde || 0) - (- sortie.montant_gnf);
       }
       await utilisateur.save();
     }
 
-    if(partenaire.montant_preter < 0){
-      partenaire.montant_preter = (partenaire.montant_preter || 0) - ( - sortie.montant);
-    }else{
-      partenaire.montant_preter = (partenaire.montant_preter || 0) - sortie.montant;
+    if (partenaire.montant_preter < 0) {
+      partenaire.montant_preter = (partenaire.montant_preter || 0) - (- sortie.montant);
+    } else {
+      partenaire.montant_preter = (partenaire.montant_preter || 0) - (- sortie.montant);
     }
     await partenaire.save();
 
@@ -226,4 +290,4 @@ const annulerSortie = async (req, res) => {
   }
 };
 
-module.exports = { ajouterSortie, recupererSortiesAvecAssocies, compterSortieDuJour , annulerSortie};
+module.exports = { ajouterSortie, recupererSortiesAvecAssocies, compterSortieDuJour, annulerSortie , validerSortie};

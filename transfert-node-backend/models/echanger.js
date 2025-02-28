@@ -17,6 +17,7 @@ const Echange = sequelize.define('Echange', {
   utilisateurId: {
     type: DataTypes.INTEGER,
     allowNull: false, // Ou true si facultatif
+    defaultValue: 0,
   },
   deviseId: {
     type: DataTypes.INTEGER,

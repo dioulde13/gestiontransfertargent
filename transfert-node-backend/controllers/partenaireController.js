@@ -86,6 +86,7 @@ const rembourserDevise = async (req, res) => {
         utilisateur.solde_echange = 0;
         await utilisateur.save();
         partenaire.montant_credit = 0;
+        partenaire.montant_preter = 0;
         await partenaire.save();
         break;
 

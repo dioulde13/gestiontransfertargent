@@ -30,5 +30,9 @@ export class SortieService {
     annulerSortie(code: string): Observable<any> {
       return this.http.put(`${this.apiUrl}/api/sorties/annuler/${code}`, {}); // Ajouter un corps vide
     }
+
+    validerSortie(id:number, data: any): Observable<any>{
+      return this.http.put(`http://localhost:3000/api/sorties/valider/${id}`, data)
+    }
     
 }

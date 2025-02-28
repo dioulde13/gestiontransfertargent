@@ -1,6 +1,6 @@
 import { AfterViewInit, ChangeDetectorRef, Component, OnDestroy, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormBuilder, FormGroup,FormsModule,  ReactiveFormsModule, Validators } from '@angular/forms';
+import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { SortieService } from '../../services/sortie/sortie.service';
 import { AuthService } from '../../services/auth/auth-service.service';
 import { DeviseService } from '../../services/devise/devise.service';
@@ -12,8 +12,8 @@ interface Result {
   code: string;
   date_creation: string;
   pays_dest: string;
-  pays_exp:string;
-  codeEnvoyer:string;
+  pays_exp: string;
+  codeEnvoyer: string;
   expediteur: string;
   receveur: string;
   telephone_receveur: string;
@@ -47,7 +47,7 @@ export class ListeSortieComponent implements OnInit, AfterViewInit, OnDestroy {
   // Formulaire pour ajouter une entrée
   sortieForm!: FormGroup;
   annulerForm!: FormGroup;
-  
+
 
   dtTrigger: Subject<any> = new Subject<any>();
 
@@ -64,8 +64,42 @@ export class ListeSortieComponent implements OnInit, AfterViewInit, OnDestroy {
 
   private dataTable: any;
 
+
+  selectedSortie: any = null;
+  valideSortieForm!: FormGroup;
+  validerSortie(sortie: any) {
+    console.log("Sortie reçue :", sortie);
+    this.selectedSortie = sortie;
+  
+    this.valideSortieForm.patchValue({
+      utilisateurId: sortie?.Utilisateur?.id,
+      partenaireId: sortie?.Partenaire?.id,
+      prix_2: sortie?.prix_2,
+    });
+  
+    console.log("Formulaire :", this.valideSortieForm);
+    console.log("Sortie sélectionnée :", this.selectedSortie);
+  }
+  
+
+  valideSortie() {
+    const updatedData = this.valideSortieForm.value;
+    console.log(updatedData);
+    console.log(this.selectedSortie.id);
+    this.sortieService.validerSortie(this.selectedSortie.id, updatedData).subscribe({
+      next: (response) => {
+        this.fetchAllSortie();
+        alert(response.message);
+      },
+      error:(error) =>{
+        alert(error.error.message);
+      }
+    }
+    );
+  }
+
   selectedDevise: any = null; // Devise sélectionnée pour modification
- 
+
   onUpdate() {
     if (this.editDeviseForm.valid && this.selectedDevise) {
       const updatedData = this.editDeviseForm.value;
@@ -93,6 +127,9 @@ export class ListeSortieComponent implements OnInit, AfterViewInit, OnDestroy {
     });
   }
 
+
+
+
   startDate: Date | null = null;
   endDate: Date | null = null;
 
@@ -101,161 +138,170 @@ export class ListeSortieComponent implements OnInit, AfterViewInit, OnDestroy {
   filtrerSortieDates(): void {
     const startDateInput = (document.getElementById('startDate') as HTMLInputElement).value;
     const endDateInput = (document.getElementById('endDate') as HTMLInputElement).value;
-  
+
     this.startDate = startDateInput ? new Date(startDateInput) : null;
     this.endDate = endDateInput ? new Date(endDateInput) : null;
-  
+
     // Réinitialiser le total
     this.totalMontant = 0;
-  
+
     // Filtrer d'abord par date
     let filteredResults = this.allresultat.filter((result: { date_creation: string }) => {
       const resultDate = new Date(result.date_creation);
-      return (!this.startDate || resultDate >= this.startDate) && 
-             (!this.endDate || resultDate <= this.endDate);
+      return (!this.startDate || resultDate >= this.startDate) &&
+        (!this.endDate || resultDate <= this.endDate);
     });
-  
+
     // Mettre à jour DataTable avec les résultats filtrés par date
     this.dataTable.clear().rows.add(filteredResults).draw();
-  
+
     // Attendre que DataTable applique son propre filtre (search)
     setTimeout(() => {
       const filteredDataTable: { montant_gnf: number }[] = this.dataTable
         .rows({ search: 'applied' })
         .data()
         .toArray();
-  
+
       // Recalculer le total avec des types explicitement définis
       this.totalMontant = filteredDataTable.reduce((sum: number, row: { montant_gnf: number }) => {
         return sum + row.montant_gnf;
       }, 0);
-  
+
       console.log('Total Montant après filtre et recherche :', this.totalMontant);
     }, 200); // Timeout pour attendre la mise à jour de DataTable
   }
 
 
-    // Méthode pour récupérer toutes les entrées via l'API
-    private fetchAllSortie(): void {
-      this.sortieService.getAllSortie().subscribe({
-        next: (response) => {
-          this.allresultat = response;
-          console.log(this.allresultat);
-          this.initDataTable();
+  // Méthode pour récupérer toutes les entrées via l'API
+  private fetchAllSortie(): void {
+    this.sortieService.getAllSortie().subscribe({
+      next: (response) => {
+        this.allresultat = response;
+        console.log(this.allresultat);
+        this.initDataTable();
         this.cd.detectChanges();
-        },
-        error: (error) => {
-          // Gestion des erreurs lors de l'appel API
-          console.error('Erreur lors de la récupération des données:', error);
-        },
-      });
-    }
+      },
+      error: (error) => {
+        // Gestion des erreurs lors de l'appel API
+        console.error('Erreur lors de la récupération des données:', error);
+      },
+    });
+  }
 
-    private initDataTable(): void {
-      setTimeout(() => {
-        if (this.dataTable) {
-          this.dataTable.destroy(); // Détruire l'ancienne instance avant d'en créer une nouvelle
-        }
-        this.dataTable = ($('#datatable') as any).DataTable({
-          dom: "<'row'<'col-sm-6 dt-buttons-left'B><'col-sm-6 text-end dt-search-right'f>>" +
-            "<'row'<'col-sm-12'tr>>" +
-            "<'row'<'col-sm-5'i><'col-sm-7'p>>",
-          buttons: ['csv', 'excel', 'pdf', 'print'],
-          paging: true,
-          searching: true,
-          pageLength: 10,
-          lengthMenu: [10, 25, 50],
-          data: this.allresultat,
-          order: [0, 'desc'],
-          columns: [
-            { title: "Code generer", data: "codeEnvoyer" },
-            { title: "Code", data: "code" },
-            {
-              title: "Date du jour", data: "date_creation",
-              render: (data: string) => {
-                const date = new Date(data);
-                const day = String(date.getDate()).padStart(2, '0'); // Jour
-                const month = String(date.getMonth() + 1).padStart(2, '0'); // Mois
-                const year = date.getFullYear(); // Année
-                const hours = String(date.getHours()).padStart(2, '0'); // Heures
-                const minutes = String(date.getMinutes()).padStart(2, '0'); // Minutes
-  
-                return `${day}/${month}/${year} ${hours}:${minutes}`; // Format final
-              }
-            }, // Formatage de la date
-            { title: "Pays", data: "pays_dest" },
-            { title: "Expéditeur", data: "expediteur" },
-            { title: "Receveur", data: "receveur" },
-            { title: "Téléphone", data: "telephone_receveur" },
-            {
-              title: "Montant",
-              data: "montant",
-              render: (data: number, type: string, row: any) => {
-                const formattedAmount = new Intl.NumberFormat('fr-FR', {
-                  style: 'decimal',
-                  minimumFractionDigits: 0,
-                  maximumFractionDigits: 0
-                }).format(data); // Format le montant sans symbole de devise
-  
-                // Si vous avez besoin d'utiliser `signe_2`, vous pouvez l'ajouter ici
-                const signe = row.signe_2; // Récupérer la valeur de `signe_2`
-                console.log(signe);
-
-                // Retourner le montant et le signe, par exemple
-                return `${formattedAmount} ${signe}`; // Exemple de retour
-              }
-            },
-            { title: "Prix", data: "prix_2",
-              render: (data: number, type: string, row: any) => {
-                const formattedAmount = new Intl.NumberFormat('fr-FR', {
-                  style: 'decimal',
-                  minimumFractionDigits: 0,
-                  maximumFractionDigits: 0
-                }).format(data); // Format le montant sans symbole de devise
-  
-                // Si vous avez besoin d'utiliser `signe_2`, vous pouvez l'ajouter ici
-                const signe = row.signe_1; // Récupérer la valeur de `signe_2`
-  
-                // Retourner le montant et le signe, par exemple
-                return `${formattedAmount} ${signe}`; // Exemple de retour
-              }
-             },
-            { title: "Montant en GNF", data: "montant_gnf",
-              render: (data: number, type: string, row: any) => {
-                const formattedAmount = new Intl.NumberFormat('fr-FR', {
-                  style: 'decimal',
-                  minimumFractionDigits: 0,
-                  maximumFractionDigits: 0
-                }).format(data); // Format le montant sans symbole de devise
-  
-                // Si vous avez besoin d'utiliser `signe_2`, vous pouvez l'ajouter ici
-                const signe = row.signe_1; // Récupérer la valeur de `signe_2`
-  
-                // Retourner le montant et le signe, par exemple
-                return `${formattedAmount} ${signe}`; // Exemple de retour
-              }
-             },
-            { title: "Statut de paiement", data: "status", render: (data: string, row: Result) => data + (row.status === 'ANNULEE' ? ` (${row.type_annuler})` : '') },
-          ]
-        });
-        this.cd.detectChanges(); 
-      }, 100);
-    }
-
-    ngAfterViewInit(): void {
-      this.dtTrigger.next(null);
-    }
-  
-    ngOnDestroy(): void {
+  private initDataTable(): void {
+    setTimeout(() => {
       if (this.dataTable) {
-        this.dataTable.destroy();
+        this.dataTable.destroy(); // Détruire l'ancienne instance avant d'en créer une nouvelle
       }
-      this.dtTrigger.unsubscribe();
+      this.dataTable = ($('#datatable') as any).DataTable({
+        dom: "<'row'<'col-sm-6 dt-buttons-left'B><'col-sm-6 text-end dt-search-right'f>>" +
+          "<'row'<'col-sm-12'tr>>" +
+          "<'row'<'col-sm-5'i><'col-sm-7'p>>",
+        buttons: ['csv', 'excel', 'pdf', 'print'],
+        paging: true,
+        searching: true,
+        pageLength: 10,
+        lengthMenu: [10, 25, 50],
+        data: this.allresultat,
+        order: [0, 'desc'],
+        columns: [
+          { title: "Code generer", data: "codeEnvoyer" },
+          { title: "Code", data: "code" },
+          {
+            title: "Date du jour", data: "date_creation",
+            render: (data: string) => {
+              const date = new Date(data);
+              const day = String(date.getDate()).padStart(2, '0'); // Jour
+              const month = String(date.getMonth() + 1).padStart(2, '0'); // Mois
+              const year = date.getFullYear(); // Année
+              const hours = String(date.getHours()).padStart(2, '0'); // Heures
+              const minutes = String(date.getMinutes()).padStart(2, '0'); // Minutes
+
+              return `${day}/${month}/${year} ${hours}:${minutes}`; // Format final
+            }
+          }, // Formatage de la date
+          { title: "Pays", data: "pays_dest" },
+          { title: "Expéditeur", data: "expediteur" },
+          { title: "Receveur", data: "receveur" },
+          { title: "Téléphone", data: "telephone_receveur" },
+          {
+            title: "Montant",
+            data: "montant",
+            render: (data: number, type: string, row: any) => {
+              const formattedAmount = new Intl.NumberFormat('fr-FR', {
+                style: 'decimal',
+                minimumFractionDigits: 0,
+                maximumFractionDigits: 0
+              }).format(data); // Format le montant sans symbole de devise
+
+              // Si vous avez besoin d'utiliser `signe_2`, vous pouvez l'ajouter ici
+              const signe = row.signe_2; // Récupérer la valeur de `signe_2`
+              console.log(signe);
+
+              // Retourner le montant et le signe, par exemple
+              return `${formattedAmount} ${signe}`; // Exemple de retour
+            }
+          },
+          {
+            title: "Prix", data: "prix_2",
+            render: (data: number, type: string, row: any) => {
+              const formattedAmount = new Intl.NumberFormat('fr-FR', {
+                style: 'decimal',
+                minimumFractionDigits: 0,
+                maximumFractionDigits: 0
+              }).format(data); // Format le montant sans symbole de devise
+
+              // Si vous avez besoin d'utiliser `signe_2`, vous pouvez l'ajouter ici
+              const signe = row.signe_1; // Récupérer la valeur de `signe_2`
+
+              // Retourner le montant et le signe, par exemple
+              return `${formattedAmount} ${signe}`; // Exemple de retour
+            }
+          },
+          {
+            title: "Montant en GNF", data: "montant_gnf",
+            render: (data: number, type: string, row: any) => {
+              const formattedAmount = new Intl.NumberFormat('fr-FR', {
+                style: 'decimal',
+                minimumFractionDigits: 0,
+                maximumFractionDigits: 0
+              }).format(data); // Format le montant sans symbole de devise
+
+              // Si vous avez besoin d'utiliser `signe_2`, vous pouvez l'ajouter ici
+              const signe = row.signe_1; // Récupérer la valeur de `signe_2`
+
+              // Retourner le montant et le signe, par exemple
+              return `${formattedAmount} ${signe}`; // Exemple de retour
+            }
+          },
+          { title: "Statut de paiement", data: "status", render: (data: string, row: Result) => data + (row.status === 'ANNULEE' ? ` (${row.type_annuler})` : '') },
+        ]
+      });
+      this.cd.detectChanges();
+    }, 100);
+  }
+
+  ngAfterViewInit(): void {
+    this.dtTrigger.next(null);
+  }
+
+  ngOnDestroy(): void {
+    if (this.dataTable) {
+      this.dataTable.destroy();
     }
-  
+    this.dtTrigger.unsubscribe();
+  }
+
 
   // Initialisation du composant
   ngOnInit(): void {
+
+
+    this.valideSortieForm = this.fb.group({
+      utilisateurId: [this.idUser],
+      partenaireId: [''],
+      prix_2: ['', Validators.required],
+    });
 
     this.editDeviseForm = this.fb.group({
       paysArriver: ['', Validators.required],
@@ -273,7 +319,7 @@ export class ListeSortieComponent implements OnInit, AfterViewInit, OnDestroy {
     this.annulerFormInitial();
   }
 
-  private annulerFormInitial(): void{
+  private annulerFormInitial(): void {
     this.annulerForm = this.fb.group({
       codeAnnuler: ['', Validators.required]
     });
@@ -281,13 +327,13 @@ export class ListeSortieComponent implements OnInit, AfterViewInit, OnDestroy {
 
   isLoadingAnnuler: boolean = false;
 
-  annulerSortie(): void{
+  annulerSortie(): void {
     this.isLoadingAnnuler = true;
     const { codeAnnuler } = this.annulerForm.value;
     this.sortieService.annulerSortie(codeAnnuler).subscribe({
-      next: (response) =>{
+      next: (response) => {
         this.isLoadingAnnuler = false;
-         alert(response.message);
+        alert(response.message);
       },
       error: (error) => {
         this.isLoadingAnnuler = false;
@@ -382,7 +428,7 @@ export class ListeSortieComponent implements OnInit, AfterViewInit, OnDestroy {
             receveur: '',
             montant: '',
             telephone_receveur: ''
-          }); 
+          });
           this.loading = false;
           alert(response.message);
         },

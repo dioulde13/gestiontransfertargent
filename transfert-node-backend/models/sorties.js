@@ -92,9 +92,9 @@ const Sortie = sequelize.define('Sortie', {
     defaultValue: 'NON COMPLET', // Définir une valeur par défaut
   },
   status: {
-    type: DataTypes.ENUM('PAYEE', 'ANNULEE'),
+    type: DataTypes.ENUM('NON PAYEE','PAYEE', 'ANNULEE'),
     allowNull: false,
-    defaultValue: 'PAYEE', // Définir une valeur par défaut
+    defaultValue: 'NON PAYEE', // Définir une valeur par défaut
   },
 });
 

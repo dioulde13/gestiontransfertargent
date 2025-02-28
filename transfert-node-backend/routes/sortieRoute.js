@@ -13,4 +13,6 @@ router.get('/compte', sortieController.compterSortieDuJour);
 
 router.put("/annuler/:code", sortieController.annulerSortie);
 
+router.put("/valider/:id", sortieController.validerSortie);
+
 module.exports = router;

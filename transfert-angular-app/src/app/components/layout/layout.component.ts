@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common'; 
 import { Router, RouterOutlet } from '@angular/router';
 import { AuthService } from '../../services/auth/auth-service.service';
-// import { RouterLink} from '@angular/router';
+import { RouterLink} from '@angular/router';
 
 
 @Component({
@@ -10,6 +10,7 @@ import { AuthService } from '../../services/auth/auth-service.service';
   imports: [
     CommonModule ,
     RouterOutlet,
+    RouterLink
     ],
   templateUrl: './layout.component.html',
   styleUrl: './layout.component.css'

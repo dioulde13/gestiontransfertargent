@@ -47,23 +47,25 @@ const ajouterEntre = async (req, res) => {
       expediteur,
       receveur,
       montant_cfa,
+      montant,
+      nomCLient,
       telephone_receveur
     } = req.body;
 
 
 
     // Vérifier si tous les champs obligatoires sont présents
-    if (
-      !utilisateurId ||
-      !partenaireId ||
-      !deviseId ||
-      !expediteur ||
-      !receveur ||
-      !montant_cfa ||
-      !telephone_receveur
-    ) {
-      return res.status(400).json({ message: 'Tous les champs obligatoires doivent être remplis.' });
-    }
+    // if (
+    //   !utilisateurId ||
+    //   !partenaireId ||
+    //   !deviseId ||
+    //   !expediteur ||
+    //   !receveur ||
+    //   !montant_cfa ||
+    //   !telephone_receveur
+    // ) {
+    //   return res.status(400).json({ message: 'Tous les champs obligatoires doivent être remplis.' });
+    // }
 
     // Vérifier si le partenaire existe
     const partenaire = await Partenaire.findByPk(partenaireId);
@@ -116,6 +118,8 @@ const ajouterEntre = async (req, res) => {
         pays_dest: PaysDest,
         code: newCode,
         expediteur,
+        nomCLient,
+        montant,
         receveur,
         montant_gnf: montant_due,
         signe_1: Sign1,
@@ -125,9 +129,6 @@ const ajouterEntre = async (req, res) => {
         prix_2: Prix2,
         telephone_receveur
       });
-
-      // utilisateur.solde = (utilisateur.solde || 0) + montant_due;
-      // await utilisateur.save();
 
       // Mettre à jour le montant_prêter du partenaire
       partenaire.montant_preter = (partenaire.montant_preter || 0) + montant_cfa;

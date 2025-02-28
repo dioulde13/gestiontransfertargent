@@ -414,8 +414,10 @@ export class ListeEntreComponent implements OnInit, AfterViewInit, OnDestroy {
       partenaireId: ['', Validators.required],
       deviseId: ['', Validators.required], // Initialisé à vide
       expediteur: ['', Validators.required],
+      nomCLient:['', Validators.required],
       receveur: ['', Validators.required],
       montant_cfa: [0, Validators.required],
+      montant: [0, Validators.required],
       telephone_receveur: ['', Validators.required],
     });
   }
