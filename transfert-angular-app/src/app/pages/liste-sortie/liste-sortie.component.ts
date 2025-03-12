@@ -274,7 +274,30 @@ export class ListeSortieComponent implements OnInit, AfterViewInit, OnDestroy {
               return `${formattedAmount} ${signe}`; // Exemple de retour
             }
           },
-          { title: "Statut de paiement", data: "status", render: (data: string, row: Result) => data + (row.status === 'ANNULEE' ? ` (${row.type_annuler})` : '') },
+          { title: "Statut de paiement", data: "status", render: (data: string, row: Result) => data + (row.status === 'ANNULEE' ? ` (${row.type_annuler})` : '') },          
+          // {
+          //   title: "Action",
+          //   data: null, // Ce n'est pas une donnée de l'objet
+          //   orderable: false, // Désactiver le tri sur cette colonne
+          //   render: (data: any, type: string, row: any) => {
+          //     // Vérifier si le statut est "NON PAYEE"
+          //     if (row.status === "NON PAYEE") {
+          //       const rowData = JSON.stringify(row); // Convertir l'objet en chaîne
+          
+          //       return `
+          //         <button 
+          //           class="btn btn-warning btn-sm" 
+          //           data-toggle="modal" 
+          //           data-target="#valider-sortie-modal" 
+          //           onclick='validerSortie(${rowData})'>
+          //           Valider
+          //         </button>
+          //       `;
+          //     }
+          //     return ""; // Retourne une chaîne vide si le statut n'est pas "NON PAYEE"
+          //   }
+          // }
+                  
         ]
       });
       this.cd.detectChanges();

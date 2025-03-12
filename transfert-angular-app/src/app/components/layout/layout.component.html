@@ -178,49 +178,45 @@
                         <div class="iq-navbar-logo d-flex align-items-center justify-content-between">
                             <i class="ri-menu-line wrapper-menu"></i>
                             <a href="index.html" class="header-logo">
-                                <img src="../assets/images/logo2.png" alt="logo" style="width:100%">
-
+                                <img src="/assets/images/logo2.png" alt="logo" style="width:100%">
                             </a>
                         </div>
                         <div class="navbar-breadcrumb">
                             <h5>Tableau de bord</h5>
                         </div>
-                           
+            
                         <div class="dropdown ms-auto">
                             <button 
-                              class="btn btn-secondary dropdown-toggle d-flex align-items-center" 
-                              type="button"
-                              id="dropdownMenuButton" 
-                              (click)="toggleDropdown()"
-                              [attr.aria-expanded]="isDropdownOpen"
+                                class="btn btn-secondary dropdown-toggle d-flex align-items-center" 
+                                type="button"
+                                id="dropdownMenuButton" 
+                                (click)="toggleDropdown()"
+                                [attr.aria-expanded]="isDropdownOpen"
                             >
-                              <i class="fa-solid fa-user me-2"></i> <!-- Icône utilisateur -->
+                                <i class="fa-solid fa-user me-2"></i>
                             </button>
                             <ul 
-                              class="dropdown-menu dropdown-menu-end" 
-                              [class.show]="isDropdownOpen" 
-                              aria-labelledby="dropdownMenuButton"
+                                class="dropdown-menu dropdown-menu-start" 
+                                [class.show]="isDropdownOpen" 
+                                aria-labelledby="dropdownMenuButton"
                             >
-                              <li>
-                                <a class="dropdown-item" routerLink="/parametres">Paramètres</a>
-                              </li>
-                              <li>
-                                <a 
-                                  (click)="logout()"
-                                  class="dropdown-item"
-                                >
-                                  Déconnexion
-                                </a>
-                              </li>
+                                <li>
+                                    <a class="dropdown-item" routerLink="/parametres">Paramètres</a>
+                                </li>
+                                <li>
+                                    <a 
+                                        (click)="logout()"
+                                        class="dropdown-item"
+                                    >
+                                        Déconnexion
+                                    </a>
+                                </li>
                             </ul>
-                          </div>
-                          
+                        </div>
                     </nav>
                 </div>
             </div>
-            <!-- Conteneur défilable -->
             <router-outlet></router-outlet>
         </main>
-
     </div>
 </div>

@@ -25,9 +25,7 @@ const ajouterPayement = async (req, res) => {
       return res.status(404).json({ message: 'Entre introuvable avec ce code.' });
     }
 
-    // Mettre à jour le solde de l'utilisateur connecté
-    utilisateur.solde = (utilisateur.solde || 0) + montant;
-    await utilisateur.save();
+   
 
     const montantEnCoursPayement = montant + entre.montant_payer;
     console.log(montantEnCoursPayement);
@@ -47,6 +45,10 @@ const ajouterPayement = async (req, res) => {
       code: code, // Inclure entreId
       montant,
     });
+
+     // Mettre à jour le solde de l'utilisateur connecté
+     utilisateur.solde = (utilisateur.solde || 0) + montant;
+     await utilisateur.save();
 
 
     // Vérification du montant restant pour définir le type de paiement

@@ -36,4 +36,8 @@ export class EntreServiceService {
   ajouterEntree(data: any): Observable<any> {
     return this.http.post(`${this.apiUrl}/api/entrees/create`, data);
   }
+  ajouterEntreeAutres(data: any): Observable<any> {
+    return this.http.post(`${this.apiUrl}/api/entrees/createAutre`, data);
+  }
+  
 }

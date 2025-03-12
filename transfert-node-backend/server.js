@@ -18,6 +18,9 @@ const payementEchangeRoute = require('./routes/payementEchangeRoute'); // Import
 const beneficeRoute = require('./routes/beneficeRoute'); // Importer les routes des entrées
 const calculBeneficeRoute = require('./routes/calculBeneficeRoute'); // Importer les routes des entrées
 
+const verifierCaisseRoute = require('./routes/verifierCaisseRoute'); // Importer les routes des entrées
+
+
 
 
 
@@ -46,6 +49,8 @@ app.use('/api/utilisateurs', utilisateurRoutes);
 // Utilisation des routes
 app.use('/api/partenaires', partenaireRoutes);
 
+app.use('/api/verifierCaisse', verifierCaisseRoute);
+
 // Utilisation des routes pour les devises
 app.use('/api/devises', deviseRoutes);
 
@@ -61,7 +66,6 @@ app.use('/api/rembourser', rembourserRoutes);
 app.use('/api/payement', payementRoutes);
 
 app.use('/api/payementCredit', payementCreditRoute);
-
 
 app.use('/api/depense', depenseRoute);
 

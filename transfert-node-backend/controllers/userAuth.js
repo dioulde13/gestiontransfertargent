@@ -61,6 +61,7 @@ const getUserInfo = async (req, res) => {
 const modifier = async (req, res) => {
   const { id } = req.params;
   const {
+    nom,
     solde,
     encien_solde,
     solde_echange,
@@ -77,6 +78,7 @@ const modifier = async (req, res) => {
 
     // Mettre à jour les informations de l'utilisateur
     await utilisateur.update({
+      nom,
       solde,
       encien_solde,
       solde_echange,
@@ -91,14 +93,40 @@ const modifier = async (req, res) => {
   }
 };
 
+const rechargerSolde = async (req, res) => {
+  try {
+    const { utilisateurId, montant } = req.body;
+
+    // Vérification des entrées
+    if (!utilisateurId || !montant || isNaN(montant) || montant <= 0) {
+      return res.status(400).json({ message: 'Montant invalide' });
+    }
+
+    // Recherche de l'utilisateur
+    const utilisateur = await Utilisateur.findByPk(utilisateurId);
+    if (!utilisateur) {
+      return res.status(404).json({ message: 'Utilisateur non trouvé' });
+    }
+
+    // Mise à jour du solde
+    utilisateur.solde += parseFloat(montant);
+    await utilisateur.save(); // Enregistrement dans la base de données
+
+    return res.json({ message: 'Solde rechargé avec succès', solde: utilisateur.solde });
+
+  } catch (error) {
+    return res.status(500).json({ message: 'Erreur lors de la mise à jour du solde', error: error.message });
+  }
+};
+
 
 
 const ajouterUtilisateur = async (req, res) => {
   try {
-    const { nom, prenom, telephone, email, sign, password } = req.body;
+    const { nom, prenom, telephone, email, sign,sign_dollar, sign_euro, password } = req.body;
 
     // Validation des champs
-    if (!nom || !prenom || !telephone || !sign || !email || !password) {
+    if (!nom || !prenom || !telephone || !sign || !sign_dollar || !email || !sign_euro || !password) {
       return res.status(400).json({
         success: false,
         message: 'Les champs nom, prénom, numéro de téléphone, email, mot de passe sont requis.',
@@ -115,6 +143,8 @@ const ajouterUtilisateur = async (req, res) => {
       telephone,
       email, // Assurez-vous d'inclure email
       sign,
+      sign_dollar,
+      sign_euro,
       password: hashedPassword,
     });
 
@@ -224,4 +254,4 @@ const login = async (req, res) => {
   }
 };
 
-module.exports = { ajouterUtilisateur, login , getAllUser, getUserInfo, modifier};
+module.exports = { ajouterUtilisateur, login , getAllUser, getUserInfo, modifier, rechargerSolde};

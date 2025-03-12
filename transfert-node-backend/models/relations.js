@@ -4,12 +4,14 @@ const PayementEchange = require('./payementEchange');
 const Entre = require('./entres');
 const Sortie = require('./sorties');
 const Partenaire = require('./partenaires');
+const VerifierCaisse = require('./verifierCaisse');
 const Utilisateur = require('./utilisateurs');
 const Rembourser = require('./rembourser');
 const Payement = require('./payement');
 const Depense = require('./depense');
 const Credit = require('./credit');
 const PayementCreadit = require('./payementCredit');
+
 
 
 
@@ -37,6 +39,9 @@ Echange.belongsTo(Partenaire, { foreignKey: 'partenaireId' });
 Partenaire.hasMany(Sortie, { foreignKey: 'partenaireId' });
 Sortie.belongsTo(Partenaire, { foreignKey: 'partenaireId' });
 
+Utilisateur.hasMany(Partenaire, { foreignKey: 'utilisateurId' });
+Partenaire.belongsTo(Utilisateur, { foreignKey: 'utilisateurId' });
+
 // Relation One-to-Many : Un Devise peut avoir plusieurs Entres
 Devise.hasMany(Entre, { foreignKey: 'deviseId' });
 Entre.belongsTo(Devise, { foreignKey: 'deviseId' });
@@ -60,6 +65,10 @@ Entre.belongsTo(Utilisateur, { foreignKey: 'utilisateurId' });
 // Relation One-to-Many : Un Utilisateur peut avoir plusieurs Sorties
 Utilisateur.hasMany(Sortie, { foreignKey: 'utilisateurId' });
 Sortie.belongsTo(Utilisateur, { foreignKey: 'utilisateurId' });
+
+// Relation One-to-Many : Un Utilisateur peut avoir plusieurs Sorties
+Utilisateur.hasMany(VerifierCaisse, { foreignKey: 'utilisateurId' });
+VerifierCaisse.belongsTo(Utilisateur, { foreignKey: 'utilisateurId' });
 
 // Relation One-to-Many : Un Utilisateur peut avoir plusieurs Échanges
 Utilisateur.hasMany(Echange, { foreignKey: 'utilisateurId' });

@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';  // Remplacer BrowserModule par CommonModule
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ReactiveFormsModule } from '@angular/forms'; // Import du module des formulaires réactifs
@@ -6,6 +6,14 @@ import { DepenseService } from '../../services/depenses/depense.service';
 import { AuthService } from '../../services/auth/auth-service.service';
 import { Subject } from 'rxjs';
 import { DataTablesModule } from 'angular-datatables';
+
+
+interface Result {
+  date_creation: string;
+  motif: string;
+  montant: number;
+}
+
 
 
 @Component({
@@ -18,7 +26,7 @@ import { DataTablesModule } from 'angular-datatables';
 export class ListeDepenseComponent implements OnInit {
 
   // Tableau pour stocker les résultats
-  allresultat: any[] = [];
+  allresultat: Result[] = [];
 
   userInfo: any = null;
   idUser: string = '';
@@ -28,28 +36,97 @@ export class ListeDepenseComponent implements OnInit {
     dtoptions: any = {};
   
     dtTrigger: Subject<any> = new Subject<any>();
+  private dataTable: any;
+
+
+  private initDataTable(): void {
+    setTimeout(() => {
+      if (this.dataTable) {
+        this.dataTable.destroy(); // Détruire l'ancienne instance avant d'en créer une nouvelle
+      }
+      this.dataTable = ($('#datatable') as any).DataTable({
+        dom: "<'row'<'col-sm-6 dt-buttons-left'B><'col-sm-6 text-end dt-search-right'f>>" +
+          "<'row'<'col-sm-12'tr>>" +
+          "<'row'<'col-sm-5'i><'col-sm-7'p>>",
+        buttons: ['csv', 'excel', 'pdf', 'print'],
+        paging: true,
+        searching: true,
+        pageLength: 5,
+        lengthMenu: [5, 10, 50],
+        data: this.allresultat,
+        order: [[0, 'desc']], // Assurez-vous que l'ordre est bien un tableau avec l'index et l'ordre
+        columns: [
+          {
+            title: "Date du jour", 
+            data: "date_creation",
+            render: (data: string) => {
+              const date = new Date(data);
+              return date.toLocaleDateString('fr-FR', {
+                day: '2-digit', 
+                month: '2-digit', 
+                year: 'numeric',
+                hour: '2-digit', 
+                minute: '2-digit'
+              });
+            }
+          },
+          { 
+            title: "Motif", 
+            data: "motif" 
+          },
+          {
+            title: "Montant",
+            data: "montant",
+            render: (data: number) => {
+              // Ajout du formatage avec le GNF
+              return new Intl.NumberFormat('fr-FR', {
+                style: 'currency',
+                currency: 'GNF',
+                currencyDisplay: 'symbol'
+              }).format(data);
+            }
+          },
+        ]
+      });
+      this.cd.detectChanges(); // Détection des changements si nécessaire
+    }, 100);
+  }
+  
+    
+  
+    ngAfterViewInit(): void {
+      this.dtTrigger.next(null);
+    }
+  
+    ngOnDestroy(): void {
+      if (this.dataTable) {
+        this.dataTable.destroy();
+      }
+      this.dtTrigger.unsubscribe();
+    }
 
   constructor(
     private fb: FormBuilder,
     private depenseService: DepenseService,
-    private authService: AuthService
+    private authService: AuthService,
+     private cd: ChangeDetectorRef,
 
   ) { }
 
   ngOnInit(): void {
-    this.dtoptions = {
-      paging: true, // Activer la pagination
-      pagingType: 'full_numbers', // Type de pagination
-      pageLength: 10 // Nombre d'éléments par page
-    };
+    
     // Initialisation du formulaire avec les validations
+    this.initDepenseForm();
+    this.getAllDepense();
+    this.getUserInfo(); // Récupération des infos utilisateur
+  }
+
+  private initDepenseForm(){
     this.depenseForm = this.fb.group({
       utilisateurId: [this.idUser],
       motif: ['', Validators.required],
       montant: [0, [Validators.required, Validators.min(0)]],
     });
-    this.getAllDepense();
-    this.getUserInfo(); // Récupération des infos utilisateur
   }
 
   getUserInfo() {
@@ -60,7 +137,7 @@ export class ListeDepenseComponent implements OnInit {
           //   if (this.userInfo) {
           this.idUser = this.userInfo.id;
           console.log('Informations utilisateur:', this.userInfo);
-
+          this.initDepenseForm();
           // Mettre à jour le champ utilisateurId dans le formulaire
           this.depenseForm.patchValue({ utilisateurId: this.idUser });
         }
@@ -73,9 +150,8 @@ export class ListeDepenseComponent implements OnInit {
     this.depenseService.getAllDepense().subscribe({
       next: (response) => {
         this.allresultat = response;
-        if (this.allresultat && this.allresultat.length > 0) {
-          this.dtTrigger.next(null); // Initialisation de DataTables
-        }
+        this.initDataTable();
+        this.cd.detectChanges(); 
         console.log(this.allresultat);
       },
       error: (error) => {
@@ -104,8 +180,8 @@ export class ListeDepenseComponent implements OnInit {
           this.loading = false;
         },
         error => {
-          console.error('Erreur lors de l\'ajout du depense:', error);
-          alert('Erreur lors de l\'ajout du depense.');
+          this.loading = false;
+          alert(error.error.message);
         }
       );
     } else {

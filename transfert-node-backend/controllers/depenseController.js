@@ -48,51 +48,61 @@ const ajouterDepense = async (req, res) => {
       return res.status(404).json({ message: 'Utilisateur introuvable.' });
     }
 
-    // Créer un nouveau partenaire
-    const depense = await Depense.create({
-      utilisateurId,
-      motif,
-      montant,
-    });
+    console.log(utilisateur.solde);
+    console.log(montant);
 
-     // Mettre à jour le solde de l'utilisateur connecté
-     utilisateur.solde = (utilisateur.solde || 0) - montant;
-     await utilisateur.save();
+    // Vérifier si l'utilisateur a suffisamment de solde
+    if (utilisateur.solde >= montant) {
+      // Créer une nouvelle dépense
+      const depense = await Depense.create({
+        utilisateurId,
+        motif,
+        montant,
+      });
 
-    res.status(201).json({
-      message: 'Depense ajouté avec succès.',
-      depense,
-    });
+      // Mettre à jour le solde de l'utilisateur
+      utilisateur.solde -= montant;
+      await utilisateur.save();
+
+      // Envoyer la réponse une seule fois
+      return res.status(201).json({
+        message: 'Dépense ajoutée avec succès.',
+        depense,
+      });
+    } else {
+      return res.status(400).json({ message: "Solde insuffisant." });
+    }
+
   } catch (error) {
-    console.error('Erreur lors de l\'ajout du depense :', error);
+    console.error('Erreur lors de l\'ajout de la dépense :', error);
     res.status(500).json({ message: 'Erreur interne du serveur.' });
   }
 };
 
+
 const recupererDepense = async (req, res) => {
-    try {
-      // Récupérer tous les partenaires avec les informations de l'utilisateur associé
-      const depense = await Depense.findAll(
+  try {
+    // Récupérer tous les partenaires avec les informations de l'utilisateur associé
+    const depense = await Depense.findAll({
+      include: [
         {
-        include: [
-          {
-            model: Utilisateur,
-            attributes: ['id', 'nom', 'prenom', 'email'], // Vous pouvez spécifier les attributs que vous voulez afficher
-          },
-        ],
-      }
-    );
-  
-      // Si aucun partenaire n'est trouvé
-      if (depense.length === 0) {
-        return res.status(404).json({ message: 'Aucun depense trouvé.' });
-      }
-  
-      res.status(200).json(depense);
-    } catch (error) {
-      console.error('Erreur lors de la récupération des depense :', error);
-      res.status(500).json({ message: 'Erreur interne du serveur.' });
+          model: Utilisateur,
+          attributes: ['id', 'nom', 'prenom', 'email'], // Vous pouvez spécifier les attributs que vous voulez afficher
+        },
+      ],
+    });
+
+    // Si aucune dépense n'est trouvée
+    if (depense.length === 0) {
+      return res.status(404).json({ message: 'Aucune dépense trouvée.' }); // Assurez-vous d'ajouter un return ici
     }
-  };
+
+    return res.status(200).json(depense); // Ajoutez return ici aussi
+  } catch (error) {
+    console.error('Erreur lors de la récupération des dépenses :', error);
+    return res.status(500).json({ message: 'Erreur interne du serveur.' }); // Ajoutez return ici
+  }
+};
+
 
 module.exports = { ajouterDepense, recupererDepense, sommeDepenseAujourdHui};

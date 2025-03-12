@@ -16,6 +16,9 @@ const ajouterCredit = async (req, res) => {
       return res.status(404).json({ message: 'Utilisateur introuvable.' });
     }
 
+   
+
+
   
     const generateUniqueCode = async () => {
       let newCode = 'AB0001'; // Code par défaut
@@ -50,6 +53,8 @@ const ajouterCredit = async (req, res) => {
     // Générer la référence unique
     newCode = await generateUniqueCode();
 
+  
+    if(utilisateur.solde > montant){
     // Création d'un nouveau crédit
     const credit = await Credit.create({
       utilisateurId,
@@ -57,18 +62,20 @@ const ajouterCredit = async (req, res) => {
       reference: newCode,
       montant
     });
-
-    // Mettre à jour le solde de l'utilisateur
-    utilisateur.solde = (utilisateur.solde || 0) - montant;
-
-    // Sauvegarde des modifications de l'utilisateur
-    await utilisateur.save();
-
-    // Réponse en cas de succès
-    res.status(201).json({
+     // Réponse en cas de succès
+     res.status(201).json({
       message: 'Crédit ajouté avec succès.',
       credit,
     });
+  } else{
+    return res.status(400).json({ message: "Solde est insuffisant." });
+  }
+
+    // Mettre à jour le solde de l'utilisateur
+    utilisateur.solde = (utilisateur.solde || 0) - montant;
+    // Sauvegarde des modifications de l'utilisateur
+    await utilisateur.save();
+
   } catch (error) {
     console.error('Erreur lors de l\'ajout du crédit :', error);
     res.status(500).json({ message: 'Erreur interne du serveur.' });

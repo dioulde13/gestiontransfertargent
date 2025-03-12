@@ -293,7 +293,7 @@ export class ListeRembourserComponent implements OnInit, AfterViewInit {
             nom: '',
             montant: ''
           });
-          alert('Partenaire ajouté avec succès!');
+          alert(response.message);
         },
         error => {
           this.isLoading = false;

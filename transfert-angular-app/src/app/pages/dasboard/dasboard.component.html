@@ -15,6 +15,358 @@
         </div>
     </div>
 </div> -->
+<div class="container">
+    <button class="btn btn-light p-1" (click)="openUserModal()">
+        Ajouter solde
+    </button>
+    <button class="btn btn-light p-1" (click)="openMontantModal()">
+        Recharger solde
+    </button>
+    <button class="btn btn-light p-1" (click)="openListeModal()">
+        Liste total solde
+    </button>
+</div>
+
+
+<!-- Modal Utilisateur -->
+<div *ngIf="showMontantModal" class="modal fade show d-block" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <form class="p-4 shadow rounded" [formGroup]="formRecharger" (ngSubmit)="rechargerSolde()">
+                <div class="modal-header">
+                    <h5 class="modal-title">Recharger solde</h5>
+                    <button type="button" class="close" (click)="closeMontantModal()">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <div class="row mb-3">
+                        <div class="col-lg-12">
+                            <label for="montant" class="form-label">Montant en GNF</label>
+                            <input type="text" id="montant" class="form-control" placeholder="Entrez le montant en GNF"
+                            [(ngModel)]="montant" formControlName="montant" name="montant"
+                            [ngModel]="montant | currencyFormat"
+                            (input)="onInputChange($event)" />
+                        </div>
+                    </div>
+                </div>
+                <div class="row justify-content-end">
+                    <div class="col-auto">
+                        <button type="button" class="btn btn-secondary" (click)="closeMontantModal()">Annuler</button>
+                    </div>
+                    <div class="col-auto">
+                        <button type="submit" class="btn btn-primary"
+                            [disabled]="formRecharger.invalid || isRechargeLoading">
+                            <span *ngIf="isRechargeLoading">Création en cours...</span>
+                            <span *ngIf="!isRechargeLoading">Ajouter</span>
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+
+<!-- Modal Liste -->
+
+<div *ngIf="showListeModal" class="modal fade show d-block" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-dialog-centered modal-xl" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Liste</h5>
+                <button type="button" class="close" (click)="closeListeModal()">&times;</button>
+            </div>
+
+            <div class="modal-body">
+                <!-- Onglets -->
+                <ul class="nav nav-tabs" id="myTab" role="tablist">
+                    <li class="nav-item">
+                        <a class="nav-link active" id="jours-tab" data-toggle="tab" href="#jours" role="tab"
+                            aria-controls="jours" aria-selected="true">
+                            Liste par jour
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" id="total-tab" data-toggle="tab" href="#total" role="tab"
+                            aria-controls="total" aria-selected="false">
+                            Liste total
+                        </a>
+                    </li>
+                </ul>
+
+                <!-- Contenu des onglets -->
+                <div class="tab-content" id="myTabContent">
+                    <!-- Onglet jours -->
+                    <div class="tab-pane fade show active" id="jours" role="tabpanel" aria-labelledby="jours-tab">
+                        <div class="overflow-x-auto mt-3">
+                            <table class="w-full border-collapse border border-gray-300">
+                                <thead>
+                                    <tr class="bg-blue-500 text-white">
+                                        <th class="border px-4 py-2">Date</th>
+                                        <th class="border px-4 py-2">Solde euro en GNF</th>
+                                        <th class="border px-4 py-2">Solde dollars en GNF</th>
+                                        <th class="border px-4 py-2">Solde cfa en GNF</th>
+                                        <th class="border px-4 py-2">Solde en GNF</th>
+                                        <th class="border px-4 py-2">Total</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr *ngFor="let result of allSoldeCaisseParJours;" class="hover:bg-gray-100">
+                                        <td class="p-1 border">
+                                            <p style="font-size: 14px; font-weight: bold;">
+                                                {{ result.date_creation | date:'dd/MM/yyyy HH:mm' }}
+                                            </p>
+                                        </td>
+                                        <td class="border px-4">
+                                            <p style="font-size: 14px; font-weight: bold;">
+                                                {{result.solde_euro | currency:'' :'' :'1.0-0'}} € -> {{result.prix_euro
+                                                | currency:'' :''
+                                                :'1.0-0'
+                                                }} GNF
+                                            </p>
+                                            <p style="font-size: 14px; font-weight: bold;">
+                                                {{ ((result.solde_euro / 100 * result.prix_euro) )|
+                                                currency:'' :'' :'1.0-0'}} GNF
+                                            </p>
+                                        </td>
+                                        <td class="border px-4">
+                                            <p style="font-size: 14px; font-weight: bold;">
+                                                {{result.solde_dollars | currency:'' :'' :'1.0-0'}} $ ->
+                                                {{result.prix_dollar | currency:'' :''
+                                                :'1.0-0'
+                                                }} GNF
+                                            </p>
+                                            <p style="font-size: 14px; font-weight: bold;">
+                                                {{ (result.solde_dollars / 100 *
+                                                result.prix_dollar) | currency:'' :'' :'1.0-0'
+                                                }} GNF
+                                            </p>
+                                        </td>
+                                        <td class="border px-4">
+                                            <p style="font-size: 14px; font-weight: bold;">
+                                                {{result.solde_cfa | currency:'' :'' :'1.0-0'}} XOF -> {{result.prix_cfa
+                                                | currency:'' :''
+                                                :'1.0-0'
+                                                }} GNF
+                                            </p>
+                                            <p style="font-size: 14px; font-weight: bold;">
+                                                {{ ((result.solde_cfa / 5000) * result.prix_cfa) |
+                                                currency:'' :'' :'1.0-0'}} GNF
+                                            </p>
+                                        </td>
+                                        <td class="border px-4">
+                                            <p style="font-size: 14px; font-weight: bold;">
+                                                {{ result.solde_gnf | currency:'' :'' :'1.0-0'}}
+                                                GNF
+                                            </p>
+                                        </td>
+                                        <td class="border px-4">
+                                            <p style="font-size: 14px; font-weight: bold;">
+                                                {{ (result.solde_gnf + ((result.solde_cfa / 5000) *
+                                                result.prix_cfa) + (result.solde_dollars / 100 * result.prix_dollar) +
+                                                (result.solde_euro / 100 * result.prix_euro) )| currency:'' :'' :'1.0-0'
+                                                }}
+                                                GNF
+                                            </p>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Onglet total -->
+                    <div class="tab-pane fade" id="total" role="tabpanel" aria-labelledby="total-tab">
+                        <div class="overflow-x-auto mt-3">
+                            <table id="datatable" class="w-full border-collapse border border-gray-300">
+                                <thead>
+                                    <tr class="bg-blue-500 text-white">
+                                        <th class="border px-4 py-2">Date</th>
+                                        <th class="border px-4 py-2">Solde euro en GNF</th>
+                                        <th class="border px-4 py-2">Solde dollars en GNF</th>
+                                        <th class="border px-4 py-2">Solde cfa en GNF</th>
+                                        <th class="border px-4 py-2">Solde en GNF</th>
+                                        <th class="border px-4 py-2">Total</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr *ngFor="let result of allSoldeCaisse;" class="hover:bg-gray-100">
+                                        <td class="p-1 border">
+                                            <p style="font-size: 14px; font-weight: bold;">
+                                                {{ result.date_creation | date:'dd/MM/yyyy HH:mm' }}
+                                            </p>
+                                        </td>
+                                        <td class="border px-4">
+                                            <p style="font-size: 14px; font-weight: bold;">
+                                                {{result.solde_euro | currency:'' :'' :'1.0-0'}} € -> {{result.prix_euro
+                                                | currency:'' :''
+                                                :'1.0-0'
+                                                }} GNF
+                                            </p>
+                                            <p style="font-size: 14px; font-weight: bold;">
+                                                {{ ((result.solde_euro / 100 * result.prix_euro) )|
+                                                currency:'' :'' :'1.0-0'}} GNF
+                                            </p>
+                                        </td>
+                                        <td class="border px-4">
+                                            <p style="font-size: 14px; font-weight: bold;">
+                                                {{result.solde_dollars | currency:'' :'' :'1.0-0'}} $ ->
+                                                {{result.prix_dollar | currency:'' :''
+                                                :'1.0-0'
+                                                }} GNF
+                                            </p>
+                                            <p style="font-size: 14px; font-weight: bold;">
+                                                {{ (result.solde_dollars / 100 *
+                                                result.prix_dollar) | currency:'' :'' :'1.0-0'
+                                                }} GNF
+                                            </p>
+                                        </td>
+                                        <td class="border px-4">
+                                            <p style="font-size: 14px; font-weight: bold;">
+                                                {{result.solde_cfa | currency:'' :'' :'1.0-0'}} XOF -> {{result.prix_cfa
+                                                | currency:'' :''
+                                                :'1.0-0'
+                                                }} GNF
+                                            </p>
+                                            <p style="font-size: 14px; font-weight: bold;">
+                                                {{ ((result.solde_cfa / 5000) * result.prix_cfa) |
+                                                currency:'' :'' :'1.0-0'}} GNF
+                                            </p>
+                                        </td>
+                                        <td class="border px-4">
+                                            <p style="font-size: 14px; font-weight: bold;">
+                                                {{ result.solde_gnf | currency:'' :'' :'1.0-0'}}
+                                                GNF
+                                            </p>
+                                        </td>
+                                        <td class="border px-4">
+                                            <p style="font-size: 14px; font-weight: bold;">
+                                                {{ (result.solde_gnf + ((result.solde_cfa / 5000) *
+                                                result.prix_cfa) + (result.solde_dollars / 100 * result.prix_dollar) +
+                                                (result.solde_euro / 100 * result.prix_euro) )| currency:'' :'' :'1.0-0'
+                                                }}
+                                                GNF
+                                            </p>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Utilisateur -->
+<div *ngIf="showUserModal" class="modal fade show d-block" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <form class="p-4 shadow rounded" [formGroup]="verifierCaisse" (ngSubmit)="ajouterCaisse()">
+                <div class="modal-header">
+                    <h5 class="modal-title">Verifier le solde du caisse</h5>
+                    <button type="button" class="close" (click)="closeUserModal()">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <div class="row mb-1">
+                        <div class="col-lg-6">
+                            <label for="solde_euro" class="form-label">Euro</label>
+                            <input type="text" id="solde_euro" class="form-control" placeholder="Entrez le solde_euro en GNF"
+                            [(ngModel)]="solde_euro" formControlName="solde_euro" name="solde_euro"
+                            [ngModel]="solde_euro | currencyFormat"
+                             />
+                        </div>
+                        <div class="col-lg-6">
+                            <label for="prix_euro" class="form-label">Prix</label>
+                            <input type="text" id="prix_euro" class="form-control" placeholder="Entrez le prix_euro en GNF"
+                            [(ngModel)]="prix_euro" formControlName="prix_euro" name="prix_euro"
+                            [ngModel]="prix_euro | currencyFormat"
+                             />
+                        </div>
+                    </div>
+                    <div class="row mb-1">
+                        <div class="col-lg-6">
+                            <label for="solde_dollars" class="form-label">Dollars</label>
+                            <input type="text" id="solde_dollars" class="form-control" placeholder="Entrez le solde_dollars en GNF"
+                            [(ngModel)]="solde_dollars" formControlName="solde_dollars" name="solde_dollars"
+                            [ngModel]="solde_dollars | currencyFormat"
+                             />
+                        </div>
+                        <div class="col-lg-6">
+                            <label for="prix_dollar" class="form-label">Prix</label>
+                            <input type="text" id="prix_dollar" class="form-control" placeholder="Entrez le prix_dollar en GNF"
+                            [(ngModel)]="prix_dollar" formControlName="prix_dollar" name="prix_dollar"
+                            [ngModel]="prix_dollar | currencyFormat"
+                             />
+                        </div>
+                    </div>
+                    <div class="row mb-1">
+                        <div class="col-lg-6">
+                            <label for="solde_cfa" class="form-label">CFA</label>
+                            <input type="text" id="solde_cfa" class="form-control" placeholder="Entrez le solde_cfa en GNF"
+                            [(ngModel)]="solde_cfa" formControlName="solde_cfa" name="solde_cfa"
+                            [ngModel]="solde_cfa | currencyFormat"
+                             />
+                        </div>
+                        <div class="col-lg-6">
+                            <label for="prix_cfa" class="form-label">Prix</label>
+                            <input type="text" id="prix_cfa" class="form-control" placeholder="Entrez le prix_cfa en GNF"
+                            [(ngModel)]="prix_cfa" formControlName="prix_cfa" name="prix_cfa"
+                            [ngModel]="prix_cfa | currencyFormat"
+                             />
+                        </div>
+                    </div>
+                    <div class="row mb-1">
+                        <div class="col-lg-12">
+                            <label for="solde_gnf" class="form-label">Montant en GNF</label>
+                            <input type="text" id="solde_gnf" class="form-control" placeholder="Entrez le solde_gnf en GNF"
+                            [(ngModel)]="solde_gnf" formControlName="solde_gnf" name="solde_gnf"
+                            [ngModel]="solde_gnf | currencyFormat"
+                             />
+                        </div>
+                    </div>
+                </div>
+                <div class="row justify-content-end">
+                    <div class="col-auto">
+                        <button type="button" class="btn btn-secondary" (click)="closeUserModal()">Annuler</button>
+                    </div>
+                    <div class="col-auto">
+                        <button type="submit" class="btn btn-primary" [disabled]="verifierCaisse.invalid || isLoading">
+                            <span *ngIf="isLoading">Création en cours...</span>
+                            <span *ngIf="!isLoading">Ajouter</span>
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Fond des modals -->
+<div *ngIf="showListeModal || showUserModal" class="modal-backdrop fade show"></div>
+
+
+<!-- Modal Bootstrap -->
+<div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Titre du Modal</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                Contenu du modal...
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
+                <button type="button" class="btn btn-primary">Sauvegarder</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
 <div class="content-page" style="margin-top: 5%;">
     <div class="container-fluid">
         <div class="row">
@@ -161,11 +513,12 @@
                             <span style="font-size: 20px;">Solde echange</span>
                         </div>
                         <div>
-                            <span
-                                style="font-size: 30px; color: black; text-align: center;">
+                            <span style="font-size: 30px; color: black; text-align: center;">
                                 <p>{{ userInfo.solde_echange | currency:'' :'' :'1.0-0'}} {{userInfo.sign}} </p>
-                                <p>{{ userInfo.solde_echange_dollar | currency:'' :'' :'1.0-0'}} {{userInfo.sign_dollar}} </p>
-                                <p>{{ userInfo.solde_echange_euro | currency:'' :'' :'1.0-0'}} {{userInfo.sign_euro}}</p>
+                                <p>{{ userInfo.solde_echange_dollar | currency:'' :'' :'1.0-0'}}
+                                    {{userInfo.sign_dollar}} </p>
+                                <p>{{ userInfo.solde_echange_euro | currency:'' :'' :'1.0-0'}} {{userInfo.sign_euro}}
+                                </p>
                             </span>
                         </div>
                     </div>

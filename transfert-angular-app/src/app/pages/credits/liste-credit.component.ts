@@ -258,8 +258,7 @@ export class ListeCreditComponent implements OnInit {
           alert('Credit ajouté avec succès!');
         },
         error => {
-          console.error('Erreur lors de l\'ajout du credit:', error);
-          alert('Erreur lors de l\'ajout du credit.');
+          alert(error.error.message);
         }
       );
     } else {

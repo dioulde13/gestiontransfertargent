@@ -12,18 +12,17 @@ const Entre = sequelize.define('Entre', {
     autoIncrement: true,
     primaryKey: true,
   },
-  
   utilisateurId: {
     type: DataTypes.INTEGER,
     allowNull: false, // Ou true si facultatif
   },
   partenaireId: {
     type: DataTypes.INTEGER,
-    allowNull: false, // Ou true si facultatif
+    allowNull: true, // Ou true si facultatif
   },
   deviseId: {
     type: DataTypes.INTEGER,
-    allowNull: false, // Ou true si facultatif
+    allowNull: true, // Ou true si facultatif
   },
   date_creation: {
     type: DataTypes.DATE,
@@ -46,6 +45,11 @@ const Entre = sequelize.define('Entre', {
   nomCLient: {
     type: DataTypes.STRING,
     allowNull: false,
+  },
+  montantClient: {
+    type: DataTypes.BIGINT,
+    allowNull: false,
+    defaultValue: 0,
   },
   expediteur: {
     type: DataTypes.STRING,

@@ -15,6 +15,10 @@ export class AuthService {
     return this.http.post(`${this.apiUrl}/api/auth/login`, { email, password });
   }
 
+  rechargerSolde(data:any): Observable<any>{
+    return this.http.post(`${this.apiUrl}/api/auth/rechargerSolde`, data);
+  }
+
   // Vérification si l'utilisateur est authentifié
   isAuthenticated(): boolean {
     const token = this.getToken();
@@ -65,6 +69,7 @@ export class AuthService {
     // Effectuer une requête GET à l'API
     return this.http.get(`${this.apiUrl}/api/auth/infoUser`, { headers });
   }
+
 
   // Fonction pour récupérer l'expiration du token
   private getTokenExpiry(token: string): number | null {

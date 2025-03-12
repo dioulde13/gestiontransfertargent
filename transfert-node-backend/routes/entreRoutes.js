@@ -6,6 +6,8 @@ const router = express.Router();
 // Route pour ajouter une entrée
 router.post('/create', entreController.ajouterEntre);
 
+router.post('/createAutre', entreController.ajouterAutreEntre);
+
 // Route pour récupérer la liste des entrées avec les informations des utilisateurs et des partenaires associés
 router.get('/liste', entreController.recupererEntreesAvecAssocies);
 

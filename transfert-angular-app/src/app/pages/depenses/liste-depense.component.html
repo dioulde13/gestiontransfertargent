@@ -33,23 +33,26 @@
                   </div>
                 </div>
   
-                <table id="transactions-table" datatable [dtOptions]="dtoptions" [dtTrigger]="dtTrigger"
-                class="table data-table table-striped table-flush" style="width:100%">                 
+               
+                <div class="overflow-x-auto">
+                  <table id="datatable" class="w-full border-collapse border border-gray-300">                
                  <thead>
-                    <tr class="text-muted">
+                  <tr class="bg-blue-500 text-white">
+                      <th class="border px-4 py-2">Date</th>
                       <th class="border px-4 py-2">Motif</th>
                       <th class="border px-4 py-2">Montant</th>
                     </tr>
                   </thead>
                   <tbody>
-                    <tr *ngFor="let result of allresultat;" class="hover:bg-gray-100 even:bg-gray-50">
+                    <tr *ngFor="let result of allresultat;" class="hover:bg-gray-100">
+                      <td class="p-1 border">{{ result.date_creation | date:'dd/MM/yyyy HH:mm' }}</td>
                       <td class="border px-4 py-2">{{ result.motif }}</td>
                       <td class="border px-4 py-2">{{ result.montant | currency:'' :'' :'1.0-0' }} GNF</td>
-                    
                     </tr>
                   </tbody>
                 </table>
               </div>
+            </div>
             </div>
           </div>
         </div>
@@ -72,9 +75,16 @@
               <label for="montant">Montant</label>
               <input id="montant" formControlName="montant" class="form-control" type="number" />
             </div>
-            <button type="submit" [disabled]="!depenseForm.valid" class="btn btn-primary">  
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-dismiss="modal">Annuler</button>
+              <button type="submit" class="btn btn-primary" >
+                <span *ngIf="loading">Création en cours...</span>
+                <span *ngIf="!loading">Ajouter</span>
+              </button>
+            </div>
+            <!-- <button type="submit" [disabled]="!depenseForm.valid" class="btn btn-primary">  
               <span *ngIf="loading">Création en cours...</span>
-              <span *ngIf="!loading">Ajouter</span></button>
+              <span *ngIf="!loading">Ajouter</span></button> -->
           </form>
         </div>
       </div>

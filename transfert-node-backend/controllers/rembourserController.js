@@ -45,21 +45,21 @@ const ajouterRemboursement = async (req, res) => {
     // Calcul du montant dû
     const montant_due = (montant / Prix1) * Prix2;
 
-    // Débogage des données avant l'insertion
-    console.log({
-      utilisateurId,
-      partenaireId,
-      deviseId,
-      montant_gnf: montant_due,
-      montant,
-      nom,
-      signe_1: Sign1,
-      signe_2: Sign2,
-      prix_1: Prix1,
-      prix_2: Prix2,
-    });
+    // // Débogage des données avant l'insertion
+    // console.log({
+    //   utilisateurId,
+    //   partenaireId,
+    //   deviseId,
+    //   montant_gnf: montant_due,
+    //   montant,
+    //   nom,
+    //   signe_1: Sign1,
+    //   signe_2: Sign2,
+    //   prix_1: Prix1,
+    //   prix_2: Prix2,
+    // });
 
-    // Ajouter une entrée dans la table Rembourser
+    if (partenaire.montant_preter >= montant) {
     const remboursement = await Rembourser.create({
       utilisateurId,
       partenaireId,
@@ -85,6 +85,9 @@ const ajouterRemboursement = async (req, res) => {
       message: 'Remboursement ajouté avec succès.',
       remboursement,
     });
+  } else {
+    return res.status(400).json({ message: "Le montant saisi est supérieur au montant restant." });
+  }
   } catch (error) {
     console.error('Erreur lors de l\'ajout du remboursement :', error);
     res.status(500).json({ message: 'Erreur interne du serveur.' });
