@@ -163,7 +163,11 @@
                           {{
                             result.montant_gnf === 0
                               ? (result.montantClient
-                                  | currency : "" : "" : "1.0-0") + " GNF"
+                                  | currency : "" : "" : "1.0-0") +
+                                " " +
+                                (result.montant_rembourser
+                                  | currency : "" : "" : "1.0-0") +
+                                " GNF"
                               : (result.montant_gnf
                                 | currency : "" : "" : "1.0-0")
                           }}
@@ -191,8 +195,8 @@
                           {{ result.montant_cfa === 0 ? "" : "GNF" }}
                         </td>
                         <td class="p-1 border">
-                          {{ result.montant_cfa === 0 ? "" : result.status
-                          }}<span *ngIf="result.status === 'ANNULEE'">{{
+                          {{ result.status }}
+                          <span *ngIf="result.status === 'ANNULEE'">{{
                             "
                             (" +
                               result.type_annuler +
@@ -309,10 +313,10 @@
               <div class="form-row">
                 <!-- Champ Code -->
                 <div class="form-group col-md-6">
-                  <label for="code">Code</label>
+                  <label for="codeAnnuler">Code</label>
                   <input
                     type="text"
-                    id="code"
+                    id="codeAnnuler"
                     class="form-control"
                     formControlName="codeAnnuler"
                     placeholder="Entrez le code"

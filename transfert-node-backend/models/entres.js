@@ -1,12 +1,10 @@
-const { DataTypes } = require('sequelize');
-const sequelize = require('./sequelize');
-const Utilisateur = require('./utilisateurs'); 
-const Partenaire = require('./partenaires'); 
-const Devise = require('./devises'); 
+const { DataTypes } = require("sequelize");
+const sequelize = require("./sequelize");
+const Utilisateur = require("./utilisateurs");
+const Partenaire = require("./partenaires");
+const Devise = require("./devises");
 
-
-
-const Entre = sequelize.define('Entre', {
+const Entre = sequelize.define("Entre", {
   id: {
     type: DataTypes.INTEGER,
     autoIncrement: true,
@@ -82,7 +80,7 @@ const Entre = sequelize.define('Entre', {
     type: DataTypes.BIGINT,
     allowNull: false,
     defaultValue: 0,
-  }, 
+  },
   montant_rembourser: {
     type: DataTypes.BIGINT,
     allowNull: false,
@@ -114,32 +112,32 @@ const Entre = sequelize.define('Entre', {
     defaultValue: 0,
   },
   payement_type: {
-    type: DataTypes.ENUM('COMPLET', 'NON COMPLET'),
+    type: DataTypes.ENUM("COMPLET", "NON COMPLET"),
     allowNull: false,
-    defaultValue: 'NON COMPLET', 
+    defaultValue: "NON COMPLET",
   },
   type_annuler: {
-    type: DataTypes.ENUM('Rembourser', 'Non Rembourser'),
+    type: DataTypes.ENUM("Rembourser", "Non Rembourser", "EN COURS"),
     allowNull: false,
-    defaultValue: 'Non Rembourser', 
+    defaultValue: "Non Rembourser",
   },
   type: {
-    type: DataTypes.ENUM('R', 'NON R'),
+    type: DataTypes.ENUM("R", "NON R"),
     allowNull: false,
-    defaultValue: 'NON R', 
+    defaultValue: "NON R",
   },
   status: {
-    type: DataTypes.ENUM('NON PAYEE', 'PAYEE','EN COURS', 'ANNULEE'),
+    type: DataTypes.ENUM("NON PAYEE", "PAYEE", "EN COURS", "ANNULEE"),
     allowNull: false,
-    defaultValue: 'NON PAYEE', 
+    defaultValue: "NON PAYEE",
   },
 });
 
-// Définir l'association : Une Entree appartient à un 
-Entre.belongsTo(Utilisateur, { foreignKey: 'utilisateurId' });
-// Définir l'association : Une Entree appartient à un 
-Entre.belongsTo(Partenaire, { foreignKey: 'partenaireId' });
-// Définir l'association : Une Entree appartient à un 
-Entre.belongsTo(Devise, { foreignKey: 'deviseId' });
+// Définir l'association : Une Entree appartient à un
+Entre.belongsTo(Utilisateur, { foreignKey: "utilisateurId" });
+// Définir l'association : Une Entree appartient à un
+Entre.belongsTo(Partenaire, { foreignKey: "partenaireId" });
+// Définir l'association : Une Entree appartient à un
+Entre.belongsTo(Devise, { foreignKey: "deviseId" });
 
 module.exports = Entre;

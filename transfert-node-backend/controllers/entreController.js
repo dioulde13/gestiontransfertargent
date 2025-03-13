@@ -263,17 +263,56 @@ const annulerEntre = async (req, res) => {
       Utilisateur.findByPk(entre.utilisateurId),
     ]);
 
-    console.log(entre.montant_cfa);
-    console.log(entre.status);
-
     if (entre.montant_cfa === 0 && entre.status === "PAYEE") {
-      utilisateur.solde =
-        (utilisateur.solde || 0) - Number(entre.montantClient);
-      await utilisateur.save();
-      entre.status = "ANNULEE";
-      entre.type_annuler = type_annuler;
-      await entre.save();
-      return res.status(400).json({ message: `Entrée annulée avec succès.` });
+      if (
+        type_annuler === "Non Rembourser" &&
+        ["PAYEE"].includes(entre.status)
+      ) {
+        entre.type_annuler = type_annuler;
+        return res
+          .status(400)
+          .json({ message: `Entrée annulée non rembourser.` });
+      }
+
+      const montantEnCoursPayement =
+        (Number(entre.montant_rembourser) || 0) + Number(montant_rembourser);
+      console.log(montantEnCoursPayement);
+
+      if (montantEnCoursPayement > entre.montantClient) {
+        return res.status(400).json({
+          message: `Le montant restant à rembourser est de : ${
+            (Number(entre.montantClient) || 0) -
+            Number(entre.montant_rembourser)
+          }`,
+        });
+      }
+
+      // Gestion du remboursement
+      if (type_annuler === "Rembourser" && ["PAYEE"].includes(entre.status)) {
+        if (utilisateur.solde > montant_rembourser) {
+          if (montant_rembourser < entre.montantClient) {
+            entre.type_annuler = "EN COURS";
+          }
+          entre.montant_rembourser = montantEnCoursPayement;
+          await entre.save();
+          utilisateur.solde =
+            (utilisateur.solde || 0) - Number(montant_rembourser);
+          await utilisateur.save();
+          if (entre.montant_rembourser === entre.montantClient) {
+            entre.status = "ANNULEE";
+            entre.type_annuler = type_annuler;
+            await entre.save();
+            return res
+              .status(400)
+              .json({ message: `Entrée annulée avec succès.` });
+          }
+          return res
+            .status(400)
+            .json({ message: `Entrée annulée avec succès....` });
+        } else {
+          return res.status(400).json({ message: `Le montant insuffisant` });
+        }
+      }
     }
     if (entre.montant_cfa === 0 && entre.status === "ANNULEE") {
       return res
@@ -290,28 +329,17 @@ const annulerEntre = async (req, res) => {
       return res.status(404).json({ message: "Partenaire introuvable." });
     if (!utilisateur)
       return res.status(404).json({ message: "Utilisateur introuvable." });
-    console.log(entre.status);
-    console.log(type_annuler);
 
-    if (entre.status === "NON PAYEE" && type_annuler === "Rembourser") {
+    if (entre.status === "NON PAYEE") {
       entre.status = "ANNULEE";
       entre.type_annuler = type_annuler;
       await entre.save();
       return res.status(400).json({ message: `Entrée annulée avec succès.` });
     }
 
-    // if (entre.status === "ANNULEE" && entre.type_annuler === "Rembourser") {
-    //   return res
-    //     .status(409)
-    //     .json({ message: "Cette entrée est déjà annulée." });
-    // }
-
     // Vérification du remboursement
     const montantEnCoursPayement =
       (Number(entre.montant_rembourser) || 0) + Number(montant_rembourser);
-    console.log(montantEnCoursPayement);
-    console.log(entre.montant_payer);
-    console.log(entre.montant_rembourser);
 
     if (entre.montant_payer === entre.montant_rembourser) {
       return res

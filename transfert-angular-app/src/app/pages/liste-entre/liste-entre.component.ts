@@ -200,13 +200,16 @@ export class ListeEntreComponent implements OnInit, AfterViewInit, OnDestroy {
             title: 'Montant en GNF',
             data: 'montant_gnf',
             render: (data: number, type: string, row: any) => {
-              return `${new Intl.NumberFormat('fr-FR').format(data)} ${
-                row.montant_cfa === 0
-                  ? `${new Intl.NumberFormat('fr-FR').format(
-                      row.montantClient
-                    )} GNF`
-                  : 'GNF'
-              }`;
+              const montantRembourser = row.montant_rembourser;
+
+              const montantGNF = row.montant_gnf;
+
+              return row.montant_cfa === 0
+                ? `${new Intl.NumberFormat('fr-FR').format(row.montantClient)} 
+                (${new Intl.NumberFormat('fr-FR').format(montantRembourser)})
+                GNF`
+                : `${new Intl.NumberFormat('fr-FR').format(montantGNF)} 
+               GNF`;
             },
           },
           {
@@ -215,10 +218,9 @@ export class ListeEntreComponent implements OnInit, AfterViewInit, OnDestroy {
             render: (data: number, type: string, row: any) => {
               if (data === 0) return '';
               const montantRembourser = row.montant_rembourser;
-              console.log(montantRembourser);
-              return `${new Intl.NumberFormat('fr-FR').format(
-                data
-              )} (${new Intl.NumberFormat('fr-FR').format(
+              // console.log(montantRembourser);
+              return `${new Intl.NumberFormat('fr-FR').format(data)} 
+              (${new Intl.NumberFormat('fr-FR').format(
                 montantRembourser
               )}) GNF`;
             },
@@ -236,7 +238,8 @@ export class ListeEntreComponent implements OnInit, AfterViewInit, OnDestroy {
             title: 'Statut de paiement',
             data: 'status',
             render: (data: string, type: string, row: any) => {
-              if (row.montant_cfa === 0) return `${row.status}`;
+              if (row.montant_cfa === 0)
+                return `${row.status} (${row.type_annuler})`;
               return data + (data === `ANNULEE` ? `(${row.type_annuler})` : ``);
             },
           },
@@ -378,6 +381,12 @@ export class ListeEntreComponent implements OnInit, AfterViewInit, OnDestroy {
       typeAnnuler: ['', Validators.required],
       montant_rembourser: [0],
     });
+
+    // this.annulerEntreForm = this.fb.group({
+    //   codeAnnuler: ['', Validators.required],
+    //   typeAnnuler: ['', Validators.required],
+    //   montant_rembourser: [0],
+    // });
   }
 
   selectedDevise: any = null; // Devise sélectionnée pour modification
@@ -409,23 +418,26 @@ export class ListeEntreComponent implements OnInit, AfterViewInit, OnDestroy {
     this.isLoadingAnnuler = true;
     const { codeAnnuler, typeAnnuler, montant_rembourser } =
       this.annulerEntreForm.value;
-
     this.entreService
       .annulerEntreParCode(codeAnnuler, typeAnnuler, montant_rembourser)
-      .subscribe(
-        (response) => {
+      .subscribe({
+        next: (response) => {
           console.log('Réponse du serveur:', response);
           this.fetchAllEntre();
+          this.annulerEntreForm.reset();
+          this.annulerEntreForm.markAsPristine();
+          this.annulerEntreForm.markAsUntouched();
+          this.annulerEntreForm.updateValueAndValidity();
+
           this.isLoadingAnnuler = false;
           alert(response.message);
-          this.cd.detectChanges(); // Forcer la détection des changements
         },
-        (error) => {
+        error: (error) => {
           console.error('Erreur:', error);
           this.isLoadingAnnuler = false;
           alert(error.error.message);
-        }
-      );
+        },
+      });
   }
 
   getUserInfo() {
