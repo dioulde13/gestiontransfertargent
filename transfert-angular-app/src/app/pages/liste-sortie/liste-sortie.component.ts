@@ -1,12 +1,23 @@
-import { AfterViewInit, ChangeDetectorRef, Component, OnDestroy, OnInit } from '@angular/core';
+import {
+  AfterViewInit,
+  ChangeDetectorRef,
+  Component,
+  OnDestroy,
+  OnInit,
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
+import {
+  FormBuilder,
+  FormGroup,
+  FormsModule,
+  ReactiveFormsModule,
+  Validators,
+} from '@angular/forms';
 import { SortieService } from '../../services/sortie/sortie.service';
 import { AuthService } from '../../services/auth/auth-service.service';
 import { DeviseService } from '../../services/devise/devise.service';
 import { PartenaireServiceService } from '../../services/partenaire/partenaire-service.service';
 import { Subject } from 'rxjs';
-
 
 interface Result {
   code: string;
@@ -35,7 +46,7 @@ interface Result {
   standalone: true,
   imports: [CommonModule, ReactiveFormsModule, FormsModule],
   templateUrl: './liste-sortie.component.html',
-  styleUrl: './liste-sortie.component.css'
+  styleUrl: './liste-sortie.component.css',
 })
 export class ListeSortieComponent implements OnInit, AfterViewInit, OnDestroy {
   // Tableau pour stocker les résultats des entrées
@@ -48,7 +59,6 @@ export class ListeSortieComponent implements OnInit, AfterViewInit, OnDestroy {
   sortieForm!: FormGroup;
   annulerForm!: FormGroup;
 
-
   dtTrigger: Subject<any> = new Subject<any>();
 
   // Injection des dépendances nécessaires
@@ -59,60 +69,27 @@ export class ListeSortieComponent implements OnInit, AfterViewInit, OnDestroy {
     private partenaireService: PartenaireServiceService,
     private cd: ChangeDetectorRef,
     private fb: FormBuilder
-  ) { }
-
+  ) {}
 
   private dataTable: any;
-
-
-  selectedSortie: any = null;
-  valideSortieForm!: FormGroup;
-  validerSortie(sortie: any) {
-    console.log("Sortie reçue :", sortie);
-    this.selectedSortie = sortie;
-  
-    this.valideSortieForm.patchValue({
-      utilisateurId: sortie?.Utilisateur?.id,
-      partenaireId: sortie?.Partenaire?.id,
-      prix_2: sortie?.prix_2,
-    });
-  
-    console.log("Formulaire :", this.valideSortieForm);
-    console.log("Sortie sélectionnée :", this.selectedSortie);
-  }
-  
-
-  valideSortie() {
-    const updatedData = this.valideSortieForm.value;
-    console.log(updatedData);
-    console.log(this.selectedSortie.id);
-    this.sortieService.validerSortie(this.selectedSortie.id, updatedData).subscribe({
-      next: (response) => {
-        this.fetchAllSortie();
-        alert(response.message);
-      },
-      error:(error) =>{
-        alert(error.error.message);
-      }
-    }
-    );
-  }
 
   selectedDevise: any = null; // Devise sélectionnée pour modification
 
   onUpdate() {
     if (this.editDeviseForm.valid && this.selectedDevise) {
       const updatedData = this.editDeviseForm.value;
-      this.deviseService.modifierDevise(this.selectedDevise.id, updatedData).subscribe(
-        response => {
-          this.fetchDevise();
-          alert('Devise modifiée avec succès!');
-        },
-        error => {
-          console.error('Erreur lors de la modification du devise:', error);
-          alert('Erreur lors de la modification du devise.');
-        }
-      );
+      this.deviseService
+        .modifierDevise(this.selectedDevise.id, updatedData)
+        .subscribe({
+          next: (response) => {
+            this.fetchDevise();
+            alert('Devise modifiée avec succès!');
+          },
+          error: (error) => {
+            console.error('Erreur lors de la modification du devise:', error);
+            alert('Erreur lors de la modification du devise.');
+          },
+        });
     }
   }
 
@@ -127,17 +104,18 @@ export class ListeSortieComponent implements OnInit, AfterViewInit, OnDestroy {
     });
   }
 
-
-
-
   startDate: Date | null = null;
   endDate: Date | null = null;
 
   totalMontant: number = 0; // Initialisation
 
   filtrerSortieDates(): void {
-    const startDateInput = (document.getElementById('startDate') as HTMLInputElement).value;
-    const endDateInput = (document.getElementById('endDate') as HTMLInputElement).value;
+    const startDateInput = (
+      document.getElementById('startDate') as HTMLInputElement
+    ).value;
+    const endDateInput = (
+      document.getElementById('endDate') as HTMLInputElement
+    ).value;
 
     this.startDate = startDateInput ? new Date(startDateInput) : null;
     this.endDate = endDateInput ? new Date(endDateInput) : null;
@@ -146,11 +124,15 @@ export class ListeSortieComponent implements OnInit, AfterViewInit, OnDestroy {
     this.totalMontant = 0;
 
     // Filtrer d'abord par date
-    let filteredResults = this.allresultat.filter((result: { date_creation: string }) => {
-      const resultDate = new Date(result.date_creation);
-      return (!this.startDate || resultDate >= this.startDate) &&
-        (!this.endDate || resultDate <= this.endDate);
-    });
+    let filteredResults = this.allresultat.filter(
+      (result: { date_creation: string }) => {
+        const resultDate = new Date(result.date_creation);
+        return (
+          (!this.startDate || resultDate >= this.startDate) &&
+          (!this.endDate || resultDate <= this.endDate)
+        );
+      }
+    );
 
     // Mettre à jour DataTable avec les résultats filtrés par date
     this.dataTable.clear().rows.add(filteredResults).draw();
@@ -163,14 +145,19 @@ export class ListeSortieComponent implements OnInit, AfterViewInit, OnDestroy {
         .toArray();
 
       // Recalculer le total avec des types explicitement définis
-      this.totalMontant = filteredDataTable.reduce((sum: number, row: { montant_gnf: number }) => {
-        return sum + row.montant_gnf;
-      }, 0);
+      this.totalMontant = filteredDataTable.reduce(
+        (sum: number, row: { montant_gnf: number }) => {
+          return sum + row.montant_gnf;
+        },
+        0
+      );
 
-      console.log('Total Montant après filtre et recherche :', this.totalMontant);
+      console.log(
+        'Total Montant après filtre et recherche :',
+        this.totalMontant
+      );
     }, 200); // Timeout pour attendre la mise à jour de DataTable
   }
-
 
   // Méthode pour récupérer toutes les entrées via l'API
   private fetchAllSortie(): void {
@@ -188,13 +175,149 @@ export class ListeSortieComponent implements OnInit, AfterViewInit, OnDestroy {
     });
   }
 
+  // private initDataTable(): void {
+  //   setTimeout(() => {
+  //     if (this.dataTable) {
+  //       this.dataTable.destroy(); // Détruire l'ancienne instance avant d'en créer une nouvelle
+  //     }
+  //     this.dataTable = ($('#datatable') as any).DataTable({
+  //       dom:
+  //         "<'row'<'col-sm-6 dt-buttons-left'B><'col-sm-6 text-end dt-search-right'f>>" +
+  //         "<'row'<'col-sm-12'tr>>" +
+  //         "<'row'<'col-sm-5'i><'col-sm-7'p>>",
+  //       buttons: ['csv', 'excel', 'pdf', 'print'],
+  //       paging: true,
+  //       searching: true,
+  //       pageLength: 10,
+  //       lengthMenu: [10, 25, 50],
+  //       data: this.allresultat,
+  //       order: [0, 'desc'],
+  //       columns: [
+  //         { title: 'Code generer', data: 'codeEnvoyer' },
+  //         { title: 'Code', data: 'code' },
+  //         {
+  //           title: 'Date du jour',
+  //           data: 'date_creation',
+  //           render: (data: string) => {
+  //             const date = new Date(data);
+  //             const day = String(date.getDate()).padStart(2, '0'); // Jour
+  //             const month = String(date.getMonth() + 1).padStart(2, '0'); // Mois
+  //             const year = date.getFullYear(); // Année
+  //             const hours = String(date.getHours()).padStart(2, '0'); // Heures
+  //             const minutes = String(date.getMinutes()).padStart(2, '0'); // Minutes
+
+  //             return `${day}/${month}/${year} ${hours}:${minutes}`; // Format final
+  //           },
+  //         }, // Formatage de la date
+  //         { title: 'Pays', data: 'pays_dest' },
+  //         { title: 'Expéditeur', data: 'expediteur' },
+  //         { title: 'Receveur', data: 'receveur' },
+  //         { title: 'Téléphone', data: 'telephone_receveur' },
+  //         {
+  //           title: 'Montant',
+  //           data: 'montant',
+  //           render: (data: number, type: string, row: any) => {
+  //             const formattedAmount = new Intl.NumberFormat('fr-FR', {
+  //               style: 'decimal',
+  //               minimumFractionDigits: 0,
+  //               maximumFractionDigits: 0,
+  //             }).format(data); // Format le montant sans symbole de devise
+
+  //             // Si vous avez besoin d'utiliser `signe_2`, vous pouvez l'ajouter ici
+  //             const signe = row.signe_2; // Récupérer la valeur de `signe_2`
+  //             console.log(signe);
+
+  //             // Retourner le montant et le signe, par exemple
+  //             return `${formattedAmount} ${signe}`; // Exemple de retour
+  //           },
+  //         },
+  //         {
+  //           title: 'Prix',
+  //           data: 'prix_2',
+  //           render: (data: number, type: string, row: any) => {
+  //             const formattedAmount = new Intl.NumberFormat('fr-FR', {
+  //               style: 'decimal',
+  //               minimumFractionDigits: 0,
+  //               maximumFractionDigits: 0,
+  //             }).format(data); // Format le montant sans symbole de devise
+
+  //             // Si vous avez besoin d'utiliser `signe_2`, vous pouvez l'ajouter ici
+  //             const signe = row.signe_1; // Récupérer la valeur de `signe_2`
+
+  //             // Retourner le montant et le signe, par exemple
+  //             return `${formattedAmount} ${signe}`; // Exemple de retour
+  //           },
+  //         },
+  //         {
+  //           title: 'Montant en GNF',
+  //           data: 'montant_gnf',
+  //           render: (data: number, type: string, row: any) => {
+  //             const formattedAmount = new Intl.NumberFormat('fr-FR', {
+  //               style: 'decimal',
+  //               minimumFractionDigits: 0,
+  //               maximumFractionDigits: 0,
+  //             }).format(data); // Format le montant sans symbole de devise
+
+  //             // Si vous avez besoin d'utiliser `signe_2`, vous pouvez l'ajouter ici
+  //             const signe = row.signe_1; // Récupérer la valeur de `signe_2`
+
+  //             // Retourner le montant et le signe, par exemple
+  //             return `${formattedAmount} ${signe}`; // Exemple de retour
+  //           },
+  //         },
+  //         {
+  //           title: 'Statut de paiement',
+  //           data: 'status',
+  //           render: (data: string, row: Result) =>
+  //             data + (row.status === 'ANNULEE' ? ` (${row.type_annuler})` : ''),
+  //         },
+  //       ],
+  //     });
+  //     this.cd.detectChanges();
+  //   }, 100);
+  // }
+
+  selectedSortie: any = null;
+  valideSortieForm!: FormGroup;
+  validerSortieModal(sortie: any) {
+    console.log('Sortie reçue :', sortie);
+    this.selectedSortie = sortie;
+
+    this.valideSortieForm.patchValue({
+      utilisateurId: sortie?.Utilisateur?.id,
+      partenaireId: sortie?.Partenaire?.id,
+      prix_2: sortie?.prix_2,
+    });
+
+    console.log('Formulaire :', this.valideSortieForm);
+    console.log('Sortie sélectionnée :', this.selectedSortie);
+  }
+
+  valideSortie() {
+    const updatedData = this.valideSortieForm.value;
+    console.log(updatedData);
+    console.log(this.selectedSortie.id);
+    this.sortieService
+      .validerSortie(this.selectedSortie.id, updatedData)
+      .subscribe({
+        next: (response) => {
+          this.fetchAllSortie();
+          alert(response.message);
+        },
+        error: (error) => {
+          alert(error.error.message);
+        },
+      });
+  }
+
   private initDataTable(): void {
     setTimeout(() => {
       if (this.dataTable) {
         this.dataTable.destroy(); // Détruire l'ancienne instance avant d'en créer une nouvelle
       }
       this.dataTable = ($('#datatable') as any).DataTable({
-        dom: "<'row'<'col-sm-6 dt-buttons-left'B><'col-sm-6 text-end dt-search-right'f>>" +
+        dom:
+          "<'row'<'col-sm-6 dt-buttons-left'B><'col-sm-6 text-end dt-search-right'f>>" +
           "<'row'<'col-sm-12'tr>>" +
           "<'row'<'col-sm-5'i><'col-sm-7'p>>",
         buttons: ['csv', 'excel', 'pdf', 'print'],
@@ -203,102 +326,93 @@ export class ListeSortieComponent implements OnInit, AfterViewInit, OnDestroy {
         pageLength: 10,
         lengthMenu: [10, 25, 50],
         data: this.allresultat,
-        order: [0, 'desc'],
+        order: [[0, 'desc']],
         columns: [
-          { title: "Code generer", data: "codeEnvoyer" },
-          { title: "Code", data: "code" },
+          { title: 'Code generer', data: 'codeEnvoyer' },
+          { title: 'Code', data: 'code' },
           {
-            title: "Date du jour", data: "date_creation",
+            title: 'Date du jour',
+            data: 'date_creation',
             render: (data: string) => {
               const date = new Date(data);
-              const day = String(date.getDate()).padStart(2, '0'); // Jour
-              const month = String(date.getMonth() + 1).padStart(2, '0'); // Mois
-              const year = date.getFullYear(); // Année
-              const hours = String(date.getHours()).padStart(2, '0'); // Heures
-              const minutes = String(date.getMinutes()).padStart(2, '0'); // Minutes
-
-              return `${day}/${month}/${year} ${hours}:${minutes}`; // Format final
-            }
-          }, // Formatage de la date
-          { title: "Pays", data: "pays_dest" },
-          { title: "Expéditeur", data: "expediteur" },
-          { title: "Receveur", data: "receveur" },
-          { title: "Téléphone", data: "telephone_receveur" },
+              const day = String(date.getDate()).padStart(2, '0');
+              const month = String(date.getMonth() + 1).padStart(2, '0');
+              const year = date.getFullYear();
+              const hours = String(date.getHours()).padStart(2, '0');
+              const minutes = String(date.getMinutes()).padStart(2, '0');
+              return `${day}/${month}/${year} ${hours}:${minutes}`;
+            },
+          },
+          { title: 'Pays', data: 'pays_dest' },
+          { title: 'Expéditeur', data: 'expediteur' },
+          { title: 'Receveur', data: 'receveur' },
+          { title: 'Téléphone', data: 'telephone_receveur' },
           {
-            title: "Montant",
-            data: "montant",
+            title: 'Montant',
+            data: 'montant',
             render: (data: number, type: string, row: any) => {
               const formattedAmount = new Intl.NumberFormat('fr-FR', {
                 style: 'decimal',
                 minimumFractionDigits: 0,
-                maximumFractionDigits: 0
-              }).format(data); // Format le montant sans symbole de devise
-
-              // Si vous avez besoin d'utiliser `signe_2`, vous pouvez l'ajouter ici
-              const signe = row.signe_2; // Récupérer la valeur de `signe_2`
-              console.log(signe);
-
-              // Retourner le montant et le signe, par exemple
-              return `${formattedAmount} ${signe}`; // Exemple de retour
-            }
+                maximumFractionDigits: 0,
+              }).format(data);
+              return `${formattedAmount} ${row.signe_2}`;
+            },
           },
           {
-            title: "Prix", data: "prix_2",
+            title: 'Prix',
+            data: 'prix_2',
             render: (data: number, type: string, row: any) => {
               const formattedAmount = new Intl.NumberFormat('fr-FR', {
                 style: 'decimal',
                 minimumFractionDigits: 0,
-                maximumFractionDigits: 0
-              }).format(data); // Format le montant sans symbole de devise
-
-              // Si vous avez besoin d'utiliser `signe_2`, vous pouvez l'ajouter ici
-              const signe = row.signe_1; // Récupérer la valeur de `signe_2`
-
-              // Retourner le montant et le signe, par exemple
-              return `${formattedAmount} ${signe}`; // Exemple de retour
-            }
+                maximumFractionDigits: 0,
+              }).format(data);
+              return `${formattedAmount} ${row.signe_1}`;
+            },
           },
           {
-            title: "Montant en GNF", data: "montant_gnf",
+            title: 'Montant en GNF',
+            data: 'montant_gnf',
             render: (data: number, type: string, row: any) => {
               const formattedAmount = new Intl.NumberFormat('fr-FR', {
                 style: 'decimal',
                 minimumFractionDigits: 0,
-                maximumFractionDigits: 0
-              }).format(data); // Format le montant sans symbole de devise
-
-              // Si vous avez besoin d'utiliser `signe_2`, vous pouvez l'ajouter ici
-              const signe = row.signe_1; // Récupérer la valeur de `signe_2`
-
-              // Retourner le montant et le signe, par exemple
-              return `${formattedAmount} ${signe}`; // Exemple de retour
-            }
+                maximumFractionDigits: 0,
+              }).format(data);
+              return `${formattedAmount} ${row.signe_1}`;
+            },
           },
-          { title: "Statut de paiement", data: "status", render: (data: string, row: Result) => data + (row.status === 'ANNULEE' ? ` (${row.type_annuler})` : '') },          
+          {
+            title: 'Statut de paiement',
+            data: 'status',
+            render: (data: string, type: string, row: any) =>
+              data + (row.status === 'ANNULEE' ? ` (${row.type_annuler})` : ''),
+          },
           // {
-          //   title: "Action",
-          //   data: null, // Ce n'est pas une donnée de l'objet
-          //   orderable: false, // Désactiver le tri sur cette colonne
-          //   render: (data: any, type: string, row: any) => {
-          //     // Vérifier si le statut est "NON PAYEE"
-          //     if (row.status === "NON PAYEE") {
-          //       const rowData = JSON.stringify(row); // Convertir l'objet en chaîne
-          
+          //   title: 'Action',
+          //   data: 'valider',
+          // },
+          // {
+          //   title: 'Action',
+          //   data: 'status',
+          //   orderable: false, // Désactiver le tri pour cette colonne
+          //   render: (data: string, type: string, row: any) => {
+          //     if (data === 'NON PAYEE') {
           //       return `
-          //         <button 
-          //           class="btn btn-warning btn-sm" 
-          //           data-toggle="modal" 
-          //           data-target="#valider-sortie-modal" 
-          //           onclick='validerSortie(${rowData})'>
-          //           Valider
-          //         </button>
-          //       `;
+          //                       <button class="btn btn-warning btn-sm"
+          //                           data-toggle="modal"
+          //                           data-target="#valider-sortie-modal"
+          //                           onclick="angular.element(this).scope().validerSortie(${JSON.stringify(
+          //                             row
+          //                           )})">
+          //                           Valider
+          //                       </button>`;
           //     }
-          //     return ""; // Retourne une chaîne vide si le statut n'est pas "NON PAYEE"
-          //   }
-          // }
-                  
-        ]
+          //     return '';
+          //   },
+          // },
+        ],
       });
       this.cd.detectChanges();
     }, 100);
@@ -315,11 +429,8 @@ export class ListeSortieComponent implements OnInit, AfterViewInit, OnDestroy {
     this.dtTrigger.unsubscribe();
   }
 
-
   // Initialisation du composant
   ngOnInit(): void {
-
-
     this.valideSortieForm = this.fb.group({
       utilisateurId: [this.idUser],
       partenaireId: [''],
@@ -344,7 +455,7 @@ export class ListeSortieComponent implements OnInit, AfterViewInit, OnDestroy {
 
   private annulerFormInitial(): void {
     this.annulerForm = this.fb.group({
-      codeAnnuler: ['', Validators.required]
+      codeAnnuler: ['', Validators.required],
     });
   }
 
@@ -361,7 +472,7 @@ export class ListeSortieComponent implements OnInit, AfterViewInit, OnDestroy {
       error: (error) => {
         this.isLoadingAnnuler = false;
         alert(error.error.message);
-      }
+      },
     });
   }
 
@@ -399,20 +510,17 @@ export class ListeSortieComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   getUserInfo() {
-    this.authService.getUserInfo().subscribe(
-      {
-        next: (response) => {
-          this.userInfo = response.user;
-          //   if (this.userInfo) {
-          this.idUser = this.userInfo.id;
-          console.log('Informations utilisateur:', this.userInfo);
-          // Mettre à jour le champ utilisateurId dans le formulaire
-          this.sortieForm.patchValue({ utilisateurId: this.idUser });
-        }
-      }
-    );
+    this.authService.getUserInfo().subscribe({
+      next: (response) => {
+        this.userInfo = response.user;
+        //   if (this.userInfo) {
+        this.idUser = this.userInfo.id;
+        console.log('Informations utilisateur:', this.userInfo);
+        // Mettre à jour le champ utilisateurId dans le formulaire
+        this.sortieForm.patchValue({ utilisateurId: this.idUser });
+      },
+    });
   }
-
 
   // Initialiser le formulaire avec des validations
   private initForm() {
@@ -427,8 +535,6 @@ export class ListeSortieComponent implements OnInit, AfterViewInit, OnDestroy {
       telephone_receveur: ['', Validators.required],
     });
   }
-
-
 
   loading: boolean = false;
 
@@ -450,7 +556,7 @@ export class ListeSortieComponent implements OnInit, AfterViewInit, OnDestroy {
             codeEnvoyer: '',
             receveur: '',
             montant: '',
-            telephone_receveur: ''
+            telephone_receveur: '',
           });
           this.loading = false;
           alert(response.message);

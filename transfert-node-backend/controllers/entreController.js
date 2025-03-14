@@ -276,7 +276,7 @@ const annulerEntre = async (req, res) => {
 
       const montantEnCoursPayement =
         (Number(entre.montant_rembourser) || 0) + Number(montant_rembourser);
-      console.log(montantEnCoursPayement);
+      // console.log(montantEnCoursPayement);
 
       if (montantEnCoursPayement > entre.montantClient) {
         return res.status(400).json({
@@ -363,6 +363,7 @@ const annulerEntre = async (req, res) => {
       entre.montant_rembourser = montantEnCoursPayement;
       utilisateur.solde = (utilisateur.solde || 0) - Number(montant_rembourser);
       await utilisateur.save();
+      // entre.type_annuler = "EN COURS";
     }
 
     // Mise à jour du montant prêté par le partenaire si l'entrée n'était pas annulée

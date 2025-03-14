@@ -126,6 +126,8 @@ const ajouterSortie = async (req, res) => {
         newCode = `ABS${(numericPart + 1).toString().padStart(4, "0")}`;
       }
     }
+    console.log(utilisateur.solde);
+    console.log(montant_due);
     if (utilisateur.solde > montant_due) {
       if (devise.paysArriver === partenaire.pays) {
         const sortie = await Sortie.create({
@@ -158,12 +160,22 @@ const ajouterSortie = async (req, res) => {
         });
       }
     } else {
+      // res.status(400).json({
+      //   message: `On ne peut pas faire une sortie de ${montant_due.toLocaleString(
+      //     "fr-FR",
+      //     { minimumFractionDigits: 0, maximumFractionDigits: 0 }
+      //   )} GNF
+      //     le solde dans la caisse est: ${solde.toLocaleString("fr-FR", {
+      //       minimumFractionDigits: 0,
+      //       maximumFractionDigits: 0,
+      //     })} GNF `,
+      // });
       const solde = Number(utilisateur.solde);
       res.status(400).json({
         message: `On ne peut pas faire une sortie de ${montant_due.toLocaleString(
           "fr-FR",
           { minimumFractionDigits: 0, maximumFractionDigits: 0 }
-        )} GNF, 
+        )} GNF,
         le solde dans la caisse est: ${solde.toLocaleString("fr-FR", {
           minimumFractionDigits: 0,
           maximumFractionDigits: 0,

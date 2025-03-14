@@ -140,7 +140,7 @@ export class ListeEntreComponent implements OnInit, AfterViewInit, OnDestroy {
   private initDataTable(): void {
     setTimeout(() => {
       if (this.dataTable) {
-        this.dataTable.destroy(); // Détruire l'ancienne instance avant d'en créer une nouvelle
+        this.dataTable.destroy();
       }
       this.dataTable = ($('#datatable') as any).DataTable({
         dom:
