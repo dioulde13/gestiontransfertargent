@@ -160,16 +160,6 @@ const ajouterSortie = async (req, res) => {
         });
       }
     } else {
-      // res.status(400).json({
-      //   message: `On ne peut pas faire une sortie de ${montant_due.toLocaleString(
-      //     "fr-FR",
-      //     { minimumFractionDigits: 0, maximumFractionDigits: 0 }
-      //   )} GNF
-      //     le solde dans la caisse est: ${solde.toLocaleString("fr-FR", {
-      //       minimumFractionDigits: 0,
-      //       maximumFractionDigits: 0,
-      //     })} GNF `,
-      // });
       const solde = Number(utilisateur.solde);
       res.status(400).json({
         message: `On ne peut pas faire une sortie de ${montant_due.toLocaleString(
@@ -190,13 +180,13 @@ const ajouterSortie = async (req, res) => {
 
 const validerSortie = async (req, res) => {
   try {
-    const { id } = req.params;
+    const { code } = req.params; // Récupération du code depuis l'URL
     const { utilisateurId, partenaireId, prix_2 } = req.body;
 
-    // Vérifier si la sortie existe
-    const sortie = await Sortie.findByPk(id);
+    // Vérifier si la sortie existe en fonction du code
+    const sortie = await Sortie.findOne({ where: { code } });
     if (!sortie) {
-      console.log("Sortie non trouvée pour l'ID :", id); // Ajoute ce log pour voir l'ID reçu
+      console.log("Sortie non trouvée pour le code :", code);
       return res.status(404).json({ message: "Sortie non trouvée." });
     }
 
@@ -212,16 +202,15 @@ const validerSortie = async (req, res) => {
       return res.status(404).json({ message: "Partenaire introuvable." });
     }
 
+    // Vérification de l'état de la sortie
     if (sortie.status === "PAYEE") {
-      return res
-        .status(400)
-        .json({ message: `On ne peut valider deux fois une sortie` });
+      return res.status(400).json({ message: "Cette sortie est déjà PAYÉE." });
     }
 
     if (sortie.status === "ANNULEE") {
       return res
         .status(400)
-        .json({ message: `On ne peut valider une sortie ANNULEE` });
+        .json({ message: "Impossible de valider une sortie ANNULÉE." });
     }
 
     // Recalculer le montant en fonction du prix_2 s'il est fourni
@@ -230,35 +219,116 @@ const validerSortie = async (req, res) => {
       montant_due = (sortie.montant / sortie.prix_1) * prix_2;
     }
 
-    // Mise à jour de la sortie
-    await sortie.update({
-      utilisateurId: utilisateurId || sortie.utilisateurId,
-      partenaireId: partenaireId || sortie.partenaireId,
-      prix_2: prix_2 || sortie.prix_2,
-      montant_gnf: montant_due,
-    });
+    if (utilisateur.solde > montant_due) {
+      await sortie.update({
+        utilisateurId: utilisateurId || sortie.utilisateurId,
+        partenaireId: partenaireId || sortie.partenaireId,
+        prix_2: prix_2 || sortie.prix_2,
+        montant_gnf: montant_due,
+        status: "PAYEE",
+      });
+    } else {
+      const solde = Number(utilisateur.solde);
+      res.status(400).json({
+        message: `On ne peut pas faire une sortie de ${montant_due.toLocaleString(
+          "fr-FR",
+          { minimumFractionDigits: 0, maximumFractionDigits: 0 }
+        )} GNF, le solde dans la caisse est: ${solde.toLocaleString("fr-FR", {
+          minimumFractionDigits: 0,
+          maximumFractionDigits: 0,
+        })} GNF`,
+      });
+    }
 
-    // Mise à jour du solde de l'utilisateur
     utilisateur.solde = (utilisateur.solde || 0) - montant_due;
     await utilisateur.save();
 
-    // Mise à jour du montant_prêter du partenaire
+    // Mise à jour du montant prêté du partenaire
     partenaire.montant_preter =
       (partenaire.montant_preter || 0) - sortie.montant;
     await partenaire.save();
 
-    sortie.status = "PAYEE";
-    await sortie.save();
-
     res.status(200).json({
-      message: "Sortie mise à jour avec succès.",
+      message: "Sortie validée avec succès.",
       sortie,
     });
   } catch (error) {
-    console.error("Erreur lors de la mise à jour de la sortie :", error);
+    console.error("Erreur lors de la validation de la sortie :", error);
     res.status(500).json({ message: "Erreur interne du serveur." });
   }
 };
+
+// const validerSortie = async (req, res) => {
+//   try {
+//     const { id } = req.params;
+//     const { utilisateurId, partenaireId, prix_2 } = req.body;
+
+//     // Vérifier si la sortie existe
+//     const sortie = await Sortie.findByPk(id);
+//     if (!sortie) {
+//       console.log("Sortie non trouvée pour l'ID :", id); // Ajoute ce log pour voir l'ID reçu
+//       return res.status(404).json({ message: "Sortie non trouvée." });
+//     }
+
+//     // Vérifier si l'utilisateur existe
+//     const utilisateur = await Utilisateur.findByPk(utilisateurId);
+//     if (!utilisateur) {
+//       return res.status(404).json({ message: "Utilisateur introuvable." });
+//     }
+
+//     // Vérifier si le partenaire existe
+//     const partenaire = await Partenaire.findByPk(partenaireId);
+//     if (!partenaire) {
+//       return res.status(404).json({ message: "Partenaire introuvable." });
+//     }
+
+//     if (sortie.status === "PAYEE") {
+//       return res
+//         .status(400)
+//         .json({ message: `On ne peut valider deux fois une sortie` });
+//     }
+
+//     if (sortie.status === "ANNULEE") {
+//       return res
+//         .status(400)
+//         .json({ message: `On ne peut valider une sortie ANNULEE` });
+//     }
+
+//     // Recalculer le montant en fonction du prix_2 s'il est fourni
+//     let montant_due = sortie.montant_gnf; // Valeur par défaut (ancienne valeur)
+//     if (prix_2 !== undefined) {
+//       montant_due = (sortie.montant / sortie.prix_1) * prix_2;
+//     }
+
+//     // Mise à jour de la sortie
+//     await sortie.update({
+//       utilisateurId: utilisateurId || sortie.utilisateurId,
+//       partenaireId: partenaireId || sortie.partenaireId,
+//       prix_2: prix_2 || sortie.prix_2,
+//       montant_gnf: montant_due,
+//     });
+
+//     // Mise à jour du solde de l'utilisateur
+//     utilisateur.solde = (utilisateur.solde || 0) - montant_due;
+//     await utilisateur.save();
+
+//     // Mise à jour du montant_prêter du partenaire
+//     partenaire.montant_preter =
+//       (partenaire.montant_preter || 0) - sortie.montant;
+//     await partenaire.save();
+
+//     sortie.status = "PAYEE";
+//     await sortie.save();
+
+//     res.status(200).json({
+//       message: "Sortie mise à jour avec succès.",
+//       sortie,
+//     });
+//   } catch (error) {
+//     console.error("Erreur lors de la mise à jour de la sortie :", error);
+//     res.status(500).json({ message: "Erreur interne du serveur." });
+//   }
+// };
 
 const annulerSortie = async (req, res) => {
   try {

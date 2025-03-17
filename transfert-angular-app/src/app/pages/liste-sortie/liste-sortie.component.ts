@@ -75,7 +75,9 @@ export class ListeSortieComponent implements OnInit, AfterViewInit, OnDestroy {
 
   selectedDevise: any = null; // Devise sélectionnée pour modification
 
+  isLoadingModifier: boolean = false;
   onUpdate() {
+    this.isLoadingModifier = true;
     if (this.editDeviseForm.valid && this.selectedDevise) {
       const updatedData = this.editDeviseForm.value;
       this.deviseService
@@ -84,6 +86,7 @@ export class ListeSortieComponent implements OnInit, AfterViewInit, OnDestroy {
           next: (response) => {
             this.fetchDevise();
             alert('Devise modifiée avec succès!');
+            this.isLoadingModifier = false;
           },
           error: (error) => {
             console.error('Erreur lors de la modification du devise:', error);
@@ -175,108 +178,6 @@ export class ListeSortieComponent implements OnInit, AfterViewInit, OnDestroy {
     });
   }
 
-  // private initDataTable(): void {
-  //   setTimeout(() => {
-  //     if (this.dataTable) {
-  //       this.dataTable.destroy(); // Détruire l'ancienne instance avant d'en créer une nouvelle
-  //     }
-  //     this.dataTable = ($('#datatable') as any).DataTable({
-  //       dom:
-  //         "<'row'<'col-sm-6 dt-buttons-left'B><'col-sm-6 text-end dt-search-right'f>>" +
-  //         "<'row'<'col-sm-12'tr>>" +
-  //         "<'row'<'col-sm-5'i><'col-sm-7'p>>",
-  //       buttons: ['csv', 'excel', 'pdf', 'print'],
-  //       paging: true,
-  //       searching: true,
-  //       pageLength: 10,
-  //       lengthMenu: [10, 25, 50],
-  //       data: this.allresultat,
-  //       order: [0, 'desc'],
-  //       columns: [
-  //         { title: 'Code generer', data: 'codeEnvoyer' },
-  //         { title: 'Code', data: 'code' },
-  //         {
-  //           title: 'Date du jour',
-  //           data: 'date_creation',
-  //           render: (data: string) => {
-  //             const date = new Date(data);
-  //             const day = String(date.getDate()).padStart(2, '0'); // Jour
-  //             const month = String(date.getMonth() + 1).padStart(2, '0'); // Mois
-  //             const year = date.getFullYear(); // Année
-  //             const hours = String(date.getHours()).padStart(2, '0'); // Heures
-  //             const minutes = String(date.getMinutes()).padStart(2, '0'); // Minutes
-
-  //             return `${day}/${month}/${year} ${hours}:${minutes}`; // Format final
-  //           },
-  //         }, // Formatage de la date
-  //         { title: 'Pays', data: 'pays_dest' },
-  //         { title: 'Expéditeur', data: 'expediteur' },
-  //         { title: 'Receveur', data: 'receveur' },
-  //         { title: 'Téléphone', data: 'telephone_receveur' },
-  //         {
-  //           title: 'Montant',
-  //           data: 'montant',
-  //           render: (data: number, type: string, row: any) => {
-  //             const formattedAmount = new Intl.NumberFormat('fr-FR', {
-  //               style: 'decimal',
-  //               minimumFractionDigits: 0,
-  //               maximumFractionDigits: 0,
-  //             }).format(data); // Format le montant sans symbole de devise
-
-  //             // Si vous avez besoin d'utiliser `signe_2`, vous pouvez l'ajouter ici
-  //             const signe = row.signe_2; // Récupérer la valeur de `signe_2`
-  //             console.log(signe);
-
-  //             // Retourner le montant et le signe, par exemple
-  //             return `${formattedAmount} ${signe}`; // Exemple de retour
-  //           },
-  //         },
-  //         {
-  //           title: 'Prix',
-  //           data: 'prix_2',
-  //           render: (data: number, type: string, row: any) => {
-  //             const formattedAmount = new Intl.NumberFormat('fr-FR', {
-  //               style: 'decimal',
-  //               minimumFractionDigits: 0,
-  //               maximumFractionDigits: 0,
-  //             }).format(data); // Format le montant sans symbole de devise
-
-  //             // Si vous avez besoin d'utiliser `signe_2`, vous pouvez l'ajouter ici
-  //             const signe = row.signe_1; // Récupérer la valeur de `signe_2`
-
-  //             // Retourner le montant et le signe, par exemple
-  //             return `${formattedAmount} ${signe}`; // Exemple de retour
-  //           },
-  //         },
-  //         {
-  //           title: 'Montant en GNF',
-  //           data: 'montant_gnf',
-  //           render: (data: number, type: string, row: any) => {
-  //             const formattedAmount = new Intl.NumberFormat('fr-FR', {
-  //               style: 'decimal',
-  //               minimumFractionDigits: 0,
-  //               maximumFractionDigits: 0,
-  //             }).format(data); // Format le montant sans symbole de devise
-
-  //             // Si vous avez besoin d'utiliser `signe_2`, vous pouvez l'ajouter ici
-  //             const signe = row.signe_1; // Récupérer la valeur de `signe_2`
-
-  //             // Retourner le montant et le signe, par exemple
-  //             return `${formattedAmount} ${signe}`; // Exemple de retour
-  //           },
-  //         },
-  //         {
-  //           title: 'Statut de paiement',
-  //           data: 'status',
-  //           render: (data: string, row: Result) =>
-  //             data + (row.status === 'ANNULEE' ? ` (${row.type_annuler})` : ''),
-  //         },
-  //       ],
-  //     });
-  //     this.cd.detectChanges();
-  //   }, 100);
-  // }
-
   selectedSortie: any = null;
   valideSortieForm!: FormGroup;
   validerSortieModal(sortie: any) {
@@ -293,16 +194,28 @@ export class ListeSortieComponent implements OnInit, AfterViewInit, OnDestroy {
     console.log('Sortie sélectionnée :', this.selectedSortie);
   }
 
+  isLoadingValiderSortie: boolean = false;
+
   valideSortie() {
+    this.isLoadingValiderSortie = true;
     const updatedData = this.valideSortieForm.value;
-    console.log(updatedData);
-    console.log(this.selectedSortie.id);
+    if (!updatedData.code_sortie) {
+      alert('Veuillez saisir un code de sortie !');
+      return;
+    }
+    console.log('Code de sortie saisi :', updatedData.code_sortie); // Vérification
     this.sortieService
-      .validerSortie(this.selectedSortie.id, updatedData)
+      .validerSortie(updatedData.code_sortie, updatedData) // Utilisation du code_sortie
       .subscribe({
         next: (response) => {
           this.fetchAllSortie();
           alert(response.message);
+          this.valideSortieForm.patchValue({
+            partenaireId: '',
+            code_sortie: '',
+            prix_2: '',
+          });
+          this.isLoadingValiderSortie = false;
         },
         error: (error) => {
           alert(error.error.message);
@@ -328,8 +241,8 @@ export class ListeSortieComponent implements OnInit, AfterViewInit, OnDestroy {
         data: this.allresultat,
         order: [[0, 'desc']],
         columns: [
-          { title: 'Code generer', data: 'codeEnvoyer' },
-          { title: 'Code', data: 'code' },
+          { title: 'Code generer', data: 'code' },
+          { title: 'Code', data: 'codeEnvoyer' },
           {
             title: 'Date du jour',
             data: 'date_creation',
@@ -389,29 +302,6 @@ export class ListeSortieComponent implements OnInit, AfterViewInit, OnDestroy {
             render: (data: string, type: string, row: any) =>
               data + (row.status === 'ANNULEE' ? ` (${row.type_annuler})` : ''),
           },
-          // {
-          //   title: 'Action',
-          //   data: 'valider',
-          // },
-          // {
-          //   title: 'Action',
-          //   data: 'status',
-          //   orderable: false, // Désactiver le tri pour cette colonne
-          //   render: (data: string, type: string, row: any) => {
-          //     if (data === 'NON PAYEE') {
-          //       return `
-          //                       <button class="btn btn-warning btn-sm"
-          //                           data-toggle="modal"
-          //                           data-target="#valider-sortie-modal"
-          //                           onclick="angular.element(this).scope().validerSortie(${JSON.stringify(
-          //                             row
-          //                           )})">
-          //                           Valider
-          //                       </button>`;
-          //     }
-          //     return '';
-          //   },
-          // },
         ],
       });
       this.cd.detectChanges();
@@ -429,14 +319,16 @@ export class ListeSortieComponent implements OnInit, AfterViewInit, OnDestroy {
     this.dtTrigger.unsubscribe();
   }
 
-  // Initialisation du composant
-  ngOnInit(): void {
+  private initValiderSortie() {
     this.valideSortieForm = this.fb.group({
       utilisateurId: [this.idUser],
       partenaireId: [''],
+      code_sortie: ['', Validators.required],
       prix_2: ['', Validators.required],
     });
-
+  }
+  // Initialisation du composant
+  ngOnInit(): void {
     this.editDeviseForm = this.fb.group({
       paysArriver: ['', Validators.required],
       signe_2: ['', Validators.required],
@@ -451,6 +343,7 @@ export class ListeSortieComponent implements OnInit, AfterViewInit, OnDestroy {
     this.fetchDevise();
     this.fetchPartenaire();
     this.annulerFormInitial();
+    this.initValiderSortie();
   }
 
   private annulerFormInitial(): void {
@@ -518,6 +411,7 @@ export class ListeSortieComponent implements OnInit, AfterViewInit, OnDestroy {
         console.log('Informations utilisateur:', this.userInfo);
         // Mettre à jour le champ utilisateurId dans le formulaire
         this.sortieForm.patchValue({ utilisateurId: this.idUser });
+        this.valideSortieForm.patchValue({ utilisateurId: this.idUser });
       },
     });
   }

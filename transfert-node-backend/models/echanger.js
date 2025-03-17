@@ -1,10 +1,10 @@
-const { DataTypes } = require('sequelize');
-const sequelize = require('./sequelize');
-const Utilisateur = require('./utilisateurs'); 
-const Devise = require('./devises'); 
-const Partenaire = require('./partenaires'); 
+const { DataTypes } = require("sequelize");
+const sequelize = require("./sequelize");
+const Utilisateur = require("./utilisateurs");
+const Devise = require("./devises");
+const Partenaire = require("./partenaires");
 
-const Echange = sequelize.define('Echange', {
+const Echange = sequelize.define("Echange", {
   id: {
     type: DataTypes.INTEGER,
     autoIncrement: true,
@@ -12,7 +12,7 @@ const Echange = sequelize.define('Echange', {
   },
   partenaireId: {
     type: DataTypes.INTEGER,
-    allowNull: false, // Ou true si facultatif
+    allowNull: true, // Ou true si facultatif
   },
   utilisateurId: {
     type: DataTypes.INTEGER,
@@ -43,7 +43,7 @@ const Echange = sequelize.define('Echange', {
     type: DataTypes.BIGINT,
     allowNull: false,
     defaultValue: 0,
-  }, 
+  },
   montant_restant: {
     type: DataTypes.BIGINT,
     allowNull: false,
@@ -76,14 +76,12 @@ const Echange = sequelize.define('Echange', {
   },
 });
 
+Echange.belongsTo(Partenaire, { foreignKey: "utilisateurId" });
 
+// Définir l'association : Une Entree appartient à un
+Echange.belongsTo(Utilisateur, { foreignKey: "utilisateurId" });
 
-Echange.belongsTo(Partenaire, { foreignKey: 'utilisateurId' });
-
-// Définir l'association : Une Entree appartient à un 
-Echange.belongsTo(Utilisateur, { foreignKey: 'utilisateurId' });
-
-// Définir l'association : Une Entree appartient à un 
-Echange.belongsTo(Devise, { foreignKey: 'deviseId' });
+// Définir l'association : Une Entree appartient à un
+Echange.belongsTo(Devise, { foreignKey: "deviseId" });
 
 module.exports = Echange;

@@ -46,6 +46,15 @@
                           >Annuler Sortie</a
                         >
                       </div>
+                      <div>
+                        <a
+                          href="#"
+                          class="btn btn-primary"
+                          data-toggle="modal"
+                          data-target="#valider-sortie-modal"
+                          >Valider Sortie</a
+                        >
+                      </div>
                       <div
                         class="d-flex flex-wrap items-center justify-between"
                       >
@@ -120,7 +129,7 @@
                     <th>Prix GNF</th>
                     <th>Montant GNF</th>
                     <th>Status</th>
-                    <th>Action</th>
+                    <!-- <th>Action</th> -->
                   </tr>
                 </thead>
                 <tbody>
@@ -150,7 +159,7 @@
                       {{ result.signe_1 }}
                     </td>
                     <td>{{ result.status }}</td>
-                    <td *ngIf="result.status === 'NON PAYEE'">
+                    <!-- <td *ngIf="result.status === 'NON PAYEE'">
                       <button
                         class="btn btn-warning btn-sm"
                         data-toggle="modal"
@@ -159,7 +168,7 @@
                       >
                         Valider
                       </button>
-                    </td>
+                    </td> -->
                   </tr>
                 </tbody>
               </table>
@@ -191,7 +200,19 @@
         <form [formGroup]="valideSortieForm" (ngSubmit)="valideSortie()">
           <div class="col-md-12">
             <div class="form-group">
-              <label for="prix_2">Prix 2</label>
+              <label for="code_sortie">Code</label>
+              <input
+                id="code_sortie"
+                name="code_sortie"
+                formControlName="code_sortie"
+                class="form-control"
+                type="text"
+              />
+            </div>
+          </div>
+          <div class="col-md-12">
+            <div class="form-group">
+              <label for="prix_2">Prix</label>
               <input
                 id="prix_2"
                 name="prix_2"
@@ -201,13 +222,50 @@
               />
             </div>
           </div>
+          <div class="col-md-12">
+            <div class="form-group">
+              <label for="devise">Partenaire</label>
+              <select
+                class="form-control"
+                id="partenaire"
+                formControlName="partenaireId"
+                required
+              >
+                <option value="" disabled selected>
+                  Sélectionnez un partenaire
+                </option>
+                <option
+                  *ngFor="let partenaire of allPartenaire"
+                  [value]="partenaire.id"
+                >
+                  {{
+                    partenaire.prenom +
+                      " " +
+                      partenaire.nom +
+                      " " +
+                      partenaire.pays +
+                      " " +
+                      (partenaire.montant_preter | currency : "" : "" : "1.0-0")
+                  }}
+                </option>
+              </select>
+            </div>
+          </div>
           <div class="modal-footer">
+            <button
+              type="button"
+              class="btn btn-secondary"
+              data-dismiss="modal"
+            >
+              Annuler
+            </button>
             <button
               type="submit"
               class="btn btn-primary"
-              [disabled]="!valideSortieForm.valid"
+              [disabled]="valideSortieForm.invalid || isLoadingValiderSortie"
             >
-              Ok
+              <span *ngIf="isLoadingValiderSortie">Validation en cours...</span>
+              <span *ngIf="!isLoadingValiderSortie">Valider</span>
             </button>
           </div>
         </form>
@@ -332,11 +390,19 @@
           </div>
           <div class="modal-footer">
             <button
+              type="button"
+              class="btn btn-secondary"
+              data-dismiss="modal"
+            >
+              Annuler
+            </button>
+            <button
               type="submit"
               class="btn btn-primary"
-              [disabled]="!editDeviseForm.valid"
+              [disabled]="editDeviseForm.invalid || isLoadingModifier"
             >
-              Modifications
+              <span *ngIf="isLoadingModifier">Modification en cours...</span>
+              <span *ngIf="!isLoadingModifier">Modifier</span>
             </button>
           </div>
         </form>

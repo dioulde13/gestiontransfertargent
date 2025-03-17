@@ -142,9 +142,7 @@
                         {{ result.prix_2 | currency : "" : "" : "1.0-0" }} GNF
                       </td>
                       <td>
-                        {{
-                          result.montant_gnf | currency : "" : "" : "1.0-0"
-                        }}
+                        {{ result.montant_gnf | currency : "" : "" : "1.0-0" }}
                         GNF
                       </td>
                       <td>
@@ -182,6 +180,17 @@
 >
   <div class="modal-dialog modal-dialog-centered modal-xl" role="document">
     <div class="modal-content">
+      <div class="modal-header">
+        <!-- <h5 class="modal-title" id="modalTitle"></h5> -->
+        <button
+          type="button"
+          class="close"
+          data-dismiss="modal"
+          aria-label="Close"
+        >
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
       <div class="modal-body">
         <table
           class="table data-table table-striped table-flush"
@@ -290,13 +299,30 @@
           </div>
           <div class="modal-footer">
             <button
+              type="button"
+              class="btn btn-secondary"
+              data-dismiss="modal"
+            >
+              Annuler
+            </button>
+            <button
+              type="submit"
+              class="btn btn-primary"
+              [disabled]="editDeviseForm.invalid || loadingModif"
+            >
+              <span *ngIf="loadingModif">Modification en cours...</span>
+              <span *ngIf="!loadingModif">Modifier</span>
+            </button>
+          </div>
+          <!-- <div class="modal-footer">
+            <button
               type="submit"
               class="btn btn-primary"
               [disabled]="!editDeviseForm.valid"
             >
               Modifications
             </button>
-          </div>
+          </div> -->
         </form>
       </div>
     </div>
@@ -399,10 +425,10 @@
             <button
               type="submit"
               class="btn btn-primary"
-              [disabled]="partenaireForm.invalid || isLoading"
+              [disabled]="partenaireForm.invalid || loadingPartenaire"
             >
-              <span *ngIf="isLoading">Création en cours...</span>
-              <span *ngIf="!isLoading">Ajouter</span>
+              <span *ngIf="loadingPartenaire">Création en cours...</span>
+              <span *ngIf="!loadingPartenaire">Ajouter</span>
             </button>
           </div>
         </form>
