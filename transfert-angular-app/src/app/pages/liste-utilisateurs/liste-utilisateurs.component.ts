@@ -1,6 +1,12 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common'; 
-import { FormsModule } from '@angular/forms'; 
+import {
+  AfterViewInit,
+  ChangeDetectorRef,
+  Component,
+  OnDestroy,
+  OnInit,
+} from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { UtilisateurService } from '../../services/utilisateurs/utilisateur.service';
@@ -16,9 +22,7 @@ interface User {
   telephone: string;
   date_creation: string;
   email: string;
-  password: string;
   role: string;
-  btEnabled: boolean;
 }
 
 @Component({
@@ -28,9 +32,84 @@ interface User {
   templateUrl: './liste-utilisateurs.component.html',
   styleUrl: './liste-utilisateurs.component.css',
 })
-export class ListeUtilisateursComponent implements OnInit , OnDestroy{
+export class ListeUtilisateursComponent
+  implements OnInit, AfterViewInit, OnDestroy
+{
+  private dataTable: any;
+
+  private initDataTable(): void {
+    // Vérifiez si l'instance DataTable est déjà initialisée pour éviter de la réinitialiser plusieurs fois
+    if ($.fn.dataTable.isDataTable('#datatable')) {
+      this.dataTable.destroy(); // Détruire l'ancienne instance avant de créer une nouvelle
+    }
+
+    this.dataTable = ($('#datatable') as any).DataTable({
+      dom:
+        "<'row'<'col-sm-6 dt-buttons-left'B><'col-sm-6 text-end dt-search-right'f>>" +
+        "<'row'<'col-sm-12'tr>>" +
+        "<'row'<'col-sm-5'i><'col-sm-7'p>>",
+      buttons: ['csv', 'excel', 'pdf', 'print'],
+      paging: true,
+      searching: true,
+      pageLength: 10,
+      lengthMenu: [10, 25, 50],
+      data: this.users, // Utiliser les données déjà récupérées
+      order: [0, 'desc'],
+      columns: [
+        { title: 'Nom', data: 'nom' },
+        { title: 'Prenom', data: 'prenom' },
+        {
+          title: 'Date du jour',
+          data: 'date_creation',
+          render: (data: string) => {
+            const date = new Date(data);
+            const day = String(date.getDate()).padStart(2, '0'); // Jour
+            const month = String(date.getMonth() + 1).padStart(2, '0'); // Mois
+            const year = date.getFullYear(); // Année
+            const hours = String(date.getHours()).padStart(2, '0'); // Heures
+            const minutes = String(date.getMinutes()).padStart(2, '0'); // Minutes
+            return `${day}/${month}/${year} ${hours}:${minutes}`; // Format final
+          },
+        },
+        { title: 'Email', data: 'email' },
+        { title: 'Role', data: 'role' },
+      ],
+    });
+    this.cd.detectChanges();
+  }
+
+  fetchUsers(): void {
+    this.utilisateurService.getUsers().subscribe({
+      next: (response) => {
+        this.users = response;
+        this.initDataTable(); // Initialiser ou réinitialiser DataTable après le chargement des utilisateurs
+        this.cd.detectChanges(); // Mettre à jour le détecteur de changements pour actualiser la vue
+      },
+      error: (error) => {
+        this.errorMessage = `Erreur : ${error.message}`;
+        console.error(
+          'Erreur lors de la récupération des utilisateurs :',
+          error
+        );
+      },
+    });
+  }
+
+  ngAfterViewInit(): void {
+    this.dtTrigger.next(null);
+  }
+
+  ngOnDestroy(): void {
+    if (this.dataTable) {
+      this.dataTable.destroy();
+    }
+    this.dtTrigger.unsubscribe();
+  }
+
+  isLoading: boolean = false;
+
   user: User = this.getEmptyUser();
-  users: any[] = [];
+  users: User[] = [];
   errorMessage: string = '';
   userInfo: any = null; // Informations de l'utilisateur connecté
 
@@ -40,7 +119,7 @@ export class ListeUtilisateursComponent implements OnInit , OnDestroy{
   dtoptions: any = {};
 
   dtTrigger: Subject<any> = new Subject<any>();
-  
+
   // Gestion des modales
   isAddUserModalOpen: boolean = false; // Modale d'ajout
   isEditStatusModalOpen: boolean = false; // Modale de modification de statut
@@ -50,47 +129,14 @@ export class ListeUtilisateursComponent implements OnInit , OnDestroy{
   constructor(
     private utilisateurService: UtilisateurService,
     private snackBar: MatSnackBar,
-    private authService: AuthService
+    private authService: AuthService,
+    private cd: ChangeDetectorRef
   ) {}
 
   ngOnInit(): void {
-    this.dtoptions = {
-      pagingType: 'full_numbers',
-      pageLength: 10,
-      columns: [
-        { title: 'Nom', data: 'nom' },
-        { title: 'Prenom', data: 'prenom' },
-        { title: 'Email', data: 'email' },
-        { title: 'Telephone', data: 'telephone' },
-        { title: 'Role', data: 'role' },
-      ]
-    };
     this.fetchUsers();
     this.userInfo = this.authService.getUserInfo();
     console.log('Informations utilisateur:', this.userInfo);
-  }
-
-  ngOnDestroy(): void {
-    // Déclenchement de la destruction de DataTables
-    this.dtTrigger.unsubscribe();
-  }
-
-  /** Récupérer les utilisateurs */
-  fetchUsers(): void {
-    this.utilisateurService.getUsers().subscribe({
-      next: (response) => {
-        this.users = response
-        console.log(this.users);
-        if (this.users && this.users.length > 0) {
-          this.dtTrigger.next(null); // Initialisation de DataTables
-        }
-
-      },
-      error: (error) => {
-        this.errorMessage = `Erreur : ${error.message}`;
-        console.error('Erreur lors de la récupération des utilisateurs :', error);
-      },
-    });
   }
 
   // Récupérer un utilisateur vide
@@ -102,9 +148,7 @@ export class ListeUtilisateursComponent implements OnInit , OnDestroy{
       telephone: '',
       date_creation: '',
       email: '',
-      password: '',
       role: '',
-      btEnabled: true,
     };
   }
 
@@ -117,11 +161,6 @@ export class ListeUtilisateursComponent implements OnInit , OnDestroy{
     });
   }
 
- 
-
-
-
-
   /** Modale d'ajout d'utilisateur */
   openAddUserModal(): void {
     // this.resetForm();
@@ -131,7 +170,7 @@ export class ListeUtilisateursComponent implements OnInit , OnDestroy{
   closeAddUserModal(): void {
     this.isAddUserModalOpen = false;
   }
-  loading : boolean = false;
+  loading: boolean = false;
 
   addUser(): void {
     if (this.isValidForm()) {
@@ -158,7 +197,6 @@ export class ListeUtilisateursComponent implements OnInit , OnDestroy{
   /** Modale de modification de statut */
   openEditStatusModal(user: User): void {
     this.selectedUserId = user.id;
-    this.btEnabled = !user.btEnabled;
     this.isEditStatusModalOpen = true;
   }
 
@@ -170,23 +208,30 @@ export class ListeUtilisateursComponent implements OnInit , OnDestroy{
 
   modifierStatus(): void {
     if (this.selectedUserId === null) {
-      this.showNotification('Aucun utilisateur sélectionné pour la modification.');
+      this.showNotification(
+        'Aucun utilisateur sélectionné pour la modification.'
+      );
       return;
     }
 
-    this.utilisateurService.updateStatusUtilisateur(this.selectedUserId, this.btEnabled).subscribe({
-      next: () => {
-        this.showNotification('Le statut de l\'utilisateur a été modifié avec succès !');
-        this.fetchUsers();
-        this.closeEditStatusModal();
-      },
-      error: (error) => {
-        const message = error.status === 400 && error.error?.message
-          ? error.error.message
-          : `Erreur lors de la mise à jour : ${error.message}`;
-        this.showNotification(message);
-      },
-    });
+    this.utilisateurService
+      .updateStatusUtilisateur(this.selectedUserId, this.btEnabled)
+      .subscribe({
+        next: () => {
+          this.showNotification(
+            "Le statut de l'utilisateur a été modifié avec succès !"
+          );
+          this.fetchUsers();
+          this.closeEditStatusModal();
+        },
+        error: (error) => {
+          const message =
+            error.status === 400 && error.error?.message
+              ? error.error.message
+              : `Erreur lors de la mise à jour : ${error.message}`;
+          this.showNotification(message);
+        },
+      });
   }
 
   /** Utilitaires */
@@ -200,7 +245,6 @@ export class ListeUtilisateursComponent implements OnInit , OnDestroy{
       this.user.prenom.trim() !== '' &&
       this.user.telephone.trim() !== '' &&
       this.user.email.trim() !== '' &&
-      this.user.password.trim() !== '' &&
       this.user.role.trim() !== ''
     );
   }

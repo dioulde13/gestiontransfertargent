@@ -6,6 +6,7 @@ import {
   ChangeDetectorRef,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { NgxIntlTelInputModule } from 'ngx-intl-tel-input';
 import { EntreServiceService } from '../../services/entre/entre-service.service';
 import {
   FormBuilder,
@@ -13,6 +14,7 @@ import {
   FormsModule,
   ReactiveFormsModule,
   Validators,
+  AbstractControl,
 } from '@angular/forms';
 import { AuthService } from '../../services/auth/auth-service.service';
 import { DeviseService } from '../../services/devise/devise.service';
@@ -52,6 +54,7 @@ interface Result {
     FormsModule,
     DataTablesModule,
     NgxPrintModule,
+    NgxIntlTelInputModule,
   ],
   templateUrl: './liste-entre.component.html',
   styleUrls: ['./liste-entre.component.css'],
@@ -462,9 +465,29 @@ export class ListeEntreComponent implements OnInit, AfterViewInit, OnDestroy {
     });
   }
 
+  indicatifs = [
+    {
+      code: '+221',
+      pays: 'Sénégal',
+      regex: /^[7][05678][0-9]{7}$/,
+      min: 9,
+      max: 9,
+    },
+    {
+      code: '+245',
+      pays: 'Guinée-Bissau',
+      regex: /^[5][0-9]{8}$/,
+      min: 9,
+      max: 9,
+    },
+    { code: '+33', pays: 'France', regex: /^[67][0-9]{8}$/, min: 9, max: 9 },
+    { code: '+1', pays: 'USA', regex: /^[2-9][0-9]{9}$/, min: 10, max: 10 },
+  ];
+
   // Initialisation du formulaire avec des validations
   private initForm(): void {
     this.entreForm = this.fb.group({
+      indicatif: [this.indicatifs[0].code], // Par défaut France
       utilisateurId: [this.idUser], // Liaison utilisateurId
       partenaireId: ['', Validators.required],
       deviseId: ['', Validators.required], // Initialisé à vide
@@ -472,8 +495,35 @@ export class ListeEntreComponent implements OnInit, AfterViewInit, OnDestroy {
       receveur: ['', Validators.required],
       montant_cfa: [0, Validators.required],
       montant: [0, Validators.required],
-      telephone_receveur: ['', Validators.required],
+      telephone_receveur: [
+        '',
+        [Validators.required, this.validatePhone.bind(this)],
+      ],
     });
+    this.entreForm.get('indicatif')?.valueChanges.subscribe(() => {
+      this.entreForm.get('telephone_receveur')?.updateValueAndValidity();
+    });
+  }
+
+  validatePhone(control: AbstractControl) {
+    const selectedIndicatif = this.entreForm?.get('indicatif')?.value;
+    const country = this.indicatifs.find((i) => i.code === selectedIndicatif);
+
+    if (country) {
+      const numValue = control.value;
+
+      // Vérifier la longueur du numéro
+      if (numValue.length < country.min || numValue.length > country.max) {
+        return { invalidLength: true };
+      }
+
+      // Vérifier si le format correspond au regex du pays
+      if (!country.regex.test(numValue)) {
+        return { invalidPhone: true };
+      }
+    }
+
+    return null;
   }
 
   allPartenaire: any[] = [];
