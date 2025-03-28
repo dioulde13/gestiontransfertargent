@@ -22,6 +22,7 @@ import { Subject } from 'rxjs';
 interface Result {
   code: string;
   date_creation: string;
+  nomCLient: string;
   pays_dest: string;
   pays_exp: string;
   codeEnvoyer: string;
@@ -33,6 +34,7 @@ interface Result {
   signe_1: string;
   prix_2: number;
   montant: number;
+  montantClient: number;
   montant_gnf: number;
   montant_payer: number;
   montant_restant: number;
@@ -239,10 +241,11 @@ export class ListeSortieComponent implements OnInit, AfterViewInit, OnDestroy {
         pageLength: 10,
         lengthMenu: [10, 25, 50],
         data: this.allresultat,
-        order: [[0, 'desc']],
+        order: [[3, 'desc']],
         columns: [
           { title: 'Code generer', data: 'code' },
           { title: 'Code', data: 'codeEnvoyer' },
+          { title: 'Client', data: 'nomCLient' },
           {
             title: 'Date du jour',
             data: 'date_creation',
@@ -288,19 +291,54 @@ export class ListeSortieComponent implements OnInit, AfterViewInit, OnDestroy {
             title: 'Montant en GNF',
             data: 'montant_gnf',
             render: (data: number, type: string, row: any) => {
+              const montantGNF = row.montant_gnf;
+
+              return row.montant_gnf === 0
+                ? `${new Intl.NumberFormat('fr-FR').format(row.montantClient)} 
+                GNF`
+                : `${new Intl.NumberFormat('fr-FR').format(montantGNF)} 
+               GNF`;
+            },
+          },
+          // {
+          //   title: 'Montant en GNF',
+          //   data: 'montant_gnf',
+          //   render: (data: number, type: string, row: any) => {
+          //     const formattedAmount = new Intl.NumberFormat('fr-FR', {
+          //       style: 'decimal',
+          //       minimumFractionDigits: 0,
+          //       maximumFractionDigits: 0,
+          //     }).format(data);
+          //     return `${formattedAmount} ${row.signe_1}`;
+          //   },
+          // },
+          {
+            title: 'Montant payé GNF',
+            data: 'montant_payer',
+            render: (data: number, type: string, row: any) => {
               const formattedAmount = new Intl.NumberFormat('fr-FR', {
                 style: 'decimal',
                 minimumFractionDigits: 0,
                 maximumFractionDigits: 0,
               }).format(data);
-              return `${formattedAmount} ${row.signe_1}`;
+              return `${formattedAmount} ${row.signe_2}`;
+            },
+          },
+          {
+            title: 'Montant restant GNF',
+            data: 'montant_restant',
+            render: (data: number, type: string, row: any) => {
+              const formattedAmount = new Intl.NumberFormat('fr-FR', {
+                style: 'decimal',
+                minimumFractionDigits: 0,
+                maximumFractionDigits: 0,
+              }).format(data);
+              return `${formattedAmount} ${row.signe_2}`;
             },
           },
           {
             title: 'Statut de paiement',
             data: 'status',
-            render: (data: string, type: string, row: any) =>
-              data + (row.status === 'ANNULEE' ? ` (${row.type_annuler})` : ''),
           },
         ],
       });
@@ -344,6 +382,44 @@ export class ListeSortieComponent implements OnInit, AfterViewInit, OnDestroy {
     this.fetchPartenaire();
     this.annulerFormInitial();
     this.initValiderSortie();
+    this.initFormAutres();
+  }
+
+  sortieFormAutre!: FormGroup;
+
+  private initFormAutres(): void {
+    this.sortieFormAutre = this.fb.group({
+      utilisateurId: [this.idUser],
+      nomCLient: ['', Validators.required],
+      montantClient: [0, Validators.required],
+    });
+  }
+
+  isloadingEntreAutre: boolean = false;
+
+  ajouterSortieAutres(): void {
+    this.isloadingEntreAutre = true;
+
+    const formData = this.sortieFormAutre.value;
+    console.log(formData);
+
+    this.sortieService.ajouterSortieAutres(formData).subscribe({
+      next: (response) => {
+        console.log('Sortie ajoutée avec succès:', response);
+        this.fetchAllSortie();
+        this.sortieFormAutre.patchValue({
+          nomCLient: '',
+          montantClient: '',
+        });
+        this.isloadingEntreAutre = false;
+        alert('Sortie ajoutée avec succès !');
+      },
+      error: (error) => {
+        this.isloadingEntreAutre = false;
+        console.error(error.error.message);
+        alert(error.error.message);
+      },
+    });
   }
 
   private annulerFormInitial(): void {
@@ -371,46 +447,54 @@ export class ListeSortieComponent implements OnInit, AfterViewInit, OnDestroy {
 
   allPartenaire: any[] = [];
 
-  // Récupération des devises
   fetchPartenaire(): void {
-    this.partenaireService.getAllPartenaire().subscribe(
-      (response) => {
-        this.allPartenaire = response;
-        if (this.allPartenaire && this.allPartenaire.length > 0) {
-          this.dtTrigger.next(null); // Initialisation de DataTables
-        }
-        console.log('Liste des partenaires:', this.allPartenaire);
+    this.partenaireService.getAllPartenaire().subscribe({
+      next: (response: any[]) => {
+        this.allPartenaire = response.filter(
+          (partenaire: any) => partenaire.pays === 'Guinée-Bissau'
+        );
       },
-      (error) => {
+      error: (error) => {
         console.error('Erreur lors de la récupération des partenaires:', error);
-      }
-    );
+      },
+    });
   }
+
+  // fetchPartenaire(): void {
+  //   this.partenaireService.getAllPartenaire().subscribe(
+  //     (response) => {
+  //       this.allPartenaire = response;
+  //     },
+  //     (error) => {
+  //       console.error('Erreur lors de la récupération des partenaires:', error);
+  //     }
+  //   );
+  // }
 
   allDevise: any[] = [];
 
   // Récupération des devises
   fetchDevise(): void {
-    this.deviseService.getAllDevise().subscribe(
-      (response) => {
-        this.allDevise = response;
-        console.log('Liste des devises:', this.allDevise);
+    this.deviseService.getAllDevise().subscribe({
+      next: (response: any[]) => {
+        this.allDevise = response.filter(
+          (devise: any) => devise.paysArriver === 'Guinée-Bissau'
+        );
       },
-      (error) => {
+      error: (error) => {
         console.error('Erreur lors de la récupération des devises:', error);
-      }
-    );
+      },
+    });
   }
 
   getUserInfo() {
     this.authService.getUserInfo().subscribe({
       next: (response) => {
         this.userInfo = response.user;
-        //   if (this.userInfo) {
         this.idUser = this.userInfo.id;
         console.log('Informations utilisateur:', this.userInfo);
-        // Mettre à jour le champ utilisateurId dans le formulaire
         this.sortieForm.patchValue({ utilisateurId: this.idUser });
+        this.sortieFormAutre.patchValue({ utilisateurId: this.idUser });
         this.valideSortieForm.patchValue({ utilisateurId: this.idUser });
       },
     });
@@ -419,9 +503,9 @@ export class ListeSortieComponent implements OnInit, AfterViewInit, OnDestroy {
   // Initialiser le formulaire avec des validations
   private initForm() {
     this.sortieForm = this.fb.group({
-      utilisateurId: [this.idUser], // Liaison utilisateurId
+      utilisateurId: [this.idUser],
       partenaireId: ['', Validators.required],
-      deviseId: ['', Validators.required], // Initialisé à vide
+      deviseId: ['', Validators.required],
       expediteur: ['', Validators.required],
       codeEnvoyer: ['', Validators.required],
       receveur: ['', Validators.required],

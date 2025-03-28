@@ -1,18 +1,18 @@
 import { Router } from '@angular/router';
 import { Component, OnInit } from '@angular/core';
-import { FormsModule } from '@angular/forms';  // Importer FormsModule
-import { CommonModule } from '@angular/common';  // Importer CommonModule
+import { FormsModule } from '@angular/forms'; // Importer FormsModule
+import { CommonModule } from '@angular/common'; // Importer CommonModule
 import { AuthService } from '../../services/auth/auth-service.service';
+import { RouterLink } from '@angular/router';
 
 @Component({
   selector: 'app-login',
   standalone: true,
-  imports: [CommonModule, FormsModule],  // Ajouter les modules ici
+  imports: [CommonModule, FormsModule, RouterLink], // Ajouter les modules ici
   templateUrl: './login.component.html',
-  styleUrls: ['./login.component.css'], 
+  styleUrls: ['./login.component.css'],
 })
-export class LoginComponent implements OnInit{
-
+export class LoginComponent implements OnInit {
   email = '';
   password = '';
   errorMessage = '';
@@ -20,11 +20,7 @@ export class LoginComponent implements OnInit{
 
   constructor(private authService: AuthService, private router: Router) {}
 
-  ngOnInit(): void {
-
-  }
-
-
+  ngOnInit(): void {}
 
   // Méthode pour gérer la connexion
   login(): void {
@@ -41,7 +37,7 @@ export class LoginComponent implements OnInit{
       },
       complete: () => {
         this.isLoading = false; // S'assurer de désactiver le chargement une fois l'appel terminé
-      }
+      },
     });
   }
 }

@@ -523,18 +523,6 @@
                       </div>
                     </div>
 
-                    <!-- <div class="form-group col-md-6">
-                      <label for="telephoneReceveur"
-                        >Téléphone du receveur</label
-                      >
-                      <input
-                        type="text"
-                        class="form-control"
-                        id="telephoneReceveur"
-                        formControlName="telephone_receveur"
-                        placeholder="Téléphone"
-                      />
-                    </div> -->
                     <div class="form-group col-md-6">
                       <label for="devise">Pays de destination</label>
                       <select
@@ -590,11 +578,14 @@
                     <div class="form-group col-md-6">
                       <label for="montant_cfa">Montant</label>
                       <input
-                        type="number"
+                        type="text"
                         class="form-control"
                         id="montant_cfa"
                         formControlName="montant_cfa"
                         placeholder="Montant"
+                        [(ngModel)]="montant_cfa"
+                        [ngModel]="montant_cfa | currencyFormat"
+                        (input)="onInputChange($event)"
                       />
                     </div>
                   </div>
@@ -606,7 +597,11 @@
                     >
                       Annuler
                     </button>
-                    <button type="submit" class="btn btn-primary">
+                    <button
+                      type="submit"
+                      class="btn btn-primary"
+                      [disabled]="!entreForm.valid || isLoading"
+                    >
                       <span *ngIf="isLoading">Création en cours...</span>
                       <span *ngIf="!isLoading">Ajouter</span>
                     </button>
@@ -639,11 +634,14 @@
                     <div class="form-group col-md-6">
                       <label for="montantClient">Montant</label>
                       <input
-                        type="number"
+                        type="text"
                         class="form-control"
                         id="montantClient"
                         formControlName="montantClient"
                         placeholder="Montant"
+                        [(ngModel)]="montantClient"
+                        [ngModel]="montantClient | currencyFormat"
+                        (input)="onInputChangeClient($event)"
                       />
                     </div>
                   </div>
@@ -655,7 +653,11 @@
                     >
                       Annuler
                     </button>
-                    <button type="submit" class="btn btn-primary">
+                    <button
+                      type="submit"
+                      class="btn btn-primary"
+                      [disabled]="!entreFormAutre.valid || isloadingEntreAutre"
+                    >
                       <span *ngIf="isloadingEntreAutre"
                         >Création en cours...</span
                       >
@@ -727,9 +729,16 @@
               </div>
               <div class="modal-footer">
                 <button
+                  type="button"
+                  class="btn btn-secondary"
+                  data-dismiss="modal"
+                >
+                  Annuler
+                </button>
+                <button
                   type="submit"
                   class="btn btn-primary"
-                  [disabled]="!editDeviseForm.valid"
+                  [disabled]="!editDeviseForm.valid || isloadingEdit"
                 >
                   <span *ngIf="isloadingEdit">Modification en cours...</span>
                   <span *ngIf="!isloadingEdit">Modifier</span>

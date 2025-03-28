@@ -11,6 +11,8 @@ router.get("/liste", sortieController.recupererSortiesAvecAssocies);
 
 router.get("/compte", sortieController.compterSortieDuJour);
 
+router.post("/ajouterAutre", sortieController.ajouterAutreSortie);
+
 router.put("/annuler/:code", sortieController.annulerSortie);
 
 router.put("/valider/:code", sortieController.validerSortie);

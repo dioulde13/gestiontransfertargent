@@ -178,6 +178,74 @@ const ajouterSortie = async (req, res) => {
   }
 };
 
+const ajouterAutreSortie = async (req, res) => {
+  try {
+    const { utilisateurId, nomCLient, montantClient } = req.body;
+
+    // Vérifier si tous les champs obligatoires sont présents
+    if (!utilisateurId || !nomCLient || !montantClient) {
+      return res.status(400).json({
+        message: "Tous les champs obligatoires doivent être remplis.",
+      });
+    }
+
+    // Récupérer les informations de l'utilisateur connecté
+    const utilisateur = await Utilisateur.findByPk(utilisateurId);
+    if (!utilisateur) {
+      return res.status(404).json({ message: "Utilisateur introuvable." });
+    }
+
+    if (utilisateur.solde > montantClient) {
+      // Créer une nouvelle entrée sans code généré automatiquement
+      const sortie = await Sortie.create({
+        utilisateurId,
+        partenaireId: null,
+        deviseId: null,
+        pays_exp: "",
+        pays_dest: "",
+        code: "", // Le champ code reste vide
+        codeEnvoyer: "",
+        expediteur: "",
+        nomCLient,
+        montantClient,
+        receveur: "",
+        montant_gnf: 0,
+        signe_1: "",
+        signe_2: "",
+        montant: 0,
+        prix_1: 0,
+        prix_2: 0,
+        telephone_receveur: "",
+        status: "PAYEE",
+      });
+      // Mettre à jour le solde de l'utilisateur
+      utilisateur.solde = (utilisateur.solde || 0) - montantClient;
+      await utilisateur.save();
+
+      res.status(201).json({
+        message: "Sortie créée avec succès.",
+        sortie,
+        solde: utilisateur.solde,
+      });
+    } else {
+      const solde = Number(utilisateur.solde);
+      res.status(400).json({
+        message: `On ne peut pas faire une sortie de ${montantClient.toLocaleString(
+          "fr-FR",
+          { minimumFractionDigits: 0, maximumFractionDigits: 0 }
+        )} GNF,
+      le solde dans la caisse est: ${solde.toLocaleString("fr-FR", {
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 0,
+      })} GNF`,
+      });
+    }
+  } catch (error) {
+    console.error("Erreur lors de l'ajout de l'entrée :", error);
+    res.status(500).json({ message: "Erreur interne du serveur." });
+  }
+};
+
 const validerSortie = async (req, res) => {
   try {
     const { code } = req.params; // Récupération du code depuis l'URL
@@ -240,12 +308,9 @@ const validerSortie = async (req, res) => {
       });
     }
 
-    utilisateur.solde = (utilisateur.solde || 0) - montant_due;
-    await utilisateur.save();
-
     // Mise à jour du montant prêté du partenaire
     partenaire.montant_preter =
-      (partenaire.montant_preter || 0) - sortie.montant;
+      (partenaire.montant_preter || 0) + sortie.montant;
     await partenaire.save();
 
     res.status(200).json({
@@ -358,24 +423,32 @@ const annulerSortie = async (req, res) => {
         .status(400)
         .json({ message: "Cette sortie est déjà annulée." });
     }
-
     if (sortie.status === "PAYEE") {
-      if (utilisateur.solde < 0) {
-        utilisateur.solde = (utilisateur.solde || 0) - -sortie.montant_gnf;
-      } else if (utilisateur.solde > 0) {
-        utilisateur.solde = (utilisateur.solde || 0) - sortie.montant_gnf;
-      }
-      await utilisateur.save();
-    }
-
-    if (partenaire.montant_preter < 0) {
-      partenaire.montant_preter =
-        (partenaire.montant_preter || 0) - -sortie.montant;
-    } else if (partenaire.montant_preter > 0) {
+      utilisateur.solde = (utilisateur.solde || 0) + sortie.montant_gnf;
       partenaire.montant_preter =
         (partenaire.montant_preter || 0) - sortie.montant;
+      await utilisateur.save();
+      await partenaire.save();
+      return res.status(400).json({ message: `Sortie annulée avec succès.` });
     }
-    await partenaire.save();
+
+    // if (sortie.status === "PAYEE") {
+    //   if (utilisateur.solde < 0) {
+    //     utilisateur.solde = (utilisateur.solde || 0) - sortie.montant_gnf;
+    //   } else if (utilisateur.solde > 0) {
+    //     utilisateur.solde = (utilisateur.solde || 0) - sortie.montant_gnf;
+    //   }
+    //   await utilisateur.save();
+    // }
+
+    // if (partenaire.montant_preter < 0) {
+    //   partenaire.montant_preter =
+    //     (partenaire.montant_preter || 0) - sortie.montant;
+    // } else if (partenaire.montant_preter > 0) {
+    //   partenaire.montant_preter =
+    //     (partenaire.montant_preter || 0) - sortie.montant;
+    // }
+    // await partenaire.save();
 
     // Mettre à jour le statut de l'entrée et le type d'annulation
     sortie.status = "ANNULEE";
@@ -397,4 +470,5 @@ module.exports = {
   compterSortieDuJour,
   annulerSortie,
   validerSortie,
+  ajouterAutreSortie,
 };

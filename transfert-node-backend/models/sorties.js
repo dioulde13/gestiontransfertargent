@@ -1,10 +1,10 @@
-const { DataTypes } = require('sequelize');
-const sequelize = require('./sequelize');
-const Utilisateur = require('./utilisateurs'); 
-const Partenaire = require('./partenaires'); 
-const Devise = require('./devises'); 
+const { DataTypes } = require("sequelize");
+const sequelize = require("./sequelize");
+const Utilisateur = require("./utilisateurs");
+const Partenaire = require("./partenaires");
+const Devise = require("./devises");
 
-const Sortie = sequelize.define('Sortie', {
+const Sortie = sequelize.define("Sortie", {
   id: {
     type: DataTypes.INTEGER,
     autoIncrement: true,
@@ -16,11 +16,11 @@ const Sortie = sequelize.define('Sortie', {
   },
   partenaireId: {
     type: DataTypes.INTEGER,
-    allowNull: false, // Ou true si facultatif
+    allowNull: true, // Ou true si facultatif
   },
   deviseId: {
     type: DataTypes.INTEGER,
-    allowNull: false, // Ou true si facultatif
+    allowNull: true, // Ou true si facultatif
   },
   code: {
     type: DataTypes.STRING,
@@ -28,7 +28,7 @@ const Sortie = sequelize.define('Sortie', {
   },
   codeEnvoyer: {
     type: DataTypes.STRING,
-    allowNull: false,
+    allowNull: true,
   },
   prix_1: {
     type: DataTypes.INTEGER,
@@ -72,6 +72,15 @@ const Sortie = sequelize.define('Sortie', {
     type: DataTypes.STRING,
     allowNull: false,
   },
+  nomCLient: {
+    type: DataTypes.STRING,
+    allowNull: true,
+  },
+  montantClient: {
+    type: DataTypes.BIGINT,
+    allowNull: true,
+    defaultValue: 0,
+  },
   montant: {
     type: DataTypes.INTEGER,
     allowNull: false,
@@ -82,27 +91,37 @@ const Sortie = sequelize.define('Sortie', {
     allowNull: false,
     defaultValue: 0,
   },
+  montant_payer: {
+    type: DataTypes.BIGINT,
+    allowNull: false,
+    defaultValue: 0,
+  },
+  montant_restant: {
+    type: DataTypes.BIGINT,
+    allowNull: false,
+    defaultValue: 0,
+  },
   telephone_receveur: {
     type: DataTypes.STRING,
     allowNull: false,
   },
   payement_type: {
-    type: DataTypes.ENUM('COMPLET', 'NON COMPLET'),
+    type: DataTypes.ENUM("COMPLET", "NON COMPLET"),
     allowNull: false,
-    defaultValue: 'NON COMPLET', // Définir une valeur par défaut
+    defaultValue: "NON COMPLET", // Définir une valeur par défaut
   },
   status: {
-    type: DataTypes.ENUM('NON PAYEE','PAYEE', 'ANNULEE'),
+    type: DataTypes.ENUM("NON PAYEE", "PAYEE", "ANNULEE"),
     allowNull: false,
-    defaultValue: 'NON PAYEE', // Définir une valeur par défaut
+    defaultValue: "NON PAYEE", // Définir une valeur par défaut
   },
 });
 
-// Définir l'association : Une Entree appartient à un 
-Sortie.belongsTo(Utilisateur, { foreignKey: 'utilisateurId' });
-// Définir l'association : Une Entree appartient à un 
-Sortie.belongsTo(Partenaire, { foreignKey: 'partenaireId' });
-// Définir l'association : Une Entree appartient à un 
-Sortie.belongsTo(Devise, { foreignKey: 'deviseId' });
+// Définir l'association : Une Entree appartient à un
+Sortie.belongsTo(Utilisateur, { foreignKey: "utilisateurId" });
+// Définir l'association : Une Entree appartient à un
+Sortie.belongsTo(Partenaire, { foreignKey: "partenaireId" });
+// Définir l'association : Une Entree appartient à un
+Sortie.belongsTo(Devise, { foreignKey: "deviseId" });
 
 module.exports = Sortie;

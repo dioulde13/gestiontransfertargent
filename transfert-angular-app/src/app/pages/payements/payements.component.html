@@ -5,7 +5,11 @@
         <div class="card bg-transparent">
           <div class="card-body p-0">
             <div class="profile-image relative">
-              <img src="/assets/images/top-header.png" class="img-fluid rounded w-full" alt="profile-image">
+              <img
+                src="/assets/images/top-header.png"
+                class="img-fluid rounded w-full"
+                alt="profile-image"
+              />
             </div>
           </div>
         </div>
@@ -20,12 +24,21 @@
               <div class="col-lg-12">
                 <div class="card">
                   <div class="card-body">
-                    <div class="d-flex flex-wrap items-center justify-between breadcrumb-content">
+                    <div
+                      class="d-flex flex-wrap items-center justify-between breadcrumb-content"
+                    >
                       <h5>Liste des payements</h5>
-                      <div class="d-flex flex-wrap items-center justify-between">
+                      <div
+                        class="d-flex flex-wrap items-center justify-between"
+                      >
                         <div class="pl-3 btn-new border-left">
-                          <a href="#" class="btn btn-primary" data-target="#new-project-modal"
-                            data-toggle="modal">Ajouter nouveau</a>
+                          <a
+                            href="#"
+                            class="btn btn-primary"
+                            data-target="#new-project-modal"
+                            data-toggle="modal"
+                            >Ajouter nouveau</a
+                          >
                         </div>
                       </div>
                     </div>
@@ -35,42 +48,63 @@
 
               <div class="row mb-4">
                 <div class="col-md-3 d-flex mb-3 mb-md-0">
-                  <input type="date" id="startDate" class="form-control" placeholder="Date Début"
-                    style="border-radius: 25px;">
+                  <input
+                    type="date"
+                    id="startDate"
+                    class="form-control"
+                    placeholder="Date Début"
+                    style="border-radius: 25px"
+                  />
                 </div>
                 <div class="col-md-3 d-flex mb-3 mb-md-0">
-                  <input type="date" id="endDate" class="form-control" placeholder="Date Fin"
-                    style="border-radius: 25px;">
+                  <input
+                    type="date"
+                    id="endDate"
+                    class="form-control"
+                    placeholder="Date Fin"
+                    style="border-radius: 25px"
+                  />
                 </div>
                 <div class="col-md-3 d-flex">
-                  <button id="btnFilter" class="btn btn-primary"
-                  (click)="filtrerEntreDates()"
-                    style="border-radius: 60px; padding: 5px 10px; font-size: 14px;">
+                  <button
+                    id="btnFilter"
+                    class="btn btn-primary"
+                    (click)="filtrerEntreDates()"
+                    style="
+                      border-radius: 60px;
+                      padding: 5px 10px;
+                      font-size: 14px;
+                    "
+                  >
                     Filtrer
                   </button>
                 </div>
                 <div class="col-md-3 d-flex">
-                  <div style="font-weight: bold; margin-top: 10px;">Total Montant : {{ totalMontant | number }} GNF</div>
+                  <div style="font-weight: bold; margin-top: 10px">
+                    Total Montant : {{ totalMontant | number }} GNF
+                  </div>
                 </div>
               </div>
 
-              <table id="datatable"
-                class="table table-striped">
+              <table id="datatable" class="table table-striped">
                 <thead>
                   <tr class="bg-blue-500 text-white">
                     <th>Date paiement</th>
                     <th>Montant</th>
+                    <th>Type</th>
                   </tr>
                 </thead>
                 <tbody>
                   <tr *ngFor="let result of filteredResults">
                     <td class="border px-4 py-2">
-                      {{ result.Entre?.pays_dest }} / {{ result.Entre?.code }} / {{ result.Entre?.expediteur }} /
-                      {{ result.date_creation | date:'dd/MM/yyyy HH:mm' }}
+                      <!-- {{ result.Entre?.pays_dest }} / {{ result.Entre?.code }} /
+                      {{ result.Entre?.expediteur }} / -->
+                      {{ result.date_creation | date : "dd/MM/yyyy HH:mm" }}
                     </td>
-                    <td>{{ result.montant | number:'1.0-0' }} GNF</td>
+                    <td>{{ result.montant | number : "1.0-0" }} GNF</td>
+                    <td>{{ result.type }}</td>
                   </tr>
-                </tbody>                
+                </tbody>
               </table>
             </div>
           </div>
@@ -79,27 +113,58 @@
     </div>
   </div>
 </div>
-<div class="modal fade" id="new-project-modal" tabindex="-1" role="dialog" aria-labelledby="modalTitle"
-  aria-hidden="true">
+<div
+  class="modal fade"
+  id="new-project-modal"
+  tabindex="-1"
+  role="dialog"
+  aria-labelledby="modalTitle"
+  aria-hidden="true"
+>
   <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
     <div class="modal-content">
-
       <div class="container">
         <h2>Ajouter un payement</h2>
         <form [formGroup]="payementForm" (ngSubmit)="onSubmit()">
           <div class="form-group">
-            <label for="code">Code entre</label>
+            <label for="code">Code</label>
             <input id="code" formControlName="code" class="form-control" />
           </div>
 
           <div class="form-group">
             <label for="montant">Montant</label>
-            <input id="montant" formControlName="montant" class="form-control" type="number" />
+            <input
+              id="montant"
+              formControlName="montant"
+              class="form-control"
+              type="text"
+              [(ngModel)]="montant"
+              [ngModel]="montant | currencyFormat"
+              (input)="onInputChange($event)"
+            />
+          </div>
+
+          <div class="form-group">
+            <label for="type">Type</label>
+            <select id="type" class="form-control" formControlName="type">
+              <option value="ENTREE">Entre</option>
+              <option value="SORTIE">Sortie</option>
+            </select>
           </div>
 
           <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" data-dismiss="modal">Annuler</button>
-            <button type="submit" [disabled]="!payementForm.valid" class="btn btn-primary">
+            <button
+              type="button"
+              class="btn btn-secondary"
+              data-dismiss="modal"
+            >
+              Annuler
+            </button>
+            <button
+              type="submit"
+              [disabled]="!payementForm.valid"
+              class="btn btn-primary"
+            >
               <span *ngIf="loading">Création en cours...</span>
               <span *ngIf="!loading">Ajouter</span>
             </button>

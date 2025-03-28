@@ -120,6 +120,7 @@
                   <tr class="bg-blue-500 text-white">
                     <th>Code generer</th>
                     <th>code</th>
+                    <th>Client</th>
                     <th>Date</th>
                     <th>Pays</th>
                     <th>Expéditeur</th>
@@ -128,6 +129,8 @@
                     <th>Montant XOF</th>
                     <th>Prix GNF</th>
                     <th>Montant GNF</th>
+                    <th class="p-1 border">Montant payé (GNF)</th>
+                    <th class="p-1 border">Montant restant (GNF)</th>
                     <th>Status</th>
                     <!-- <th>Action</th> -->
                   </tr>
@@ -139,6 +142,7 @@
                   >
                     <td class="text-center">{{ result.code }}</td>
                     <td class="text-center">{{ result.codeEnvoyer }}</td>
+                    <td class="p-1 border">{{ result.nomCLient }}</td>
                     <td>
                       {{ result.date_creation | date : "dd/MM/yyyy HH:mm" }}
                     </td>
@@ -154,9 +158,27 @@
                       {{ result.prix_2 | currency : "" : "" : "1.0-0" }}
                       {{ result.signe_1 }}
                     </td>
-                    <td>
+                    <td class="p-1 border">
+                      {{
+                        result.montant_gnf === 0
+                          ? (result.montantClient
+                              | currency : "" : "" : "1.0-0") + " GNF"
+                          : (result.montant_gnf | currency : "" : "" : "1.0-0")
+                      }}
+                    </td>
+                    <!-- <td>
                       {{ result.montant_gnf | currency : "" : "" : "1.0-0" }}
                       {{ result.signe_1 }}
+                    </td> -->
+                    <td class="p-1 border">
+                      {{ result.montant_payer | currency : "" : "" : "1.0-0" }}
+                      {{ result.signe_2 }}
+                    </td>
+                    <td class="p-1 border">
+                      {{
+                        result.montant_restant | currency : "" : "" : "1.0-0"
+                      }}
+                      {{ result.signe_2 }}
                     </td>
                     <td>{{ result.status }}</td>
                     <!-- <td *ngIf="result.status === 'NON PAYEE'">
@@ -504,131 +526,225 @@
         </button>
       </div>
       <div class="modal-body">
-        <form [formGroup]="sortieForm" (ngSubmit)="ajouterSortie()">
-          <div class="form-row">
-            <div class="form-group col-lg-12">
-              <label for="codeEnvoyer">Code</label>
-              <input
-                type="text"
-                class="form-control"
-                id="codeEnvoyer"
-                formControlName="codeEnvoyer"
-                placeholder="Code du sortie"
-              />
-            </div>
-          </div>
-          <div class="form-row">
-            <div class="form-group col-md-6">
-              <label for="expediteur">Expéditeur</label>
-              <input
-                type="text"
-                class="form-control"
-                id="expediteur"
-                formControlName="expediteur"
-                placeholder="Nom de l'expéditeur"
-              />
-            </div>
-            <div class="form-group col-md-6">
-              <label for="receveur">Receveur</label>
-              <input
-                type="text"
-                class="form-control"
-                id="receveur"
-                formControlName="receveur"
-                placeholder="Nom du receveur"
-              />
-            </div>
-          </div>
-          <div class="form-row">
-            <div class="form-group col-md-6">
-              <label for="telephoneReceveur">Téléphone du receveur</label>
-              <input
-                type="text"
-                class="form-control"
-                id="telephoneReceveur"
-                formControlName="telephone_receveur"
-                placeholder="Téléphone"
-              />
-            </div>
-            <div class="form-group col-md-6">
-              <div class="form-group mb-3">
-                <label for="devise">Pays destination</label>
-                <select
-                  class="form-control"
-                  id="devise"
-                  formControlName="deviseId"
-                  required
-                >
-                  <option value="" disabled selected>
-                    Sélectionnez un pays
-                  </option>
-                  <option *ngFor="let devise of allDevise" [value]="devise.id">
-                    {{ devise.paysArriver }}
-                    {{ devise.prix_1 | currency : "" : "" : "1.0-0" }}
-                    {{ devise.signe_2 }} →
-                    {{ devise.prix_2 | currency : "" : "" : "1.0-0" }}
-                    {{ devise.signe_1 }}
-                  </option>
-                </select>
-              </div>
-            </div>
-          </div>
-          <div class="form-row">
-            <div class="form-group col-md-6">
-              <div class="form-group mb-3">
-                <label for="devise">Partenaire</label>
-                <select
-                  class="form-control"
-                  id="partenaire"
-                  formControlName="partenaireId"
-                  required
-                >
-                  <option value="" disabled selected>
-                    Sélectionnez un partenaire
-                  </option>
-                  <option
-                    *ngFor="let partenaire of allPartenaire"
-                    [value]="partenaire.id"
-                  >
-                    {{
-                      partenaire.prenom +
-                        " " +
-                        partenaire.nom +
-                        " " +
-                        partenaire.pays +
-                        " " +
-                        (partenaire.montant_preter
-                          | currency : "" : "" : "1.0-0")
-                    }}
-                  </option>
-                </select>
-              </div>
-            </div>
-            <div class="form-group col-md-6">
-              <label for="montant">Montant</label>
-              <input
-                type="number"
-                class="form-control"
-                id="montant"
-                formControlName="montant"
-                placeholder="Montant en CFA"
-              />
-            </div>
-          </div>
-          <div class="modal-footer">
-            <button
-              type="button"
-              class="btn btn-secondary"
-              data-dismiss="modal"
+        <ul class="nav nav-tabs" id="myTab" role="tablist">
+          <li class="nav-item">
+            <a
+              class="nav-link active"
+              id="details-tab"
+              data-toggle="tab"
+              href="#details"
+              role="tab"
+              aria-controls="details"
+              aria-selected="true"
             >
-              Annuler
-            </button>
-            <button type="submit" class="btn btn-primary">
-              <span *ngIf="loading">Création en cours...</span>
-              <span *ngIf="!loading">Ajouter</span>
-            </button>
+              Sortie
+            </a>
+          </li>
+          <li class="nav-item">
+            <a
+              class="nav-link"
+              id="paiement-tab"
+              data-toggle="tab"
+              href="#paiement"
+              role="tab"
+              aria-controls="paiement"
+              aria-selected="false"
+            >
+              Autre
+            </a>
+          </li>
+        </ul>
+
+        <div class="tab-content" id="myTabContent">
+          <!-- Onglet Détails -->
+          <div
+            class="tab-pane fade show active"
+            id="details"
+            role="tabpanel"
+            aria-labelledby="details-tab"
+          >
+            <form [formGroup]="sortieForm" (ngSubmit)="ajouterSortie()">
+              <div class="form-row">
+                <div class="form-group col-lg-12">
+                  <label for="codeEnvoyer">Code</label>
+                  <input
+                    type="text"
+                    class="form-control"
+                    id="codeEnvoyer"
+                    formControlName="codeEnvoyer"
+                    placeholder="Code du sortie"
+                  />
+                </div>
+              </div>
+              <div class="form-row">
+                <div class="form-group col-md-6">
+                  <label for="expediteur">Expéditeur</label>
+                  <input
+                    type="text"
+                    class="form-control"
+                    id="expediteur"
+                    formControlName="expediteur"
+                    placeholder="Nom de l'expéditeur"
+                  />
+                </div>
+                <div class="form-group col-md-6">
+                  <label for="receveur">Receveur</label>
+                  <input
+                    type="text"
+                    class="form-control"
+                    id="receveur"
+                    formControlName="receveur"
+                    placeholder="Nom du receveur"
+                  />
+                </div>
+              </div>
+              <div class="form-row">
+                <div class="form-group col-md-6">
+                  <label for="telephoneReceveur">Téléphone du receveur</label>
+                  <input
+                    type="text"
+                    class="form-control"
+                    id="telephoneReceveur"
+                    formControlName="telephone_receveur"
+                    placeholder="Téléphone"
+                  />
+                </div>
+                <div class="form-group col-md-6">
+                  <div class="form-group mb-3">
+                    <label for="devise">Pays destination</label>
+                    <select
+                      class="form-control"
+                      id="devise"
+                      formControlName="deviseId"
+                      required
+                    >
+                      <option value="" disabled selected>
+                        Sélectionnez un pays
+                      </option>
+                      <option
+                        *ngFor="let devise of allDevise"
+                        [value]="devise.id"
+                      >
+                        {{ devise.paysArriver }}
+                        {{ devise.prix_1 | currency : "" : "" : "1.0-0" }}
+                        {{ devise.signe_2 }} →
+                        {{ devise.prix_2 | currency : "" : "" : "1.0-0" }}
+                        {{ devise.signe_1 }}
+                      </option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+              <div class="form-row">
+                <div class="form-group col-md-6">
+                  <div class="form-group mb-3">
+                    <label for="devise">Partenaire</label>
+                    <select
+                      class="form-control"
+                      id="partenaire"
+                      formControlName="partenaireId"
+                      required
+                    >
+                      <option value="" disabled selected>
+                        Sélectionnez un partenaire
+                      </option>
+                      <option
+                        *ngFor="let partenaire of allPartenaire"
+                        [value]="partenaire.id"
+                      >
+                        {{
+                          partenaire.prenom +
+                            " " +
+                            partenaire.nom +
+                            " " +
+                            partenaire.pays +
+                            " " +
+                            (partenaire.montant_preter
+                              | currency : "" : "" : "1.0-0")
+                        }}
+                      </option>
+                    </select>
+                  </div>
+                </div>
+                <div class="form-group col-md-6">
+                  <label for="montant">Montant</label>
+                  <input
+                    type="number"
+                    class="form-control"
+                    id="montant"
+                    formControlName="montant"
+                    placeholder="Montant en CFA"
+                  />
+                </div>
+              </div>
+              <div class="modal-footer">
+                <button
+                  type="button"
+                  class="btn btn-secondary"
+                  data-dismiss="modal"
+                >
+                  Annuler
+                </button>
+                <button type="submit" class="btn btn-primary">
+                  <span *ngIf="loading">Création en cours...</span>
+                  <span *ngIf="!loading">Ajouter</span>
+                </button>
+              </div>
+            </form>
           </div>
-        </form>
+
+          <div
+            class="tab-pane fade"
+            id="paiement"
+            role="tabpanel"
+            aria-labelledby="paiement-tab"
+          >
+            <form
+              [formGroup]="sortieFormAutre"
+              (ngSubmit)="ajouterSortieAutres()"
+            >
+              <div class="form-row">
+                <div class="form-group col-md-6">
+                  <label for="nomCLient">Nom client</label>
+                  <input
+                    type="text"
+                    class="form-control"
+                    id="nomCLient"
+                    formControlName="nomCLient"
+                    placeholder="Nom nomCLient"
+                  />
+                </div>
+                <div class="form-group col-md-6">
+                  <label for="montantClient">Montant</label>
+                  <input
+                    type="number"
+                    class="form-control"
+                    id="montantClient"
+                    formControlName="montantClient"
+                    placeholder="Montant"
+                  />
+                </div>
+              </div>
+              <div class="modal-footer">
+                <button
+                  type="button"
+                  class="btn btn-secondary"
+                  data-dismiss="modal"
+                >
+                  Annuler
+                </button>
+                <button
+                  type="submit"
+                  class="btn btn-primary"
+                  [disabled]="!sortieFormAutre.valid || isloadingEntreAutre"
+                >
+                  <span *ngIf="isloadingEntreAutre">Création en cours...</span>
+                  <span *ngIf="!isloadingEntreAutre">Ajouter</span>
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
       </div>
     </div>
   </div>

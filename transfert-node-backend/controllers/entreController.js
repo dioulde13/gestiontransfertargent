@@ -176,29 +176,14 @@ const ajouterAutreEntre = async (req, res) => {
       return res.status(404).json({ message: "Utilisateur introuvable." });
     }
 
-    // Générer le code automatiquement
-    const lastEntry = await Entre.findOne({
-      order: [["id", "DESC"]],
-    });
-
-    let newCode = "AB0001";
-    if (lastEntry) {
-      const lastCode = lastEntry.code || "";
-      const numericPart = parseInt(lastCode.slice(2), 10);
-      if (!isNaN(numericPart)) {
-        const incrementedPart = (numericPart + 1).toString().padStart(4, "0");
-        newCode = `AB${incrementedPart}`;
-      }
-    }
-
-    // Créer une nouvelle entrée
+    // Créer une nouvelle entrée sans code généré automatiquement
     const entre = await Entre.create({
       utilisateurId,
       partenaireId: null,
       deviseId: null,
       pays_exp: "",
       pays_dest: "",
-      code: newCode,
+      code: "", // Le champ code reste vide
       expediteur: "",
       nomCLient,
       montantClient,
@@ -213,6 +198,7 @@ const ajouterAutreEntre = async (req, res) => {
       status: "PAYEE",
     });
 
+    // Mettre à jour le solde de l'utilisateur
     utilisateur.solde = (utilisateur.solde || 0) + montantClient;
     await utilisateur.save();
 
@@ -304,11 +290,11 @@ const annulerEntre = async (req, res) => {
             await entre.save();
             return res
               .status(400)
-              .json({ message: `Entrée annulée avec succès.` });
+              .json({ message: `Entrée annulée avec succès.sjsjjs` });
           }
           return res
             .status(400)
-            .json({ message: `Entrée annulée avec succès....` });
+            .json({ message: `Entrée annulée avec succès....dhh` });
         } else {
           return res.status(400).json({ message: `Le montant insuffisant` });
         }
@@ -331,6 +317,11 @@ const annulerEntre = async (req, res) => {
       return res.status(404).json({ message: "Utilisateur introuvable." });
 
     if (entre.status === "NON PAYEE") {
+      if (entre.status !== "ANNULEE") {
+        partenaire.montant_preter =
+          (partenaire.montant_preter || 0) - entre.montant_cfa;
+        await partenaire.save();
+      }
       entre.status = "ANNULEE";
       entre.type_annuler = type_annuler;
       await entre.save();

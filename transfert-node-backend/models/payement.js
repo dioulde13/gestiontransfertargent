@@ -1,10 +1,10 @@
-const { DataTypes } = require('sequelize');
-const sequelize = require('./sequelize');
-const Utilisateur = require('./utilisateurs'); 
-const Entre = require('./entres'); 
+const { DataTypes } = require("sequelize");
+const sequelize = require("./sequelize");
+const Utilisateur = require("./utilisateurs");
+const Entre = require("./entres");
+const Sortie = require("./sorties");
 
-
-const Payement = sequelize.define('Payement', {
+const Payement = sequelize.define("Payement", {
   id: {
     type: DataTypes.INTEGER,
     autoIncrement: true,
@@ -16,7 +16,11 @@ const Payement = sequelize.define('Payement', {
   },
   entreId: {
     type: DataTypes.INTEGER,
-    allowNull: false, // Ou true si facultatif
+    allowNull: true, // Ou true si facultatif
+  },
+  sortieId: {
+    type: DataTypes.INTEGER,
+    allowNull: true, // Ou true si facultatif
   },
   code: {
     type: DataTypes.STRING,
@@ -25,7 +29,7 @@ const Payement = sequelize.define('Payement', {
   date_creation: {
     type: DataTypes.DATE,
     allowNull: false,
-    defaultValue: DataTypes.NOW, // Définit la date et l'heure actuelles par défaut
+    defaultValue: DataTypes.NOW,
   },
   montant: {
     type: DataTypes.BIGINT,
@@ -33,15 +37,17 @@ const Payement = sequelize.define('Payement', {
     defaultValue: 0,
   },
   type: {
-    type: DataTypes.ENUM('CREDIT', 'ENTRE'),
+    type: DataTypes.ENUM("ENTREE", "SORTIE"),
     allowNull: false,
-    defaultValue: 'ENTRE', // Définir une valeur par défaut
+    defaultValue: "ENTREE",
   },
 });
 
-// Définir l'association : Une Entree appartient à un 
-Payement.belongsTo(Utilisateur, { foreignKey: 'utilisateurId' });
-// Définir l'association : Une Entree appartient à un 
-Payement.belongsTo(Entre, { foreignKey: 'entreId' });
+// Définir l'association : Une Entree appartient à un
+Payement.belongsTo(Utilisateur, { foreignKey: "utilisateurId" });
+// Définir l'association : Une Entree appartient à un
+Payement.belongsTo(Entre, { foreignKey: "entreId" });
+
+Payement.belongsTo(Sortie, { foreignKey: "sortieId" });
 
 module.exports = Payement;

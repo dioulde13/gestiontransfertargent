@@ -1,27 +1,39 @@
-import { Component, OnInit, OnDestroy, AfterViewInit, ChangeDetectorRef } from '@angular/core';
+import {
+  Component,
+  OnInit,
+  OnDestroy,
+  AfterViewInit,
+  ChangeDetectorRef,
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormBuilder, FormGroup,FormsModule, Validators } from '@angular/forms';
+import {
+  FormBuilder,
+  FormGroup,
+  FormsModule,
+  Validators,
+} from '@angular/forms';
 import { ReactiveFormsModule } from '@angular/forms';
 import { PayementService } from '../../services/payements/payement.service';
 import { AuthService } from '../../services/auth/auth-service.service';
 import { Subject } from 'rxjs';
+import { CurrencyFormatPipe } from '../dasboard/currency-format.pipe';
 
 interface Result {
   code: string;
   date_creation: string;
   montant: number;
+  type: string;
   id: number;
 }
 
 @Component({
   selector: 'app-payements',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, FormsModule],
+  imports: [CommonModule, ReactiveFormsModule, FormsModule, CurrencyFormatPipe],
   templateUrl: './payements.component.html',
-  styleUrl: './payements.component.css'
+  styleUrl: './payements.component.css',
 })
 export class PayementsComponent implements OnInit, AfterViewInit {
-
   allresultat: Result[] = [];
   private dataTable: any;
 
@@ -37,14 +49,15 @@ export class PayementsComponent implements OnInit, AfterViewInit {
     private fb: FormBuilder,
     private payementService: PayementService,
     private authService: AuthService,
-    private cd: ChangeDetectorRef,
-  ) { }
+    private cd: ChangeDetectorRef
+  ) {}
 
   ngOnInit(): void {
     this.payementForm = this.fb.group({
       utilisateurId: [this.idUser],
       code: ['', Validators.required],
       montant: ['', Validators.required],
+      type: ['', Validators.required],
     });
     this.filteredResults = [...this.allresultat];
     this.getUserInfo();
@@ -58,47 +71,59 @@ export class PayementsComponent implements OnInit, AfterViewInit {
 
   totalMontant: number = 0; // Initialisation
   filtrerEntreDates(): void {
-    const startDateInput = (document.getElementById('startDate') as HTMLInputElement).value;
-    const endDateInput = (document.getElementById('endDate') as HTMLInputElement).value;
-  
+    const startDateInput = (
+      document.getElementById('startDate') as HTMLInputElement
+    ).value;
+    const endDateInput = (
+      document.getElementById('endDate') as HTMLInputElement
+    ).value;
+
     this.startDate = startDateInput ? new Date(startDateInput) : null;
     this.endDate = endDateInput ? new Date(endDateInput) : null;
 
-      // Filtrer d'abord par date
-    let filteredResults = this.allresultat.filter((result: { date_creation: string }) => {
-      const resultDate = new Date(result.date_creation);
-      return (!this.startDate || resultDate >= this.startDate) && 
-             (!this.endDate || resultDate <= this.endDate);
-    });
-  
+    // Filtrer d'abord par date
+    let filteredResults = this.allresultat.filter(
+      (result: { date_creation: string }) => {
+        const resultDate = new Date(result.date_creation);
+        return (
+          (!this.startDate || resultDate >= this.startDate) &&
+          (!this.endDate || resultDate <= this.endDate)
+        );
+      }
+    );
+
     // Mettre à jour DataTable avec les résultats filtrés par date
     this.dataTable.clear().rows.add(filteredResults).draw();
-  
+
     // Attendre que DataTable applique son propre filtre (search)
     setTimeout(() => {
       const filteredDataTable: { montant: number }[] = this.dataTable
         .rows({ search: 'applied' })
         .data()
         .toArray();
-  
+
       // Recalculer le total avec des types explicitement définis
-      this.totalMontant = filteredDataTable.reduce((sum: number, row: { montant: number }) => {
-        return sum + row.montant;
-      }, 0);
-  
-      console.log('Total Montant après filtre et recherche :', this.totalMontant);
+      this.totalMontant = filteredDataTable.reduce(
+        (sum: number, row: { montant: number }) => {
+          return sum + row.montant;
+        },
+        0
+      );
+
+      console.log(
+        'Total Montant après filtre et recherche :',
+        this.totalMontant
+      );
     }, 200); // Timeout pour attendre la mise à jour de DataTable
-
   }
-  
-
 
   getAllPayement() {
     this.payementService.getAllPayement().subscribe({
       next: (response) => {
         this.allresultat = response;
+        console.log(this.allresultat);
         this.initDataTable();
-        this.cd.detectChanges(); 
+        this.cd.detectChanges();
       },
       error: (error) => {
         console.error('Erreur lors de la récupération des données', error);
@@ -106,14 +131,14 @@ export class PayementsComponent implements OnInit, AfterViewInit {
     });
   }
 
-
   private initDataTable(): void {
     setTimeout(() => {
       if (this.dataTable) {
         this.dataTable.destroy();
       }
       this.dataTable = ($('#datatable') as any).DataTable({
-        dom: "<'row'<'col-sm-6 dt-buttons-left'B><'col-sm-6 text-end dt-search-right'f>>" +
+        dom:
+          "<'row'<'col-sm-6 dt-buttons-left'B><'col-sm-6 text-end dt-search-right'f>>" +
           "<'row'<'col-sm-12'tr>>" +
           "<'row'<'col-sm-5'i><'col-sm-7'p>>",
         buttons: ['csv', 'excel', 'pdf', 'print'],
@@ -125,44 +150,54 @@ export class PayementsComponent implements OnInit, AfterViewInit {
         order: [[0, 'desc']],
         columns: [
           {
-            title: "Date paiement",
-            data: "date_creation",
+            title: 'Date paiement',
+            data: 'date_creation',
             render: (data: string, type: any, row: any) => {
-              if (!data || !row.Entre) return '';
-              const date = new Date(data);
+              const date = new Date(row.date_creation);
               const formattedDate = date.toLocaleString('fr-FR', {
                 day: '2-digit',
                 month: '2-digit',
                 year: 'numeric',
                 hour: '2-digit',
-                minute: '2-digit'
+                minute: '2-digit',
               });
-              return `${row.Entre.pays_dest} / ${row.Entre.code} / ${row.Entre.expediteur} / ${formattedDate}`;
-            }
+              return `${
+                row.entreId === null ? row.Sortie.pays_exp : row.Entre.pays_dest
+              } / ${
+                row.entreId === null ? row.Sortie.code : row.Entre.code
+              } / ${
+                row.entreId === null
+                  ? row.Sortie.expediteur
+                  : row.Entre.expediteur
+              } / ${formattedDate}`;
+            },
           },
           {
-            title: "Montant",
-            data: "montant",
+            title: 'Montant',
+            data: 'montant',
             render: (data: number) => {
-              return new Intl.NumberFormat('fr-FR', {
-                style: 'decimal',
-                minimumFractionDigits: 0,
-                maximumFractionDigits: 0
-              }).format(data) + " GNF";
-            }
+              return (
+                new Intl.NumberFormat('fr-FR', {
+                  style: 'decimal',
+                  minimumFractionDigits: 0,
+                  maximumFractionDigits: 0,
+                }).format(data) + ' GNF'
+              );
+            },
           },
-        ]
+          {
+            title: 'Type',
+            data: 'type',
+          },
+        ],
       });
       this.cd.detectChanges(); // Force la détection des changements
     }, 100);
   }
-  
 
   ngAfterViewInit(): void {
     this.dtTrigger.next(null);
   }
-
-
 
   getUserInfo() {
     this.authService.getUserInfo().subscribe({
@@ -170,25 +205,34 @@ export class PayementsComponent implements OnInit, AfterViewInit {
         this.userInfo = response.user;
         this.idUser = this.userInfo.id;
         this.payementForm.patchValue({ utilisateurId: this.idUser });
-      }
+      },
     });
+  }
+
+  montant: number = 0;
+
+  onInputChange(event: any): void {
+    this.montant = event.target.value.replace(/[^0-9,]/g, '');
   }
 
   onSubmit() {
     if (this.payementForm.valid) {
       const formData = this.payementForm.value;
       this.loading = true;
-  
-      this.payementService.ajouterPayement(formData).subscribe(
-        response => {
+
+      const montant = parseInt(formData.montant.replace(/,/g, ''), 10);
+
+      this.payementService.ajouterPayement({ ...formData, montant }).subscribe(
+        (response) => {
           this.loading = false;
           this.payementForm.reset();
           this.getAllPayement();
           alert(response.message); // Afficher le message retourné par l'API
         },
-        error => {
+        (error) => {
           this.loading = false;
-          const errorMessage = error.error?.message || "Erreur lors de l'ajout du paiement.";
+          const errorMessage =
+            error.error?.message || "Erreur lors de l'ajout du paiement.";
           alert(errorMessage); // Afficher le message d'erreur retourné par l'API
         }
       );
@@ -196,122 +240,118 @@ export class PayementsComponent implements OnInit, AfterViewInit {
       alert('Veuillez remplir tous les champs obligatoires.');
     }
   }
-  
 
   ngOnDestroy(): void {
     this.dtTrigger.unsubscribe(); // Nettoyage
   }
 }
 
+// // Détruire l'ancienne instance de DataTable si elle existe
+// if ($.fn.DataTable.isDataTable('#transactions-table')) {
+//   $('#transactions-table').DataTable().clear().destroy();
+// }
 
+// // Initialiser DataTable après un court délai
+// setTimeout(() => {
+//   let table = $('#transactions-table').DataTable(this.dtoptions);
 
-  // // Détruire l'ancienne instance de DataTable si elle existe
-  // if ($.fn.DataTable.isDataTable('#transactions-table')) {
-  //   $('#transactions-table').DataTable().clear().destroy();
-  // }
+//   const calculateTotal = () => {
+//     let total = 0;
+//     let visibleRows = table.rows(':visible').data().length; // Nombre de lignes visibles
 
-  // // Initialiser DataTable après un court délai
-  // setTimeout(() => {
-  //   let table = $('#transactions-table').DataTable(this.dtoptions);
+//     if (visibleRows > 0) {
+//       table.rows(':visible').every(function () {
+//         let rowData = this.data();
+//         let montant = parseFloat(
+//           rowData[1].toString().replace(/\s/g, '').replace(/,/g, '')
+//         ) || 0;
 
-  //   const calculateTotal = () => {
-  //     let total = 0;
-  //     let visibleRows = table.rows(':visible').data().length; // Nombre de lignes visibles
+//         total += montant;
+//       });
+//     }
 
-  //     if (visibleRows > 0) {
-  //       table.rows(':visible').every(function () {
-  //         let rowData = this.data();
-  //         let montant = parseFloat(
-  //           rowData[1].toString().replace(/\s/g, '').replace(/,/g, '')
-  //         ) || 0;
+//     // Afficher le total uniquement si un filtre est actif
+//     if (visibleRows > 0 && (startDateObj || endDateObj)) {
+//       $('#totalMontant').html(
+//         `<strong>Total Montant GNF :</strong> ${total.toLocaleString()} GNF`
+//       );
+//     } else {
+//       $('#totalMontant').html(`<strong>Total Montant GNF :</strong> 0 GNF`);
+//     }
+//   };
 
-  //         total += montant;
-  //       });
-  //     }
+//   let startDateObj: Date | null = null;
+//   let endDateObj: Date | null = null;
 
-  //     // Afficher le total uniquement si un filtre est actif
-  //     if (visibleRows > 0 && (startDateObj || endDateObj)) {
-  //       $('#totalMontant').html(
-  //         `<strong>Total Montant GNF :</strong> ${total.toLocaleString()} GNF`
-  //       );
-  //     } else {
-  //       $('#totalMontant').html(`<strong>Total Montant GNF :</strong> 0 GNF`);
-  //     }
-  //   };
+//   // Fonction de filtrage des dates
+//   $('#btnFilter').on('click', function () {
+//     let startDate = ($('#startDate').val() as string);
+//     let endDate = ($('#endDate').val() as string);
 
-  //   let startDateObj: Date | null = null;
-  //   let endDateObj: Date | null = null;
+//     startDateObj = startDate ? new Date(startDate + 'T00:00:00') : null;
+//     endDateObj = endDate ? new Date(endDate + 'T23:59:59') : null;
 
-  //   // Fonction de filtrage des dates
-  //   $('#btnFilter').on('click', function () {
-  //     let startDate = ($('#startDate').val() as string);
-  //     let endDate = ($('#endDate').val() as string);
+//     table.rows().every(function () {
+//       let rowData = this.data();
+//       console.log(rowData);
 
-  //     startDateObj = startDate ? new Date(startDate + 'T00:00:00') : null;
-  //     endDateObj = endDate ? new Date(endDate + 'T23:59:59') : null;
+//       // Extraction de la chaîne de date depuis la première colonne
+//       let dateStr = rowData[0];
+//       console.log(dateStr);
 
-  //     table.rows().every(function () {
-  //       let rowData = this.data();
-  //       console.log(rowData);
-      
-  //       // Extraction de la chaîne de date depuis la première colonne
-  //       let dateStr = rowData[0];
-  //       console.log(dateStr);
-      
-  //       if (dateStr) {
-  //         // Séparer la chaîne par " / " pour obtenir chaque partie
-  //         let parts = dateStr.split(' / ');
-          
-  //         // La date et l'heure sont dans la dernière partie après le dernier "/"
-  //         let lastPart = parts[parts.length - 1];
-      
-  //         // Extraire la date et l'heure séparément
-  //         let [dateOnly, timePart] = lastPart.split(' '); // dateOnly = "02/02/2025", timePart = "16:05"
-  //         console.log(dateOnly);
-      
-  //         if (dateOnly && timePart) {
-  //           // Conversion de la date et de l'heure en objets numériques
-  //           let [day, month, year] = dateOnly.split('/').map(Number);
-  //           let [hours, minutes] = timePart.split(':').map(Number);
-      
-  //           // Création de l'objet Date
-  //           let rowDate = new Date(year, month - 1, day, hours, minutes);
-  //           console.log(rowDate);
-      
-  //           // Vérification si la date est comprise entre startDateObj et endDateObj
-  //           if (
-  //             (!startDateObj || rowDate >= startDateObj) &&
-  //             (!endDateObj || rowDate <= endDateObj)
-  //           ) {
-  //             $(this.node()).show(); // Affiche la ligne si la condition est respectée
-  //           } else {
-  //             $(this.node()).hide(); // Cache la ligne sinon
-  //           }
-  //         }
-  //       }
-  //     });            
+//       if (dateStr) {
+//         // Séparer la chaîne par " / " pour obtenir chaque partie
+//         let parts = dateStr.split(' / ');
 
-  //     table.draw();
-  //     calculateTotal();
-  //   });
+//         // La date et l'heure sont dans la dernière partie après le dernier "/"
+//         let lastPart = parts[parts.length - 1];
 
-  //   // Mettre à jour le total lors de la recherche
-  //   table.on('search.dt', function () {
-  //     calculateTotal();
-  //   });
+//         // Extraire la date et l'heure séparément
+//         let [dateOnly, timePart] = lastPart.split(' '); // dateOnly = "02/02/2025", timePart = "16:05"
+//         console.log(dateOnly);
 
-  //   // Afficher 0 par défaut
-  //   $('#totalMontant').html(`<strong>Total Montant GNF :</strong> 0 GNF`);
-  // }, 100);
+//         if (dateOnly && timePart) {
+//           // Conversion de la date et de l'heure en objets numériques
+//           let [day, month, year] = dateOnly.split('/').map(Number);
+//           let [hours, minutes] = timePart.split(':').map(Number);
 
+//           // Création de l'objet Date
+//           let rowDate = new Date(year, month - 1, day, hours, minutes);
+//           console.log(rowDate);
+
+//           // Vérification si la date est comprise entre startDateObj et endDateObj
+//           if (
+//             (!startDateObj || rowDate >= startDateObj) &&
+//             (!endDateObj || rowDate <= endDateObj)
+//           ) {
+//             $(this.node()).show(); // Affiche la ligne si la condition est respectée
+//           } else {
+//             $(this.node()).hide(); // Cache la ligne sinon
+//           }
+//         }
+//       }
+//     });
+
+//     table.draw();
+//     calculateTotal();
+//   });
+
+//   // Mettre à jour le total lors de la recherche
+//   table.on('search.dt', function () {
+//     calculateTotal();
+//   });
+
+//   // Afficher 0 par défaut
+//   $('#totalMontant').html(`<strong>Total Montant GNF :</strong> 0 GNF`);
+// }, 100);
 
 // this.dtoptions = {
 //   pagingType: 'full_numbers',
 //   pageLength: 10,
 //   processing: true,
 //   order: [0,'desc'],
-//   dom: "<'row'<'col-sm-6 dt-buttons-left'B><'col-sm-6 text-end dt-search-right'f>>" + 
-//        "<'row'<'col-sm-12'tr>>" + 
+//   dom: "<'row'<'col-sm-6 dt-buttons-left'B><'col-sm-6 text-end dt-search-right'f>>" +
+//        "<'row'<'col-sm-12'tr>>" +
 //        "<'row'<'col-sm-5'i><'col-sm-7'p>>",
 //   buttons: ['csv', 'excel', 'print'],
 //   language: {

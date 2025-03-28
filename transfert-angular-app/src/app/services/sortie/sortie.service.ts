@@ -36,4 +36,8 @@ export class SortieService {
       data
     );
   }
+
+  ajouterSortieAutres(data: any): Observable<any> {
+    return this.http.post(`${this.apiUrl}/api/sorties/ajouterAutre`, data);
+  }
 }

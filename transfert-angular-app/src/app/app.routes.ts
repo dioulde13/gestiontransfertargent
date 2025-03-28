@@ -15,13 +15,17 @@ import { ListeUtilisateursComponent } from './pages/liste-utilisateurs/liste-uti
 import { PayementComponent } from './pages/payementCredit/payement.component';
 import { PayementEchangeComponent } from './pages/payement-echange/payement-echange.component';
 import { ListeEchangeComponent } from './pages/liste-echange/liste-echange.component';
-
+import { InscriptionComponent } from './pages/inscription/inscription.component';
 
 export const routes: Routes = [
   {
     path: '',
     redirectTo: 'login',
     pathMatch: 'full',
+  },
+  {
+    path: 'inscription',
+    component: InscriptionComponent,
   },
   {
     path: 'login',
@@ -34,66 +38,67 @@ export const routes: Routes = [
       {
         path: 'dashboard',
         component: DasboardComponent,
-        canActivate: [AuthGuard]
+        canActivate: [AuthGuard],
       },
       {
         path: 'entre',
         component: ListeEntreComponent,
-        canActivate: [AuthGuard]
-      },{
+        canActivate: [AuthGuard],
+      },
+      {
         path: 'echange',
         component: ListeEchangeComponent,
-        canActivate: [AuthGuard]
+        canActivate: [AuthGuard],
       },
       {
         path: 'payementEchange',
         component: PayementEchangeComponent,
-        canActivate: [AuthGuard]
+        canActivate: [AuthGuard],
       },
       {
         path: 'payement',
         component: PayementsComponent,
-        canActivate: [AuthGuard]
+        canActivate: [AuthGuard],
       },
       {
         path: 'sortie',
         component: ListeSortieComponent,
-        canActivate: [AuthGuard]
+        canActivate: [AuthGuard],
       },
       {
         path: 'partenaire',
         component: ListePartenaireComponent,
-        canActivate: [AuthGuard]
+        canActivate: [AuthGuard],
       },
       {
         path: 'devise',
         component: ListeDeviseComponent,
-        canActivate: [AuthGuard]
+        canActivate: [AuthGuard],
       },
       {
         path: 'rembourser',
         component: ListeRembourserComponent,
-        canActivate: [AuthGuard]
+        canActivate: [AuthGuard],
       },
       {
         path: 'depense',
         component: ListeDepenseComponent,
-        canActivate: [AuthGuard]
+        canActivate: [AuthGuard],
       },
       {
         path: 'credit',
         component: ListeCreditComponent,
-        canActivate: [AuthGuard]
+        canActivate: [AuthGuard],
       },
       {
         path: 'payementCredit',
         component: PayementComponent,
-        canActivate: [AuthGuard]
+        canActivate: [AuthGuard],
       },
       {
         path: 'utilisateur',
         component: ListeUtilisateursComponent,
-        canActivate: [AuthGuard]
+        canActivate: [AuthGuard],
       },
     ],
   },

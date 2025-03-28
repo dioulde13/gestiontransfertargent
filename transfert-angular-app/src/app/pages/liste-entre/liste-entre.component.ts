@@ -23,6 +23,7 @@ import { PartenaireServiceService } from '../../services/partenaire/partenaire-s
 import { Subject } from 'rxjs';
 import { DataTablesModule } from 'angular-datatables';
 import { NgxPrintModule } from 'ngx-print';
+import { CurrencyFormatPipe } from '../dasboard/currency-format.pipe';
 
 interface Result {
   code: string;
@@ -55,6 +56,7 @@ interface Result {
     DataTablesModule,
     NgxPrintModule,
     NgxIntlTelInputModule,
+    CurrencyFormatPipe,
   ],
   templateUrl: './liste-entre.component.html',
   styleUrls: ['./liste-entre.component.css'],
@@ -123,7 +125,7 @@ export class ListeEntreComponent implements OnInit, AfterViewInit, OnDestroy {
         'Total Montant après filtre et recherche :',
         this.totalMontant
       );
-    }, 200); // Timeout pour attendre la mise à jour de DataTable
+    }, 200);
   }
 
   private fetchAllEntre(): void {
@@ -132,7 +134,7 @@ export class ListeEntreComponent implements OnInit, AfterViewInit, OnDestroy {
         this.allresultat = response;
         console.log('Liste des entrées:', this.allresultat);
         this.initDataTable();
-        this.cd.detectChanges(); // Forcer la détection des changements
+        this.cd.detectChanges();
       },
       error: (error) => {
         console.error('Erreur lors de la récupération des données:', error);
@@ -156,7 +158,7 @@ export class ListeEntreComponent implements OnInit, AfterViewInit, OnDestroy {
         pageLength: 10,
         lengthMenu: [10, 25, 50],
         data: this.allresultat,
-        order: [0, 'desc'],
+        order: [1, 'desc'],
         columns: [
           { title: 'Code', data: 'code' },
           {
@@ -265,28 +267,47 @@ export class ListeEntreComponent implements OnInit, AfterViewInit, OnDestroy {
 
   isloadingEntreAutre: boolean = false;
 
+  montantClient: number = 0;
+
+  onInputChangeClient(event: any): void {
+    this.montantClient = event.target.value.replace(/[^0-9,]/g, '');
+  }
+
   ajouterEntreeAutres(): void {
     this.isloadingEntreAutre = true;
 
     const formData = this.entreFormAutre.value;
 
-    this.entreService.ajouterEntreeAutres(formData).subscribe({
-      next: (response) => {
-        console.log('Entrée ajoutée avec succès:', response);
-        this.fetchAllEntre();
-        this.entreFormAutre.patchValue({
-          nomCLient: '',
-          montantClient: '',
-        });
-        this.isloadingEntreAutre = false;
-        alert('Entrée ajoutée avec succès !');
-      },
-      error: (error) => {
-        this.isloadingEntreAutre = false;
-        console.error(error.error.message);
-        alert(error.error.message);
-      },
-    });
+    const montantClient = parseInt(
+      formData.montantClient.replace(/,/g, ''),
+      10
+    );
+
+    this.entreService
+      .ajouterEntreeAutres({ ...formData, montantClient })
+      .subscribe({
+        next: (response) => {
+          console.log('Entrée ajoutée avec succès:', response);
+          this.fetchAllEntre();
+          this.entreFormAutre.patchValue({
+            nomCLient: '',
+            montantClient: '',
+          });
+          this.isloadingEntreAutre = false;
+          alert('Entrée ajoutée avec succès !');
+        },
+        error: (error) => {
+          this.isloadingEntreAutre = false;
+          console.error(error.error.message);
+          alert(error.error.message);
+        },
+      });
+  }
+
+  montant_cfa: number = 0;
+
+  onInputChange(event: any): void {
+    this.montant_cfa = event.target.value.replace(/[^0-9,]/g, '');
   }
 
   ajouterEntres(): void {
@@ -294,7 +315,9 @@ export class ListeEntreComponent implements OnInit, AfterViewInit, OnDestroy {
     this.isLoading = true;
     const formData = this.entreForm.value;
 
-    this.entreService.ajouterEntree(formData).subscribe({
+    const montant_cfa = parseInt(formData.montant_cfa.replace(/,/g, ''), 10);
+
+    this.entreService.ajouterEntree({ ...formData, montant_cfa }).subscribe({
       next: (response) => {
         console.log('Entrée ajoutée avec succès:', response);
         this.fetchAllEntre();
@@ -378,20 +401,6 @@ export class ListeEntreComponent implements OnInit, AfterViewInit, OnDestroy {
     this.initAnnulerEntreForm();
   }
 
-  private initAnnulerEntreForm(): void {
-    this.annulerEntreForm = this.fb.group({
-      codeAnnuler: ['', Validators.required],
-      typeAnnuler: ['', Validators.required],
-      montant_rembourser: [0],
-    });
-
-    // this.annulerEntreForm = this.fb.group({
-    //   codeAnnuler: ['', Validators.required],
-    //   typeAnnuler: ['', Validators.required],
-    //   montant_rembourser: [0],
-    // });
-  }
-
   selectedDevise: any = null; // Devise sélectionnée pour modification
   isloadingEdit: boolean = false;
 
@@ -415,6 +424,14 @@ export class ListeEntreComponent implements OnInit, AfterViewInit, OnDestroy {
     }
   }
 
+  private initAnnulerEntreForm(): void {
+    this.annulerEntreForm = this.fb.group({
+      codeAnnuler: ['', Validators.required],
+      typeAnnuler: ['', Validators.required],
+      montant_rembourser: [0],
+    });
+  }
+
   isLoadingAnnuler: boolean = false;
 
   annulerEntre(): void {
@@ -426,13 +443,9 @@ export class ListeEntreComponent implements OnInit, AfterViewInit, OnDestroy {
       .subscribe({
         next: (response) => {
           console.log('Réponse du serveur:', response);
+          this.isLoadingAnnuler = false;
           this.fetchAllEntre();
           this.annulerEntreForm.reset();
-          this.annulerEntreForm.markAsPristine();
-          this.annulerEntreForm.markAsUntouched();
-          this.annulerEntreForm.updateValueAndValidity();
-
-          this.isLoadingAnnuler = false;
           alert(response.message);
         },
         error: (error) => {
@@ -484,7 +497,6 @@ export class ListeEntreComponent implements OnInit, AfterViewInit, OnDestroy {
     { code: '+1', pays: 'USA', regex: /^[2-9][0-9]{9}$/, min: 10, max: 10 },
   ];
 
-  // Initialisation du formulaire avec des validations
   private initForm(): void {
     this.entreForm = this.fb.group({
       indicatif: [this.indicatifs[0].code], // Par défaut France
@@ -528,31 +540,36 @@ export class ListeEntreComponent implements OnInit, AfterViewInit, OnDestroy {
 
   allPartenaire: any[] = [];
 
-  // Récupération des devises
   fetchPartenaire(): void {
-    this.partenaireService.getAllPartenaire().subscribe(
-      (response) => {
-        this.allPartenaire = response;
-        console.log('Liste des partenaires:', this.allPartenaire);
+    this.partenaireService.getAllPartenaire().subscribe({
+      next: (response: any[]) => {
+        this.allPartenaire = response.filter(
+          (partenaire: any) => partenaire.pays !== 'Guinée-Bissau'
+        );
       },
-      (error) => {
+      error: (error) => {
         console.error('Erreur lors de la récupération des partenaires:', error);
-      }
-    );
+      },
+    });
   }
 
   allDevise: any[] = [];
 
   // Récupération des devises
   fetchDevise(): void {
-    this.deviseService.getAllDevise().subscribe(
-      (response) => {
-        this.allDevise = response;
-        console.log('Liste des devises:', this.allDevise);
+    this.deviseService.getAllDevise().subscribe({
+      next: (response: any[]) => {
+        this.allDevise = response.filter(
+          (devise: any) => devise.paysArriver !== 'Guinée-Bissau'
+        );
       },
-      (error) => {
+      // (response) => {
+      //   this.allDevise = response;
+      //   console.log('Liste des devises:', this.allDevise);
+      // },
+      error: (error) => {
         console.error('Erreur lors de la récupération des devises:', error);
-      }
-    );
+      },
+    });
   }
 }
