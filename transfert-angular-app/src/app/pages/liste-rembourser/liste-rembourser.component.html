@@ -306,12 +306,12 @@
             </div>
           </div>
           <div class="form-group">
-            <label for="montant">Montant en devise</label>
+            <label for="montantR">Montant en devise</label>
             <input
               type="number"
-              id="montant"
-              [(ngModel)]="montant"
-              name="montantCfa"
+              id="montantR"
+              [(ngModel)]="montantR"
+              name="montantR"
               required
             />
           </div>
@@ -465,7 +465,10 @@
               id="montant"
               formControlName="montant"
               class="form-control"
-              type="number"
+              type="text"
+              [(ngModel)]="montant"
+              [ngModel]="montant | currencyFormat"
+              (input)="onInputChange($event)"
             />
           </div>
           <div class="modal-footer">

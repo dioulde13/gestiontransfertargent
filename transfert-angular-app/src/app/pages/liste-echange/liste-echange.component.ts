@@ -19,6 +19,7 @@ import { EchangeService } from '../../services/echanges/echange.service';
 import { AuthService } from '../../services/auth/auth-service.service';
 import { DeviseService } from '../../services/devise/devise.service';
 import { PartenaireServiceService } from '../../services/partenaire/partenaire-service.service';
+import { CurrencyFormatPipe } from '../dasboard/currency-format.pipe';
 
 interface Result {
   code: string;
@@ -39,7 +40,13 @@ interface Result {
 @Component({
   selector: 'app-liste-echange',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, FormsModule, DataTablesModule],
+  imports: [
+    CommonModule,
+    ReactiveFormsModule,
+    FormsModule,
+    DataTablesModule,
+    CurrencyFormatPipe,
+  ],
   templateUrl: './liste-echange.component.html',
   styleUrl: './liste-echange.component.css',
 })
@@ -336,31 +343,43 @@ export class ListeEchangeComponent implements OnInit, AfterViewInit, OnDestroy {
     });
   }
 
+  montant_devise: number = 0;
+
+  onInputChange(event: any): void {
+    this.montant_devise = event.target.value.replace(/[^0-9,]/g, '');
+  }
+
   // Méthode pour soumettre le formulaire et ajouter une nouvelle entrée
   ajouterEchange(): void {
     console.log(this.echangeForm.value);
     if (this.echangeForm.valid) {
       this.isLoading = true;
-      const formData = this.echangeForm.value; // Récupérer les valeurs du formulaire
-      this.echangeService.ajouterEchange(formData).subscribe({
-        next: (response) => {
-          console.log('Echange ajoutée avec succès:', response);
-          this.fetchAllEchange();
-          // Réinitialiser le formulaire et mettre à jour la liste
-          this.echangeForm.patchValue({
-            deviseId: '',
-            nom: '',
-            montant_devise: '',
-          });
-          this.isLoading = false;
-          alert('Echange ajoutée avec succès !');
-        },
-        error: (error) => {
-          this.isLoading = false;
-          console.error("Erreur lors de l'ajout de l'echange:", error);
-          alert("Erreur lors de l'ajout de l'echange.");
-        },
-      });
+      const formData = this.echangeForm.value;
+      const montant_devise = parseInt(
+        formData.montant_devise.replace(/,/g, ''),
+        10
+      );
+      this.echangeService
+        .ajouterEchange({ ...formData, montant_devise })
+        .subscribe({
+          next: (response) => {
+            console.log('Echange ajoutée avec succès:', response);
+            this.fetchAllEchange();
+            // Réinitialiser le formulaire et mettre à jour la liste
+            this.echangeForm.patchValue({
+              deviseId: '',
+              nom: '',
+              montant_devise: '',
+            });
+            this.isLoading = false;
+            alert('Echange ajoutée avec succès !');
+          },
+          error: (error) => {
+            this.isLoading = false;
+            console.error("Erreur lors de l'ajout de l'echange:", error);
+            alert("Erreur lors de l'ajout de l'echange.");
+          },
+        });
     } else {
       alert('Veuillez remplir tous les champs obligatoires.');
     }
@@ -385,28 +404,38 @@ export class ListeEchangeComponent implements OnInit, AfterViewInit, OnDestroy {
     });
   }
 
+  montant: number = 0;
+
+  onInputChangePartenaire(event: any): void {
+    this.montant = event.target.value.replace(/[^0-9,]/g, '');
+  }
+
   loadingPartenaire: boolean = false;
 
   onSoldeUpdate() {
     this.loadingPartenaire = true;
     if (this.partenaireForm.valid) {
       const updatedData = this.partenaireForm.value;
+
+      const montant = parseInt(updatedData.montant.replace(/,/g, ''), 10);
       console.log(updatedData);
-      this.echangeService.ajouterSoldePartenaire(updatedData).subscribe({
-        next: (response) => {
-          this.partenaireForm.patchValue({
-            deviseId: '',
-            partenaireId: '',
-            montant: '',
-          });
-          this.loadingPartenaire = false;
-          alert(response.message);
-        },
-        error: (error) => {
-          console.error('Erreur lors de la modification du echange:', error);
-          alert('Erreur lors de la modification du echange.');
-        },
-      });
+      this.echangeService
+        .ajouterSoldePartenaire({ ...updatedData, montant })
+        .subscribe({
+          next: (response) => {
+            this.partenaireForm.patchValue({
+              deviseId: '',
+              partenaireId: '',
+              montant: '',
+            });
+            this.loadingPartenaire = false;
+            alert(response.message);
+          },
+          error: (error) => {
+            console.error('Erreur lors de la modification du echange:', error);
+            alert('Erreur lors de la modification du echange.');
+          },
+        });
     }
   }
 

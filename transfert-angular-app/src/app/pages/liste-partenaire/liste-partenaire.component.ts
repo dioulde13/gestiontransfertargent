@@ -7,12 +7,17 @@ import { AuthService } from '../../services/auth/auth-service.service';
 import { Subject } from 'rxjs';
 import { DataTablesModule } from 'angular-datatables';
 import { DeviseService } from '../../services/devise/devise.service';
-import { error } from 'node:console';
+import { CurrencyFormatPipe } from '../dasboard/currency-format.pipe';
 
 @Component({
   selector: 'app-liste-partenaire',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, DataTablesModule], // Enlever BrowserModule
+  imports: [
+    CommonModule,
+    ReactiveFormsModule,
+    DataTablesModule,
+    CurrencyFormatPipe,
+  ], // Enlever BrowserModule
   templateUrl: './liste-partenaire.component.html',
   styleUrls: ['./liste-partenaire.component.css'], // Correction de 'styleUrl' en 'styleUrls'
 })
@@ -124,7 +129,6 @@ export class ListePartenaireComponent implements OnInit {
     this.loadingRembourser = true;
     const updatedData = this.editPartenaireForm.value;
     // console.log(updatedData);
-    // console.log(this.selectedPartenaire.id);
     this.partenaireService
       .rembourserDevise(this.selectedPartenaire.id, updatedData)
       .subscribe({
@@ -155,28 +159,40 @@ export class ListePartenaireComponent implements OnInit {
   }
   isLoading: boolean = false;
 
+  montant_preter: number = 0;
+
+  onInputChange(event: any): void {
+    this.montant_preter = event.target.value.replace(/[^0-9,]/g, '');
+  }
+
   onSubmit() {
     if (this.partenaireForm.valid) {
       const formData = this.partenaireForm.value;
-      this.isLoading = true;
-      this.partenaireService.ajouterPartenaire(formData).subscribe(
-        (response) => {
-          this.isLoading = false;
-          console.log('Partenaire ajouté avec succès:', response);
-          this.partenaireForm.patchValue({
-            nom: '',
-            prenom: '',
-            pays: '',
-            montant_preter: '',
-          });
-          this.getAllPartenaire();
-          alert('Partenaire ajouté avec succès!');
-        },
-        (error) => {
-          console.error("Erreur lors de l'ajout du partenaire:", error);
-          alert("Erreur lors de l'ajout du partenaire.");
-        }
+      const montant_preter = parseInt(
+        formData.montant_preter.replace(/,/g, ''),
+        10
       );
+      this.isLoading = true;
+      this.partenaireService
+        .ajouterPartenaire({ ...formData, montant_preter })
+        .subscribe(
+          (response) => {
+            this.isLoading = false;
+            console.log('Partenaire ajouté avec succès:', response);
+            this.partenaireForm.patchValue({
+              nom: '',
+              prenom: '',
+              pays: '',
+              montant_preter: '',
+            });
+            this.getAllPartenaire();
+            alert('Partenaire ajouté avec succès!');
+          },
+          (error) => {
+            console.error("Erreur lors de l'ajout du partenaire:", error);
+            alert("Erreur lors de l'ajout du partenaire.");
+          }
+        );
     } else {
       alert('Veuillez remplir tous les champs obligatoires.');
     }

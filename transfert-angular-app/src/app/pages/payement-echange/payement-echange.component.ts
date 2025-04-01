@@ -1,11 +1,17 @@
-import { AfterViewInit, ChangeDetectorRef, Component, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';  // Remplacer BrowserModule par CommonModule
+import {
+  AfterViewInit,
+  ChangeDetectorRef,
+  Component,
+  OnInit,
+} from '@angular/core';
+import { CommonModule } from '@angular/common'; // Remplacer BrowserModule par CommonModule
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ReactiveFormsModule } from '@angular/forms'; // Import du module des formulaires réactifs
 import { AuthService } from '../../services/auth/auth-service.service';
 import { Subject } from 'rxjs';
 import { DataTablesModule } from 'angular-datatables';
 import { PayementEchangeService } from '../../services/payementEchange/payement.service';
+import { CurrencyFormatPipe } from '../dasboard/currency-format.pipe';
 
 interface Result {
   code: string;
@@ -17,12 +23,16 @@ interface Result {
 @Component({
   selector: 'app-payement-echange',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, DataTablesModule],  // Enlever BrowserModule
+  imports: [
+    CommonModule,
+    ReactiveFormsModule,
+    DataTablesModule,
+    CurrencyFormatPipe,
+  ], // Enlever BrowserModule
   templateUrl: './payement-echange.component.html',
-  styleUrl: './payement-echange.component.css'
+  styleUrl: './payement-echange.component.css',
 })
 export class PayementEchangeComponent implements OnInit, AfterViewInit {
-
   allresultat: Result[] = [];
 
   userInfo: any = null;
@@ -43,18 +53,26 @@ export class PayementEchangeComponent implements OnInit, AfterViewInit {
 
   totalMontant: number = 0; // Initialisation
   filtrerEntreDates(): void {
-    const startDateInput = (document.getElementById('startDate') as HTMLInputElement).value;
-    const endDateInput = (document.getElementById('endDate') as HTMLInputElement).value;
+    const startDateInput = (
+      document.getElementById('startDate') as HTMLInputElement
+    ).value;
+    const endDateInput = (
+      document.getElementById('endDate') as HTMLInputElement
+    ).value;
 
     this.startDate = startDateInput ? new Date(startDateInput) : null;
     this.endDate = endDateInput ? new Date(endDateInput) : null;
 
     // Filtrer d'abord par date
-    let filteredResults = this.allresultat.filter((result: { date_creation: string }) => {
-      const resultDate = new Date(result.date_creation);
-      return (!this.startDate || resultDate >= this.startDate) &&
-        (!this.endDate || resultDate <= this.endDate);
-    });
+    let filteredResults = this.allresultat.filter(
+      (result: { date_creation: string }) => {
+        const resultDate = new Date(result.date_creation);
+        return (
+          (!this.startDate || resultDate >= this.startDate) &&
+          (!this.endDate || resultDate <= this.endDate)
+        );
+      }
+    );
 
     // Mettre à jour DataTable avec les résultats filtrés par date
     this.dataTable.clear().rows.add(filteredResults).draw();
@@ -67,22 +85,26 @@ export class PayementEchangeComponent implements OnInit, AfterViewInit {
         .toArray();
 
       // Recalculer le total avec des types explicitement définis
-      this.totalMontant = filteredDataTable.reduce((sum: number, row: { montant: number }) => {
-        return sum + row.montant;
-      }, 0);
+      this.totalMontant = filteredDataTable.reduce(
+        (sum: number, row: { montant: number }) => {
+          return sum + row.montant;
+        },
+        0
+      );
 
-      console.log('Total Montant après filtre et recherche :', this.totalMontant);
+      console.log(
+        'Total Montant après filtre et recherche :',
+        this.totalMontant
+      );
     }, 200); // Timeout pour attendre la mise à jour de DataTable
-
   }
-
 
   constructor(
     private fb: FormBuilder,
     private payementService: PayementEchangeService,
     private authService: AuthService,
-      private cd: ChangeDetectorRef,
-  ) { }
+    private cd: ChangeDetectorRef
+  ) {}
 
   ngOnInit(): void {
     this.filteredResults = [...this.allresultat];
@@ -104,7 +126,7 @@ export class PayementEchangeComponent implements OnInit, AfterViewInit {
       next: (response) => {
         this.allresultat = response;
         this.initDataTable();
-        this.cd.detectChanges(); 
+        this.cd.detectChanges();
         console.log(this.allresultat);
       },
       error: (error) => {
@@ -119,7 +141,8 @@ export class PayementEchangeComponent implements OnInit, AfterViewInit {
         this.dataTable.destroy();
       }
       this.dataTable = ($('#datatable') as any).DataTable({
-        dom: "<'row'<'col-sm-6 dt-buttons-left'B><'col-sm-6 text-end dt-search-right'f>>" +
+        dom:
+          "<'row'<'col-sm-6 dt-buttons-left'B><'col-sm-6 text-end dt-search-right'f>>" +
           "<'row'<'col-sm-12'tr>>" +
           "<'row'<'col-sm-5'i><'col-sm-7'p>>",
         buttons: ['csv', 'excel', 'pdf', 'print'],
@@ -131,8 +154,8 @@ export class PayementEchangeComponent implements OnInit, AfterViewInit {
         order: [[0, 'desc']],
         columns: [
           {
-            title: "Date paiement",
-            data: "date_creation",
+            title: 'Date paiement',
+            data: 'date_creation',
             render: (data: string, type: any, row: any) => {
               if (!data || !row.Echange) return '';
               const date = new Date(data);
@@ -141,47 +164,52 @@ export class PayementEchangeComponent implements OnInit, AfterViewInit {
                 month: '2-digit',
                 year: 'numeric',
                 hour: '2-digit',
-                minute: '2-digit'
+                minute: '2-digit',
               });
-              return `${formattedDate} / ${row.Echange.nom}`;
-            }
+              return `${row.code} /${formattedDate} / ${row.Echange.nom}`;
+            },
           },
           {
-            title: "Montant",
-            data: "montant",
+            title: 'Montant',
+            data: 'montant',
             render: (data: number) => {
-              return new Intl.NumberFormat('fr-FR', {
-                style: 'decimal',
-                minimumFractionDigits: 0,
-                maximumFractionDigits: 0
-              }).format(data) + " GNF";
-            }
+              return (
+                new Intl.NumberFormat('fr-FR', {
+                  style: 'decimal',
+                  minimumFractionDigits: 0,
+                  maximumFractionDigits: 0,
+                }).format(data) + ' GNF'
+              );
+            },
           },
-        ]
+        ],
       });
       this.cd.detectChanges(); // Force la détection des changements
     }, 100);
   }
-  
 
   ngAfterViewInit(): void {
     this.dtTrigger.next(null);
   }
 
   getUserInfo() {
-    this.authService.getUserInfo().subscribe(
-      {
-        next: (response) => {
-          this.userInfo = response.user;
-          //   if (this.userInfo) {
-          this.idUser = this.userInfo.id;
-          console.log('Informations utilisateur:', this.userInfo);
+    this.authService.getUserInfo().subscribe({
+      next: (response) => {
+        this.userInfo = response.user;
+        //   if (this.userInfo) {
+        this.idUser = this.userInfo.id;
+        console.log('Informations utilisateur:', this.userInfo);
 
-          // Mettre à jour le champ utilisateurId dans le formulaire
-          this.payementForm.patchValue({ utilisateurId: this.idUser });
-        }
-      }
-    );
+        // Mettre à jour le champ utilisateurId dans le formulaire
+        this.payementForm.patchValue({ utilisateurId: this.idUser });
+      },
+    });
+  }
+
+  montant: number = 0;
+
+  onInputChange(event: any): void {
+    this.montant = event.target.value.replace(/[^0-9,]/g, '');
   }
 
   loading: boolean = false;
@@ -189,30 +217,34 @@ export class PayementEchangeComponent implements OnInit, AfterViewInit {
   onSubmit() {
     if (this.payementForm.valid) {
       const formData = this.payementForm.value;
+      const montant = parseInt(formData.montant.replace(/,/g, ''), 10);
       this.loading = true;
       // Appeler le service pour ajouter le partenaire
-      this.payementService.ajouterPayemnentEchange(formData).subscribe(
-        response => {
-          this.loading = false;
-          console.log('Payement ajouté avec succès:', response);
-          this.payementForm.patchValue({
-            code: '',
-            montant: ''
-          });
-          this.getAllPayementEchange();
-          alert('Payement ajouté avec succès!');
-        },
-        error => {
-          this.loading = false;
-          const errorMessage = error.error?.message || 'Une erreur est survenue lors de l\'ajout du résultat.';
-          alert(errorMessage);
-          // console.error('Erreur lors de l\'ajout du payement:', error);
-          // alert('Erreur lors de l\'ajout du payement.');
-        }
-      );
+      this.payementService
+        .ajouterPayemnentEchange({ ...formData, montant })
+        .subscribe(
+          (response) => {
+            this.loading = false;
+            console.log('Payement ajouté avec succès:', response);
+            this.payementForm.patchValue({
+              code: '',
+              montant: '',
+            });
+            this.getAllPayementEchange();
+            alert('Payement ajouté avec succès!');
+          },
+          (error) => {
+            this.loading = false;
+            const errorMessage =
+              error.error?.message ||
+              "Une erreur est survenue lors de l'ajout du résultat.";
+            alert(errorMessage);
+            // console.error('Erreur lors de l\'ajout du payement:', error);
+            // alert('Erreur lors de l\'ajout du payement.');
+          }
+        );
     } else {
       alert('Veuillez remplir tous les champs obligatoires.');
     }
   }
-
 }

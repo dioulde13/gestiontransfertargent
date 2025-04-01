@@ -372,10 +372,6 @@
                   }})
                 </option>
               </select>
-              <!-- <div *ngIf="partenaireForm.controls.partenaireId.invalid && partenaireForm.controls.partenaireId.touched"
-                                class="text-danger">
-                                Sélectionnez un partenaire.
-                            </div> -->
             </div>
 
             <div class="form-group col-md-6">
@@ -401,16 +397,15 @@
             <div class="form-group col-lg-12">
               <label for="montant">Montant</label>
               <input
-                type="number"
+                type="text"
                 class="form-control"
                 id="montant"
                 formControlName="montant"
                 placeholder="Montant"
+                [(ngModel)]="montant"
+                [ngModel]="montant | currencyFormat"
+                (input)="onInputChange($event)"
               />
-              <!-- <div *ngIf="partenaireForm.controls.montant.invalid && partenaireForm.controls.montant.touched"
-                                class="text-danger">
-                                Le montant est requis et doit être supérieur à 0.
-                            </div> -->
             </div>
           </div>
 
@@ -504,11 +499,14 @@
             <div class="form-group col-lg-12">
               <label for="montant_devise">Montant </label>
               <input
-                type="number"
+                type="text"
                 class="form-control"
                 id="montant_devise"
                 formControlName="montant_devise"
                 placeholder="Montant"
+                [(ngModel)]="montant_devise"
+                [ngModel]="montant_devise | currencyFormat"
+                (input)="onInputChange($event)"
               />
             </div>
           </div>

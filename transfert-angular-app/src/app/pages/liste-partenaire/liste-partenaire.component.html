@@ -73,6 +73,14 @@
                     <td class="border px-4 py-2">{{ result.pays }}</td>
                     <td class="border px-4 py-2">
                       {{ result.montant_preter | currency : "" : "" : "1.0-0" }}
+                      {{
+                        result.pays === "Sénégal" ||
+                        result.pays === "Guinée-Bissau"
+                          ? "XOF"
+                          : result.pays === "France"
+                          ? "EURO"
+                          : "USD"
+                      }}
                     </td>
                     <td class="border px-4 py-2">
                       <p>
@@ -215,7 +223,10 @@
               id="montant_preter"
               formControlName="montant_preter"
               class="form-control"
-              type="number"
+              type="text"
+              [(ngModel)]="montant_preter"
+              [ngModel]="montant_preter | currencyFormat"
+              (input)="onInputChange($event)"
             />
           </div>
           <div class="modal-footer">

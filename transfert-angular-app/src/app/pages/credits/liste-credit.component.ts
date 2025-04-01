@@ -1,12 +1,12 @@
 import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';  // Remplacer BrowserModule par CommonModule
+import { CommonModule } from '@angular/common'; // Remplacer BrowserModule par CommonModule
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ReactiveFormsModule } from '@angular/forms'; // Import du module des formulaires réactifs
 import { CreditService } from '../../services/credits/credit.service';
 import { AuthService } from '../../services/auth/auth-service.service';
 import { Subject } from 'rxjs';
 import { DataTablesModule } from 'angular-datatables';
-
+import { CurrencyFormatPipe } from '../dasboard/currency-format.pipe';
 
 interface Result {
   reference: string;
@@ -22,12 +22,16 @@ interface Result {
 @Component({
   selector: 'app-liste-credit',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, DataTablesModule],  // Enlever BrowserModule
+  imports: [
+    CommonModule,
+    ReactiveFormsModule,
+    DataTablesModule,
+    CurrencyFormatPipe,
+  ], // Enlever BrowserModule
   templateUrl: './liste-credit.component.html',
-  styleUrl: './liste-credit.component.css'
+  styleUrl: './liste-credit.component.css',
 })
 export class ListeCreditComponent implements OnInit {
-
   // Tableau pour stocker les résultats
   allresultat: Result[] = [];
 
@@ -35,7 +39,6 @@ export class ListeCreditComponent implements OnInit {
   idUser: string = '';
 
   private dataTable: any;
-
 
   creditForm!: FormGroup;
 
@@ -45,41 +48,55 @@ export class ListeCreditComponent implements OnInit {
   totalMontant: number = 0; // Initialisation
 
   filtrerEntreDates(): void {
-    const startDateInput = (document.getElementById('startDate') as HTMLInputElement).value;
-    const endDateInput = (document.getElementById('endDate') as HTMLInputElement).value;
-  
+    const startDateInput = (
+      document.getElementById('startDate') as HTMLInputElement
+    ).value;
+    const endDateInput = (
+      document.getElementById('endDate') as HTMLInputElement
+    ).value;
+
     this.startDate = startDateInput ? new Date(startDateInput) : null;
     this.endDate = endDateInput ? new Date(endDateInput) : null;
-  
+
     // Réinitialiser le total
     this.totalMontant = 0;
-  
+
     // Filtrer d'abord par date
-    let filteredResults = this.allresultat.filter((result: { date_creation: string }) => {
-      const resultDate = new Date(result.date_creation);
-      return (!this.startDate || resultDate >= this.startDate) && 
-             (!this.endDate || resultDate <= this.endDate);
-    });
-  
+    let filteredResults = this.allresultat.filter(
+      (result: { date_creation: string }) => {
+        const resultDate = new Date(result.date_creation);
+        return (
+          (!this.startDate || resultDate >= this.startDate) &&
+          (!this.endDate || resultDate <= this.endDate)
+        );
+      }
+    );
+
     // Mettre à jour DataTable avec les résultats filtrés par date
     this.dataTable.clear().rows.add(filteredResults).draw();
-  
+
     // Attendre que DataTable applique son propre filtre (search)
     setTimeout(() => {
       const filteredDataTable: { montant: number }[] = this.dataTable
         .rows({ search: 'applied' })
         .data()
         .toArray();
-  
+
       // Recalculer le total avec des types explicitement définis
-      this.totalMontant = filteredDataTable.reduce((sum: number, row: { montant: number }) => {
-        return sum + row.montant;
-      }, 0);
-  
-      console.log('Total Montant après filtre et recherche :', this.totalMontant);
+      this.totalMontant = filteredDataTable.reduce(
+        (sum: number, row: { montant: number }) => {
+          return sum + row.montant;
+        },
+        0
+      );
+
+      console.log(
+        'Total Montant après filtre et recherche :',
+        this.totalMontant
+      );
     }, 200); // Timeout pour attendre la mise à jour de DataTable
   }
-    
+
   dtTrigger: Subject<any> = new Subject<any>();
 
   constructor(
@@ -87,10 +104,9 @@ export class ListeCreditComponent implements OnInit {
     private creditService: CreditService,
     private cd: ChangeDetectorRef,
     private authService: AuthService
-  ) { }
+  ) {}
 
   ngOnInit(): void {
-   
     this.creditForm = this.fb.group({
       // Champ pour l'identifiant de l'utilisateur (pré-rempli avec l'ID de l'utilisateur courant)
       utilisateurId: [this.idUser],
@@ -99,8 +115,7 @@ export class ListeCreditComponent implements OnInit {
       nom: ['', Validators.required],
 
       // Champ pour le montant, obligatoire et doit être un nombre positif ou zéro
-      montant: [0, [Validators.required, Validators.min(0)]]
-      
+      montant: [0, [Validators.required, Validators.min(0)]],
     });
 
     this.getAllCredit();
@@ -108,22 +123,18 @@ export class ListeCreditComponent implements OnInit {
   }
 
   getUserInfo() {
-    this.authService.getUserInfo().subscribe(
-      {
-        next: (response) => {
-          this.userInfo = response.user;
-          //   if (this.userInfo) {
-          this.idUser = this.userInfo.id;
-          console.log('Informations utilisateur:', this.userInfo);
+    this.authService.getUserInfo().subscribe({
+      next: (response) => {
+        this.userInfo = response.user;
+        //   if (this.userInfo) {
+        this.idUser = this.userInfo.id;
+        console.log('Informations utilisateur:', this.userInfo);
 
-          // Mettre à jour le champ utilisateurId dans le formulaire
-          this.creditForm.patchValue({ utilisateurId: this.idUser });
-        }
-      }
-    );
+        // Mettre à jour le champ utilisateurId dans le formulaire
+        this.creditForm.patchValue({ utilisateurId: this.idUser });
+      },
+    });
   }
-
-
 
   getAllCredit() {
     // Appel à l'API et gestion des réponses
@@ -131,7 +142,7 @@ export class ListeCreditComponent implements OnInit {
       next: (response) => {
         this.allresultat = response;
         this.initDataTable();
-        this.cd.detectChanges(); 
+        this.cd.detectChanges();
         console.log(this.allresultat);
       },
       error: (error) => {
@@ -146,7 +157,8 @@ export class ListeCreditComponent implements OnInit {
         this.dataTable.destroy(); // Détruire l'ancienne instance avant d'en créer une nouvelle
       }
       this.dataTable = ($('#datatable') as any).DataTable({
-        dom: "<'row'<'col-sm-6 dt-buttons-left'B><'col-sm-6 text-end dt-search-right'f>>" +
+        dom:
+          "<'row'<'col-sm-6 dt-buttons-left'B><'col-sm-6 text-end dt-search-right'f>>" +
           "<'row'<'col-sm-12'tr>>" +
           "<'row'<'col-sm-5'i><'col-sm-7'p>>",
         buttons: ['csv', 'excel', 'pdf', 'print'],
@@ -157,9 +169,10 @@ export class ListeCreditComponent implements OnInit {
         data: this.allresultat,
         order: [0, 'desc'],
         columns: [
-          { title: "Reference", data: "reference" },
+          { title: 'Reference', data: 'reference' },
           {
-            title: "Date du jour", data: "date_creation",
+            title: 'Date du jour',
+            data: 'date_creation',
             render: (data: string) => {
               const date = new Date(data);
               const day = String(date.getDate()).padStart(2, '0'); // Jour
@@ -169,60 +182,63 @@ export class ListeCreditComponent implements OnInit {
               const minutes = String(date.getMinutes()).padStart(2, '0'); // Minutes
 
               return `${day}/${month}/${year} ${hours}:${minutes}`; // Format final
-            }
+            },
           },
-          { title: "Nom", data: "nom" },
+          { title: 'Nom', data: 'nom' },
           {
-            title: "Montant",
-            data: "montant",
+            title: 'Montant',
+            data: 'montant',
             render: (data: number) => {
               const formattedAmount = new Intl.NumberFormat('fr-FR', {
                 style: 'decimal',
                 minimumFractionDigits: 0,
-                maximumFractionDigits: 0
-              }).format(data); 
-
-
-              return `${formattedAmount}`; 
-            }
+                maximumFractionDigits: 0,
+              }).format(data);
+              return `${formattedAmount} GNF`;
+            },
           },
-          { title: "Montant Payer", data: "montantPaye",
+          {
+            title: 'Montant Payer',
+            data: 'montantPaye',
             render: (data: number) => {
               const formattedAmount = new Intl.NumberFormat('fr-FR', {
                 style: 'decimal',
                 minimumFractionDigits: 0,
-                maximumFractionDigits: 0
-              }).format(data); 
+                maximumFractionDigits: 0,
+              }).format(data);
 
-              return `${formattedAmount}`; 
-            }
-           },
-           { title: "Montant Restant GNF", data: "montantRestant" ,
+              return `${formattedAmount} GNF`;
+            },
+          },
+          {
+            title: 'Montant Restant GNF',
+            data: 'montantRestant',
             render: (data: number) => {
               const formattedAmount = new Intl.NumberFormat('fr-FR', {
                 style: 'decimal',
                 minimumFractionDigits: 0,
-                maximumFractionDigits: 0
-              }).format(data); 
-          
+                maximumFractionDigits: 0,
+              }).format(data);
 
-              return `${formattedAmount}`; 
-            }
-          }, 
-          { title: "Montant surPlus", data: "montant_plus" ,
+              return `${formattedAmount} GNF`;
+            },
+          },
+          {
+            title: 'Montant surPlus',
+            data: 'montant_plus',
             render: (data: number) => {
               const formattedAmount = new Intl.NumberFormat('fr-FR', {
                 style: 'decimal',
                 minimumFractionDigits: 0,
-                maximumFractionDigits: 0
-              }).format(data); 
+                maximumFractionDigits: 0,
+              }).format(data);
 
-              return `${formattedAmount}`; 
-            }
-          }, 
-        ]
+              return `${formattedAmount} GNF`;
+            },
+          },
+        ],
       });
-      this.cd.detectChanges(); 
+      this.cd.detectChanges();
     }, 100);
   }
 
@@ -238,26 +254,32 @@ export class ListeCreditComponent implements OnInit {
   }
 
   loading: boolean = false;
+  montant: number = 0;
 
+  onInputChange(event: any): void {
+    this.montant = event.target.value.replace(/[^0-9,]/g, '');
+  }
 
   onSubmit() {
     if (this.creditForm.valid) {
       this.loading = true;
       const formData = this.creditForm.value;
+      const montant = parseInt(formData.montant.replace(/,/g, ''), 10);
+
       console.log(formData);
       // Appeler le service pour ajouter le partenaire
-      this.creditService.ajoutCredit(formData).subscribe(
-        response => {
+      this.creditService.ajoutCredit({ ...formData, montant }).subscribe(
+        (response) => {
           this.getAllCredit();
           console.log('Credit ajouté avec succès:', response);
           this.creditForm.patchValue({
             nom: '',
-            montant: ''
+            montant: '',
           });
           this.loading = false;
           alert('Credit ajouté avec succès!');
         },
-        error => {
+        (error) => {
           alert(error.error.message);
         }
       );
@@ -265,5 +287,4 @@ export class ListeCreditComponent implements OnInit {
       alert('Veuillez remplir tous les champs obligatoires.');
     }
   }
-
 }

@@ -18,6 +18,7 @@ import { CalculBeneficeService } from '../../services/calculBenefices/calcul-ben
 import { FormsModule } from '@angular/forms';
 import { EntreServiceService } from '../../services/entre/entre-service.service';
 import { HttpClient } from '@angular/common/http';
+import { CurrencyFormatPipe } from '../dasboard/currency-format.pipe';
 
 interface Result {
   date_creation: string;
@@ -33,7 +34,13 @@ interface Result {
 @Component({
   selector: 'app-liste-rembourser',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, DataTablesModule, FormsModule],
+  imports: [
+    CommonModule,
+    ReactiveFormsModule,
+    DataTablesModule,
+    FormsModule,
+    CurrencyFormatPipe,
+  ],
   templateUrl: './liste-rembourser.component.html',
   styleUrl: './liste-rembourser.component.css',
 })
@@ -286,32 +293,42 @@ export class ListeRembourserComponent implements OnInit, AfterViewInit {
     });
   }
 
+  montant: number = 0;
+
+  onInputChange(event: any): void {
+    this.montant = event.target.value.replace(/[^0-9,]/g, '');
+  }
+
   isLoading: boolean = false;
 
   onSubmit() {
     this.isLoading = true;
     if (this.rembourserForm.valid) {
       const formData = this.rembourserForm.value;
+      const montant = parseInt(formData.montant.replace(/,/g, ''), 10);
+
       // Appeler le service pour ajouter le partenaire
-      this.rembourserService.ajouterRembourser(formData).subscribe(
-        (response) => {
-          this.isLoading = false;
-          console.log('Partenaire ajouté avec succès:', response);
-          this.getAllRemboursement();
-          this.rembourserForm.patchValue({
-            deviseId: '',
-            partenaireId: '',
-            nom: '',
-            montant: '',
-          });
-          alert(response.message);
-        },
-        (error) => {
-          this.isLoading = false;
-          console.error("Erreur lors de l'ajout du partenaire:", error);
-          alert(error.error.message);
-        }
-      );
+      this.rembourserService
+        .ajouterRembourser({ ...formData, montant })
+        .subscribe(
+          (response) => {
+            this.isLoading = false;
+            console.log('Remboursement ajouté avec succès:', response);
+            this.getAllRemboursement();
+            this.rembourserForm.patchValue({
+              deviseId: '',
+              partenaireId: '',
+              nom: '',
+              montant: '',
+            });
+            alert(response.message);
+          },
+          (error) => {
+            this.isLoading = false;
+            console.error("Erreur lors de l'ajout du partenaire:", error);
+            alert(error.error.message);
+          }
+        );
     } else {
       alert('Veuillez remplir tous les champs obligatoires.');
     }
@@ -367,18 +384,22 @@ export class ListeRembourserComponent implements OnInit, AfterViewInit {
 
   dateDebut: string = '';
   dateFin: string = '';
-  montant: number = 0;
+  montantR: number = 0;
   prix: number = 0;
   prix_1: number = 0; // Champ à saisir par l'utilisateur
   resultats: any;
   benefice: any;
+
+  onInputChangeCalcule(event: any): void {
+    this.montantR = event.target.value.replace(/[^0-9,]/g, '');
+  }
 
   onCalculer() {
     this.calculService
       .calculerBenefice(
         this.dateDebut,
         this.dateFin,
-        this.montant,
+        this.montantR,
         this.prix_1,
         this.prix
       )
@@ -386,7 +407,7 @@ export class ListeRembourserComponent implements OnInit, AfterViewInit {
         (response) => {
           this.resultats = response;
           this.benefice = response.totalMontantGnf - response.montantGnfSaisi;
-          console.log(this.resultats);
+          // console.log(this.resultats);
         },
         (error) => {
           console.error('Erreur:', error);

@@ -23,6 +23,8 @@ const ajoutSoldePartenaire = async (req, res) => {
       return res.status(404).json({ message: "Utilisateur introuvable." });
     }
 
+    console.log(Number(montant));
+
     if (devise.signe_2 === "XOF") {
       utilisateur.sign = devise.signe_2;
       utilisateur.solde_echange =

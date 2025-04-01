@@ -18,6 +18,7 @@ import { AuthService } from '../../services/auth/auth-service.service';
 import { DeviseService } from '../../services/devise/devise.service';
 import { PartenaireServiceService } from '../../services/partenaire/partenaire-service.service';
 import { Subject } from 'rxjs';
+import { CurrencyFormatPipe } from '../dasboard/currency-format.pipe';
 
 interface Result {
   code: string;
@@ -46,7 +47,7 @@ interface Result {
 @Component({
   selector: 'app-liste-sortie',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, FormsModule],
+  imports: [CommonModule, ReactiveFormsModule, FormsModule, CurrencyFormatPipe],
   templateUrl: './liste-sortie.component.html',
   styleUrl: './liste-sortie.component.css',
 })
@@ -169,7 +170,7 @@ export class ListeSortieComponent implements OnInit, AfterViewInit, OnDestroy {
     this.sortieService.getAllSortie().subscribe({
       next: (response) => {
         this.allresultat = response;
-        console.log(this.allresultat);
+        // console.log(this.allresultat);
         this.initDataTable();
         this.cd.detectChanges();
       },
@@ -192,8 +193,8 @@ export class ListeSortieComponent implements OnInit, AfterViewInit, OnDestroy {
       prix_2: sortie?.prix_2,
     });
 
-    console.log('Formulaire :', this.valideSortieForm);
-    console.log('Sortie sélectionnée :', this.selectedSortie);
+    // console.log('Formulaire :', this.valideSortieForm);
+    // console.log('Sortie sélectionnée :', this.selectedSortie);
   }
 
   isLoadingValiderSortie: boolean = false;
@@ -211,6 +212,7 @@ export class ListeSortieComponent implements OnInit, AfterViewInit, OnDestroy {
       .subscribe({
         next: (response) => {
           this.fetchAllSortie();
+          this.fetchPartenaire();
           alert(response.message);
           this.valideSortieForm.patchValue({
             partenaireId: '',
@@ -241,7 +243,7 @@ export class ListeSortieComponent implements OnInit, AfterViewInit, OnDestroy {
         pageLength: 10,
         lengthMenu: [10, 25, 50],
         data: this.allresultat,
-        order: [[3, 'desc']],
+        order: [[0, 'desc']],
         columns: [
           { title: 'Code generer', data: 'code' },
           { title: 'Code', data: 'codeEnvoyer' },
@@ -321,7 +323,7 @@ export class ListeSortieComponent implements OnInit, AfterViewInit, OnDestroy {
                 minimumFractionDigits: 0,
                 maximumFractionDigits: 0,
               }).format(data);
-              return `${formattedAmount} ${row.signe_2}`;
+              return `${formattedAmount} ${row.signe_1}`;
             },
           },
           {
@@ -333,7 +335,7 @@ export class ListeSortieComponent implements OnInit, AfterViewInit, OnDestroy {
                 minimumFractionDigits: 0,
                 maximumFractionDigits: 0,
               }).format(data);
-              return `${formattedAmount} ${row.signe_2}`;
+              return `${formattedAmount} ${row.signe_1}`;
             },
           },
           {
@@ -395,31 +397,44 @@ export class ListeSortieComponent implements OnInit, AfterViewInit, OnDestroy {
     });
   }
 
+  montantClient: number = 0;
+
+  onInputChangeMontantClient(event: any): void {
+    this.montantClient = event.target.value.replace(/[^0-9,]/g, '');
+  }
+
   isloadingEntreAutre: boolean = false;
 
   ajouterSortieAutres(): void {
     this.isloadingEntreAutre = true;
 
     const formData = this.sortieFormAutre.value;
-    console.log(formData);
+    // console.log(formData);
 
-    this.sortieService.ajouterSortieAutres(formData).subscribe({
-      next: (response) => {
-        console.log('Sortie ajoutée avec succès:', response);
-        this.fetchAllSortie();
-        this.sortieFormAutre.patchValue({
-          nomCLient: '',
-          montantClient: '',
-        });
-        this.isloadingEntreAutre = false;
-        alert('Sortie ajoutée avec succès !');
-      },
-      error: (error) => {
-        this.isloadingEntreAutre = false;
-        console.error(error.error.message);
-        alert(error.error.message);
-      },
-    });
+    const montantClient = parseInt(
+      formData.montantClient.replace(/,/g, ''),
+      10
+    );
+
+    this.sortieService
+      .ajouterSortieAutres({ ...formData, montantClient })
+      .subscribe({
+        next: (response) => {
+          console.log('Sortie ajoutée avec succès:', response);
+          this.fetchAllSortie();
+          this.sortieFormAutre.patchValue({
+            nomCLient: '',
+            montantClient: '',
+          });
+          this.isloadingEntreAutre = false;
+          alert('Sortie ajoutée avec succès !');
+        },
+        error: (error) => {
+          this.isloadingEntreAutre = false;
+          console.error(error.error.message);
+          alert(error.error.message);
+        },
+      });
   }
 
   private annulerFormInitial(): void {
@@ -437,6 +452,8 @@ export class ListeSortieComponent implements OnInit, AfterViewInit, OnDestroy {
       next: (response) => {
         this.isLoadingAnnuler = false;
         alert(response.message);
+        this.fetchPartenaire();
+        this.fetchAllSortie();
       },
       error: (error) => {
         this.isLoadingAnnuler = false;
@@ -459,17 +476,6 @@ export class ListeSortieComponent implements OnInit, AfterViewInit, OnDestroy {
       },
     });
   }
-
-  // fetchPartenaire(): void {
-  //   this.partenaireService.getAllPartenaire().subscribe(
-  //     (response) => {
-  //       this.allPartenaire = response;
-  //     },
-  //     (error) => {
-  //       console.error('Erreur lors de la récupération des partenaires:', error);
-  //     }
-  //   );
-  // }
 
   allDevise: any[] = [];
 
@@ -514,6 +520,12 @@ export class ListeSortieComponent implements OnInit, AfterViewInit, OnDestroy {
     });
   }
 
+  montant: number = 0;
+
+  onInputChange(event: any): void {
+    this.montant = event.target.value.replace(/[^0-9,]/g, '');
+  }
+
   loading: boolean = false;
 
   // Méthode pour soumettre le formulaire et ajouter une nouvelle entrée
@@ -522,7 +534,10 @@ export class ListeSortieComponent implements OnInit, AfterViewInit, OnDestroy {
     if (this.sortieForm.valid) {
       this.loading = true;
       const formData = this.sortieForm.value; // Récupérer les valeurs du formulaire
-      this.sortieService.ajouterSortie(formData).subscribe({
+
+      const montant = parseInt(formData.montant.replace(/,/g, ''), 10);
+
+      this.sortieService.ajouterSortie({ ...formData, montant }).subscribe({
         next: (response) => {
           console.log('Sortie ajoutée avec succès:', response);
           this.fetchAllSortie();
