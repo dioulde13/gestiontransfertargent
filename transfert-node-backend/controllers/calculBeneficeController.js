@@ -29,7 +29,7 @@ const calculBenefice = async (req, res) => {
     });
 
     entreData.forEach(entry => {
-      if (entry.status !== 'ANNULEE') {
+      if (entry.status !== 'ANNULEE' && entry.type !== 'R') {
           totalMontantCfa += entry.montant_cfa;
           totalMontantGnf += entry.montant_gnf;
       }

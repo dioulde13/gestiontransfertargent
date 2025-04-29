@@ -6,11 +6,7 @@
         <div class="card bg-transparent">
           <div class="card-body p-0">
             <div class="profile-image relative">
-              <img
-                src="/assets/images/top-header.png"
-                class="img-fluid rounded w-full"
-                alt="profile-image"
-              />
+              <img src="/assets/images/top-header.png" class="img-fluid rounded w-full" alt="profile-image" />
             </div>
           </div>
         </div>
@@ -26,37 +22,19 @@
               <!-- Titre et bouton d'ajout -->
               <div class="col-lg-12">
                 <div class="card">
-                  <div
-                    class="card-body d-flex flex-wrap items-center justify-between breadcrumb-content"
-                  >
+                  <div class="card-body d-flex flex-wrap items-center justify-between breadcrumb-content">
                     <h5>Liste des entrées</h5>
                     <div>
-                      <a
-                        href="#"
-                        class="btn btn-primary"
-                        data-toggle="modal"
-                        data-target="#modifier-devise-modal"
-                        >Devise</a
-                      >
+                      <a href="#" class="btn btn-primary" data-toggle="modal"
+                        data-target="#modifier-devise-modal">Devise</a>
                     </div>
                     <div>
-                      <a
-                        href="#"
-                        class="btn btn-primary"
-                        data-toggle="modal"
-                        data-target="#annuler-entre-modal"
-                        >Annuler Entre</a
-                      >
+                      <a href="#" class="btn btn-primary" data-toggle="modal" data-target="#annuler-entre-modal">Annuler
+                        Entre</a>
                     </div>
                     <div class="pr-3 btn-new border-left">
-                      <a
-                        href="#"
-                        class="btn btn-primary"
-                        data-toggle="modal"
-                        data-target="#new-project-modal"
-                      >
-                        Nouvelle entree</a
-                      >
+                      <a href="#" class="btn btn-primary" data-toggle="modal" data-target="#new-project-modal">
+                        Nouvelle entree</a>
                     </div>
                   </div>
                 </div>
@@ -65,34 +43,19 @@
               <div class="container mx-auto p-6 bg-white shadow-lg rounded-lg">
                 <div class="row mb-4">
                   <div class="col-md-3 d-flex mb-3 mb-md-0">
-                    <input
-                      type="date"
-                      id="startDate"
-                      class="form-control"
-                      placeholder="Date Début"
-                      style="border-radius: 25px"
-                    />
+                    <input type="date" id="startDate" class="form-control" placeholder="Date Début"
+                      style="border-radius: 25px" />
                   </div>
                   <div class="col-md-3 d-flex mb-3 mb-md-0">
-                    <input
-                      type="date"
-                      id="endDate"
-                      class="form-control"
-                      placeholder="Date Fin"
-                      style="border-radius: 25px"
-                    />
+                    <input type="date" id="endDate" class="form-control" placeholder="Date Fin"
+                      style="border-radius: 25px" />
                   </div>
                   <div class="col-md-3 d-flex">
-                    <button
-                      id="btnFilter"
-                      class="btn btn-primary"
-                      (click)="filtrerEntreDates()"
-                      style="
+                    <button id="btnFilter" class="btn btn-primary" (click)="filtrerEntreDates()" style="
                         border-radius: 60px;
                         padding: 5px 10px;
                         font-size: 14px;
-                      "
-                    >
+                      ">
                       Filtrer
                     </button>
                   </div>
@@ -104,10 +67,7 @@
                 </div>
 
                 <div class="overflow-x-auto">
-                  <table
-                    id="datatable"
-                    class="w-full border-collapse border border-gray-300"
-                  >
+                  <table id="datatable" class="w-full border-collapse border border-gray-300">
                     <thead>
                       <tr class="bg-blue-500 text-white">
                         <th class="p-1 border">Code</th>
@@ -127,10 +87,7 @@
                       </tr>
                     </thead>
                     <tbody>
-                      <tr
-                        *ngFor="let result of allresultat"
-                        class="hover:bg-gray-100"
-                      >
+                      <tr *ngFor="let result of allresultat" class="hover:bg-gray-100">
                         <td class="p-1 border">{{ result.code }}</td>
                         <td class="p-1 border">
                           {{ result.date_creation | date : "dd/MM/yyyy HH:mm" }}
@@ -144,64 +101,68 @@
                         </td>
                         <td class="p-1 border">
                           {{
-                            result.montant_cfa === 0
-                              ? ""
-                              : (result.montant_cfa
-                                | currency : "" : "" : "1.0-0")
+                          result.montant_cfa === 0
+                          ? ""
+                          : (result.montant_cfa
+                          | currency : "" : "" : "1.0-0")
                           }}
                           {{ result.signe_2 }}
                         </td>
                         <td class="p-1 border">
                           {{
-                            result.prix_2 === 0
-                              ? ""
-                              : (result.prix_2 | currency : "" : "" : "1.0-0")
+                          result.prix_2 === 0
+                          ? ""
+                          : (result.prix_2 | currency : "" : "" : "1.0-0")
                           }}
                           {{ result.montant_cfa === 0 ? "" : "GNF" }}
                         </td>
                         <td class="p-1 border">
                           {{
-                            result.montant_gnf === 0
-                              ? (result.montantClient
-                                  | currency : "" : "" : "1.0-0") +
-                                " " +
-                                (result.montant_rembourser
-                                  | currency : "" : "" : "1.0-0") +
-                                " GNF"
-                              : (result.montant_gnf
-                                | currency : "" : "" : "1.0-0")
+                          result.montant_gnf === 0
+                          ? (result.montantClient
+                          | currency : "" : "" : "1.0-0") +
+                          " " +
+                          (result.montant_rembourser
+                          | currency : "" : "" : "1.0-0") +
+                          " GNF"
+                          : (result.montant_gnf
+                          | currency : "" : "" : "1.0-0")
                           }}
                           {{ result.montant_cfa === 0 ? "" : "GNF" }}
                         </td>
                         <td class="p-1 border">
                           {{
-                            result.montant_payer === 0
-                              ? ""
-                              : (result.montant_payer
-                                | currency : "" : "" : "1.0-0")
+                          result.montant_payer === 0
+                          ? ""
+                          : (result.montant_payer
+                          | currency : "" : "" : "1.0-0")
                           }}{{
-                            result.montant_cfa === 0
-                              ? ""
-                              : "(" + result.montant_rembourser + ")"
+                          result.montant_cfa === 0
+                          ? ""
+                          : "(" + result.montant_rembourser + ")"
                           }}{{ result.montant_cfa === 0 ? "" : "GNF" }}
                         </td>
                         <td class="p-1 border">
                           {{
-                            result.montant_restant === 0
-                              ? ""
-                              : (result.montant_restant
-                                | currency : "" : "" : "1.0-0")
+                          result.montant_restant === 0
+                          ? ""
+                          : (result.montant_restant
+                          | currency : "" : "" : "1.0-0")
                           }}
                           {{ result.montant_cfa === 0 ? "" : "GNF" }}
                         </td>
                         <td class="p-1 border">
-                          {{ result.status }}
+                          {{ result.status }} {{
+                          (result.montant_cfa > 0 && result.type ==="R")?
+                            result.type
+                          :""
+                          }}
                           <span *ngIf="result.status === 'ANNULEE'">{{
                             "
                             (" +
-                              result.type_annuler +
-                              ")"
-                          }}</span>
+                            result.type_annuler +
+                            ")"
+                            }}</span>
                         </td>
                       </tr>
                     </tbody>
@@ -214,31 +175,17 @@
       </div>
     </div>
 
-    <div
-      class="modal fade"
-      id="modifier-devise-modal"
-      tabindex="-1"
-      role="dialog"
-      aria-labelledby="modalTitle"
-      aria-hidden="true"
-    >
+    <div class="modal fade" id="modifier-devise-modal" tabindex="-1" role="dialog" aria-labelledby="modalTitle"
+      aria-hidden="true">
       <div class="modal-dialog modal-dialog-centered modal-xl" role="document">
         <div class="modal-content">
           <div class="modal-header">
-            <button
-              type="button"
-              class="close"
-              data-dismiss="modal"
-              aria-label="Close"
-            >
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
               <span aria-hidden="true">&times;</span>
             </button>
           </div>
           <div class="modal-body">
-            <table
-              class="table data-table table-striped table-flush"
-              style="width: 100%"
-            >
+            <table class="table data-table table-striped table-flush" style="width: 100%">
               <thead>
                 <tr class="text-muted">
                   <th class="border px-4 py-2">Pays depart</th>
@@ -254,25 +201,21 @@
                   <td class="border px-4 py-2">{{ result.paysArriver }}</td>
                   <td class="border px-4 py-2">
                     {{
-                      (result.prix_1 | currency : "" : "" : "1.0-0") +
-                        " " +
-                        result.signe_2
+                    (result.prix_1 | currency : "" : "" : "1.0-0") +
+                    " " +
+                    result.signe_2
                     }}
                   </td>
                   <td class="border px-4 py-2">
                     {{
-                      (result.prix_2 | currency : "" : "" : "1.0-0") +
-                        " " +
-                        result.signe_1
+                    (result.prix_2 | currency : "" : "" : "1.0-0") +
+                    " " +
+                    result.signe_1
                     }}
                   </td>
                   <td>
-                    <button
-                      class="btn btn-warning btn-sm"
-                      data-toggle="modal"
-                      data-target="#edit-modifier-modal"
-                      (click)="onEdit(result)"
-                    >
+                    <button class="btn btn-warning btn-sm" data-toggle="modal" data-target="#edit-modifier-modal"
+                      (click)="onEdit(result)">
                       Modifier
                     </button>
                   </td>
@@ -285,24 +228,13 @@
     </div>
 
     <!-- Modal d'annulation -->
-    <div
-      class="modal fade"
-      id="annuler-entre-modal"
-      tabindex="-1"
-      role="dialog"
-      aria-labelledby="modalTitle"
-      aria-hidden="true"
-    >
+    <div class="modal fade" id="annuler-entre-modal" tabindex="-1" role="dialog" aria-labelledby="modalTitle"
+      aria-hidden="true">
       <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
         <div class="modal-content">
           <div class="modal-header">
             <h5 class="modal-title" id="modalTitle">Annuler une entrée</h5>
-            <button
-              type="button"
-              class="close"
-              data-dismiss="modal"
-              aria-label="Close"
-            >
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
               <span aria-hidden="true">&times;</span>
             </button>
           </div>
@@ -313,20 +245,12 @@
                 <!-- Champ Code -->
                 <div class="form-group col-md-6">
                   <label for="codeAnnuler">Code</label>
-                  <input
-                    type="text"
-                    id="codeAnnuler"
-                    class="form-control"
-                    formControlName="codeAnnuler"
-                    placeholder="Entrez le code"
-                  />
-                  <div
-                    *ngIf="
+                  <input type="text" id="codeAnnuler" class="form-control" formControlName="codeAnnuler"
+                    placeholder="Entrez le code" />
+                  <div *ngIf="
                       annulerEntreForm?.get('codeAnnuler')?.invalid &&
                       annulerEntreForm?.get('codeAnnuler')?.touched
-                    "
-                    class="text-danger"
-                  >
+                    " class="text-danger">
                     Ce champ est obligatoire. Ce champ est obligatoire.
                   </div>
                 </div>
@@ -334,56 +258,35 @@
                 <!-- Sélection du type d'annulation -->
                 <div class="form-group col-md-6">
                   <label for="typeAnnuler">Type d'annulation</label>
-                  <select
-                    id="typeAnnuler"
-                    class="form-control"
-                    formControlName="typeAnnuler"
-                  >
+                  <select id="typeAnnuler" class="form-control" formControlName="typeAnnuler">
+                    <option value=""></option>
+                    <option value="EN COURS">En cours</option>
                     <option value="Rembourser">Rembourser</option>
                     <option value="Non Rembourser">Non Rembourser</option>
                   </select>
                 </div>
               </div>
 
-              <div
-                *ngIf="
-                  annulerEntreForm?.get('typeAnnuler')?.value === 'Rembourser'
-                "
-                class="form-group col-md-6"
-              >
+              <div *ngIf="
+                  annulerEntreForm?.get('typeAnnuler')?.value === 'Rembourser' ||  annulerEntreForm?.get('typeAnnuler')?.value === 'EN COURS'
+                " class="form-group col-md-6">
                 <label for="montant_rembourser">Montant</label>
-                <input
-                  type="text"
-                  id="montant_rembourser"
-                  class="form-control"
-                  formControlName="montant_rembourser"
-                  placeholder="Entrez le montant rembourser"
-                />
-                <div
-                  *ngIf="
+                <input type="text" id="montant_rembourser" class="form-control" formControlName="montant_rembourser"
+                  placeholder="Entrez le montant rembourser" />
+                <div *ngIf="
                     annulerEntreForm?.get('montant_rembourser')?.invalid &&
                     annulerEntreForm?.get('montant_rembourser')?.touched
-                  "
-                  class="text-danger"
-                >
+                  " class="text-danger">
                   Ce champ est obligatoire. Ce champ est obligatoire.
                 </div>
               </div>
 
               <!-- Footer -->
               <div class="modal-footer">
-                <button
-                  type="button"
-                  class="btn btn-secondary"
-                  data-dismiss="modal"
-                >
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">
                   Annuler
                 </button>
-                <button
-                  type="submit"
-                  class="btn btn-danger"
-                  [disabled]="annulerEntreForm.invalid || isLoadingAnnuler"
-                >
+                <button type="submit" class="btn btn-danger" [disabled]="annulerEntreForm.invalid || isLoadingAnnuler">
                   <span *ngIf="isLoadingAnnuler">Annulation en cours...</span>
                   <span *ngIf="!isLoadingAnnuler">Valider</span>
                 </button>
@@ -394,26 +297,15 @@
       </div>
     </div>
 
-    <div
-      class="modal fade"
-      id="new-project-modal"
-      tabindex="-1"
-      role="dialog"
-      aria-labelledby="modalTitle"
-      aria-hidden="true"
-    >
+    <div class="modal fade" id="new-project-modal" tabindex="-1" role="dialog" aria-labelledby="modalTitle"
+      aria-hidden="true">
       <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
         <div class="modal-content">
           <div class="modal-header">
             <h5 class="modal-title" id="modalTitle">
               Ajouter une nouvelle entrée
             </h5>
-            <button
-              type="button"
-              class="close"
-              data-dismiss="modal"
-              aria-label="Close"
-            >
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
               <span aria-hidden="true">&times;</span>
             </button>
           </div>
@@ -422,28 +314,14 @@
             <!-- Onglets -->
             <ul class="nav nav-tabs" id="myTab" role="tablist">
               <li class="nav-item">
-                <a
-                  class="nav-link active"
-                  id="details-tab"
-                  data-toggle="tab"
-                  href="#details"
-                  role="tab"
-                  aria-controls="details"
-                  aria-selected="true"
-                >
+                <a class="nav-link active" id="details-tab" data-toggle="tab" href="#details" role="tab"
+                  aria-controls="details" aria-selected="true">
                   Entre
                 </a>
               </li>
               <li class="nav-item">
-                <a
-                  class="nav-link"
-                  id="paiement-tab"
-                  data-toggle="tab"
-                  href="#paiement"
-                  role="tab"
-                  aria-controls="paiement"
-                  aria-selected="false"
-                >
+                <a class="nav-link" id="paiement-tab" data-toggle="tab" href="#paiement" role="tab"
+                  aria-controls="paiement" aria-selected="false">
                   Autre
                 </a>
               </li>
@@ -452,92 +330,53 @@
             <!-- Contenu des onglets -->
             <div class="tab-content" id="myTabContent">
               <!-- Onglet Détails -->
-              <div
-                class="tab-pane fade show active"
-                id="details"
-                role="tabpanel"
-                aria-labelledby="details-tab"
-              >
+              <div class="tab-pane fade show active" id="details" role="tabpanel" aria-labelledby="details-tab">
                 <form [formGroup]="entreForm" (ngSubmit)="ajouterEntres()">
                   <div class="form-row">
                     <div class="form-group col-md-6">
                       <label for="expediteur">Expéditeur</label>
-                      <input
-                        type="text"
-                        class="form-control"
-                        id="expediteur"
-                        formControlName="expediteur"
-                        placeholder="Nom de l'expéditeur"
-                      />
+                      <input type="text" class="form-control" id="expediteur" formControlName="expediteur"
+                        placeholder="Nom de l'expéditeur" />
                     </div>
                     <div class="form-group col-md-6">
                       <label for="receveur">Receveur</label>
-                      <input
-                        type="text"
-                        class="form-control"
-                        id="receveur"
-                        formControlName="receveur"
-                        placeholder="Nom du receveur"
-                      />
+                      <input type="text" class="form-control" id="receveur" formControlName="receveur"
+                        placeholder="Nom du receveur" />
                     </div>
                   </div>
 
                   <div class="form-row">
                     <div class="form-group col-md-6">
-                      <label for="telephoneReceveur"
-                        >Téléphone du receveur</label
-                      >
+                      <label for="telephoneReceveur">Téléphone du receveur</label>
                       <div class="input-group">
                         <!-- Sélection de l'indicatif -->
-                        <select
-                          class="form-control col-md-3"
-                          formControlName="indicatif"
-                        >
-                          <option
-                            *ngFor="let indicatif of indicatifs"
-                            [value]="indicatif.code"
-                          >
+                        <select class="form-control col-md-3" formControlName="indicatif">
+                          <option *ngFor="let indicatif of indicatifs" [value]="indicatif.code">
                             {{ indicatif.pays }} ({{ indicatif.code }})
                           </option>
                         </select>
 
                         <!-- Champ de saisie du téléphone -->
-                        <input
-                          type="text"
-                          class="form-control"
-                          id="telephone_receveur"
-                          formControlName="telephone_receveur"
-                          placeholder="Téléphone"
-                        />
+                        <input type="text" class="form-control" id="telephone_receveur"
+                          formControlName="telephone_receveur" placeholder="Téléphone" />
                       </div>
 
                       <!-- Message d'erreur -->
-                      <div
-                        *ngIf="
+                      <div *ngIf="
                           entreForm.get('telephone_receveur')?.invalid &&
                           entreForm.get('telephone_receveur')?.touched
-                        "
-                        class="text-danger"
-                      >
+                        " class="text-danger">
                         Numéro invalide pour le pays sélectionné.
                       </div>
                     </div>
 
                     <div class="form-group col-md-6">
                       <label for="devise">Pays de destination</label>
-                      <select
-                        class="form-control"
-                        id="devise"
-                        formControlName="deviseId"
-                        required
-                      >
+                      <select class="form-control" id="devise" formControlName="deviseId" required>
                         <option value="" disabled selected>
                           Sélectionnez un pays
                         </option>
-                        <option
-                          *ngFor="let devise of allDevise"
-                          [value]="devise.id"
-                        >
+                        <option *ngFor="let devise of allDevise" [value]="devise.id">
                           {{ devise.paysArriver }}
                           {{ devise.prix_1 | currency : "" : "" : "1.0-0" }}
                           {{ devise.signe_2 }} →
@@ -551,25 +390,17 @@
                   <div class="form-row">
                     <div class="form-group col-md-6">
                       <label for="partenaire">Partenaire</label>
-                      <select
-                        class="form-control"
-                        id="partenaire"
-                        formControlName="partenaireId"
-                        required
-                      >
+                      <select class="form-control" id="partenaire" formControlName="partenaireId" required>
                         <option value="" disabled selected>
                           Sélectionnez un partenaire
                         </option>
-                        <option
-                          *ngFor="let partenaire of allPartenaire"
-                          [value]="partenaire.id"
-                        >
+                        <option *ngFor="let partenaire of allPartenaire" [value]="partenaire.id">
                           {{ partenaire.prenom }} {{ partenaire.nom }} ({{
-                            partenaire.pays
+                          partenaire.pays
                           }}) ->
                           {{
-                            partenaire.montant_preter
-                              | currency : "" : "" : "1.0-0"
+                          partenaire.montant_preter
+                          | currency : "" : "" : "1.0-0"
                           }}
                         </option>
                       </select>
@@ -577,31 +408,16 @@
 
                     <div class="form-group col-md-6">
                       <label for="montant_cfa">Montant</label>
-                      <input
-                        type="text"
-                        class="form-control"
-                        id="montant_cfa"
-                        formControlName="montant_cfa"
-                        placeholder="Montant"
-                        [(ngModel)]="montant_cfa"
-                        [ngModel]="montant_cfa | currencyFormat"
-                        (input)="onInputChange($event)"
-                      />
+                      <input type="text" class="form-control" id="montant_cfa" formControlName="montant_cfa"
+                        placeholder="Montant" [(ngModel)]="montant_cfa" [ngModel]="montant_cfa | currencyFormat"
+                        (input)="onInputChange($event)" />
                     </div>
                   </div>
                   <div class="modal-footer">
-                    <button
-                      type="button"
-                      class="btn btn-secondary"
-                      data-dismiss="modal"
-                    >
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">
                       Annuler
                     </button>
-                    <button
-                      type="submit"
-                      class="btn btn-primary"
-                      [disabled]="!entreForm.valid || isLoading"
-                    >
+                    <button type="submit" class="btn btn-primary" [disabled]="!entreForm.valid || isLoading">
                       <span *ngIf="isLoading">Création en cours...</span>
                       <span *ngIf="!isLoading">Ajouter</span>
                     </button>
@@ -610,57 +426,28 @@
               </div>
 
               <!-- Onglet Paiement -->
-              <div
-                class="tab-pane fade"
-                id="paiement"
-                role="tabpanel"
-                aria-labelledby="paiement-tab"
-              >
-                <form
-                  [formGroup]="entreFormAutre"
-                  (ngSubmit)="ajouterEntreeAutres()"
-                >
+              <div class="tab-pane fade" id="paiement" role="tabpanel" aria-labelledby="paiement-tab">
+                <form [formGroup]="entreFormAutre" (ngSubmit)="ajouterEntreeAutres()">
                   <div class="form-row">
                     <div class="form-group col-md-6">
                       <label for="nomCLient">Nom client</label>
-                      <input
-                        type="text"
-                        class="form-control"
-                        id="nomCLient"
-                        formControlName="nomCLient"
-                        placeholder="Nom nomCLient"
-                      />
+                      <input type="text" class="form-control" id="nomCLient" formControlName="nomCLient"
+                        placeholder="Nom nomCLient" />
                     </div>
                     <div class="form-group col-md-6">
                       <label for="montantClient">Montant</label>
-                      <input
-                        type="text"
-                        class="form-control"
-                        id="montantClient"
-                        formControlName="montantClient"
-                        placeholder="Montant"
-                        [(ngModel)]="montantClient"
-                        [ngModel]="montantClient | currencyFormat"
-                        (input)="onInputChangeClient($event)"
-                      />
+                      <input type="text" class="form-control" id="montantClient" formControlName="montantClient"
+                        placeholder="Montant" [(ngModel)]="montantClient" [ngModel]="montantClient | currencyFormat"
+                        (input)="onInputChangeClient($event)" />
                     </div>
                   </div>
                   <div class="modal-footer">
-                    <button
-                      type="button"
-                      class="btn btn-secondary"
-                      data-dismiss="modal"
-                    >
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">
                       Annuler
                     </button>
-                    <button
-                      type="submit"
-                      class="btn btn-primary"
-                      [disabled]="!entreFormAutre.valid || isloadingEntreAutre"
-                    >
-                      <span *ngIf="isloadingEntreAutre"
-                        >Création en cours...</span
-                      >
+                    <button type="submit" class="btn btn-primary"
+                      [disabled]="!entreFormAutre.valid || isloadingEntreAutre">
+                      <span *ngIf="isloadingEntreAutre">Création en cours...</span>
                       <span *ngIf="!isloadingEntreAutre">Ajouter</span>
                     </button>
                   </div>
@@ -673,14 +460,8 @@
     </div>
 
     <!-- Modal de modification -->
-    <div
-      class="modal fade"
-      id="edit-modifier-modal"
-      tabindex="-1"
-      role="dialog"
-      aria-labelledby="editProjectModalLabel"
-      aria-hidden="true"
-    >
+    <div class="modal fade" id="edit-modifier-modal" tabindex="-1" role="dialog" aria-labelledby="editProjectModalLabel"
+      aria-hidden="true">
       <div class="modal-dialog" role="document">
         <div class="modal-content">
           <div class="modal-header bg-warning text-white">
@@ -693,53 +474,25 @@
             <form [formGroup]="editDeviseForm" (ngSubmit)="onUpdate()">
               <div class="form-group">
                 <label for="edit_paysArriver">Pays Arriver</label>
-                <input
-                  id="edit_paysArriver"
-                  formControlName="paysArriver"
-                  class="form-control"
-                  type="text"
-                />
+                <input id="edit_paysArriver" formControlName="paysArriver" class="form-control" type="text" />
               </div>
               <div class="form-group">
                 <label for="edit_signe_2">Signe 2</label>
-                <input
-                  id="edit_signe_2"
-                  formControlName="signe_2"
-                  class="form-control"
-                  type="text"
-                />
+                <input id="edit_signe_2" formControlName="signe_2" class="form-control" type="text" />
               </div>
               <div class="form-group">
                 <label for="edit_prix_1">Prix 1</label>
-                <input
-                  id="edit_prix_1"
-                  formControlName="prix_1"
-                  class="form-control"
-                  type="number"
-                />
+                <input id="edit_prix_1" formControlName="prix_1" class="form-control" type="number" />
               </div>
               <div class="form-group">
                 <label for="edit_prix_2">Prix 2</label>
-                <input
-                  id="edit_prix_2"
-                  formControlName="prix_2"
-                  class="form-control"
-                  type="number"
-                />
+                <input id="edit_prix_2" formControlName="prix_2" class="form-control" type="number" />
               </div>
               <div class="modal-footer">
-                <button
-                  type="button"
-                  class="btn btn-secondary"
-                  data-dismiss="modal"
-                >
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">
                   Annuler
                 </button>
-                <button
-                  type="submit"
-                  class="btn btn-primary"
-                  [disabled]="!editDeviseForm.valid || isloadingEdit"
-                >
+                <button type="submit" class="btn btn-primary" [disabled]="!editDeviseForm.valid || isloadingEdit">
                   <span *ngIf="isloadingEdit">Modification en cours...</span>
                   <span *ngIf="!isloadingEdit">Modifier</span>
                 </button>

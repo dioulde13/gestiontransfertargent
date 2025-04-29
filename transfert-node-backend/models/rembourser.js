@@ -1,8 +1,8 @@
 const { DataTypes } = require('sequelize');
 const sequelize = require('./sequelize');
-const Utilisateur = require('./utilisateurs'); 
-const Partenaire = require('./partenaires'); 
-const Devise = require('./devises'); 
+const Utilisateur = require('./utilisateurs');
+const Partenaire = require('./partenaires');
+// const Devise = require('./devises');
 
 
 const Rembourser = sequelize.define('Rembourser', {
@@ -13,39 +13,24 @@ const Rembourser = sequelize.define('Rembourser', {
   },
   utilisateurId: {
     type: DataTypes.INTEGER,
-    allowNull: false, // Ou true si facultatif
+    allowNull: false,
   },
   partenaireId: {
     type: DataTypes.INTEGER,
-    allowNull: false, // Ou true si facultatif
+    allowNull: false,
   },
   nom: {
     type: DataTypes.STRING,
     allowNull: false,
   },
-  prix_1: {
+  prix: {
     type: DataTypes.INTEGER,
-    allowNull: false,
-    defaultValue: 0,
-  },
-  prix_2: {
-    type: DataTypes.INTEGER,
-    allowNull: false,
-    defaultValue: 0,
-  },
-  signe_1: {
-    type: DataTypes.STRING,
-    allowNull: false,
-    defaultValue: 0,
-  },
-  signe_2: {
-    type: DataTypes.STRING,
     allowNull: false,
     defaultValue: 0,
   },
   montant: {
     type: DataTypes.BIGINT,
-    allowNull: false, // Ajout de la contrainte pour montant
+    allowNull: false, 
   },
   montant_gnf: {
     type: DataTypes.BIGINT,
@@ -55,16 +40,36 @@ const Rembourser = sequelize.define('Rembourser', {
   date_creation: {
     type: DataTypes.DATE,
     allowNull: false,
-    defaultValue: DataTypes.NOW, // Définit la date et l'heure actuelles par défaut
+    defaultValue: DataTypes.NOW, 
   },
+  // prix_1: {
+  //   type: DataTypes.INTEGER,
+  //   allowNull: false,
+  //   defaultValue: 0,
+  // },
+  // prix_2: {
+  //   type: DataTypes.INTEGER,
+  //   allowNull: false,
+  //   defaultValue: 0,
+  // },
+  // signe_1: {
+  //   type: DataTypes.STRING,
+  //   allowNull: false,
+  //   defaultValue: 0,
+  // },
+  // signe_2: {
+  //   type: DataTypes.STRING,
+  //   allowNull: false,
+  //   defaultValue: 0,
+  // },
 });
 
-// Définir l'association : Une Entree appartient à un 
+
 Rembourser.belongsTo(Utilisateur, { foreignKey: 'utilisateurId' });
-// Définir l'association : Une Entree appartient à un 
+
 Rembourser.belongsTo(Partenaire, { foreignKey: 'partenaireId' });
 
-Rembourser.belongsTo(Devise, { foreignKey: 'deviseId' });
+// Rembourser.belongsTo(Devise, { foreignKey: 'deviseId' });
 
 
 module.exports = Rembourser;

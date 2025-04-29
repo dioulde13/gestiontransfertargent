@@ -42,6 +42,7 @@ interface Result {
   montant_restant: number;
   montantClient: number;
   status: string;
+  type: string;
   type_annuler?: string;
   id: number;
 }
@@ -243,8 +244,12 @@ export class ListeEntreComponent implements OnInit, AfterViewInit, OnDestroy {
             title: 'Statut de paiement',
             data: 'status',
             render: (data: string, type: string, row: any) => {
-              if (row.montant_cfa === 0)
+              console.log(row); 
+              if (row.montant_cfa === 0){
                 return `${row.status} (${row.type_annuler})`;
+              } else if(row.montant_cfa > 0 && row.type ==="R"){
+                return `${row.status} (${row.type})`;
+              }
               return data + (data === `ANNULEE` ? `(${row.type_annuler})` : ``);
             },
           },
@@ -427,7 +432,7 @@ export class ListeEntreComponent implements OnInit, AfterViewInit, OnDestroy {
   private initAnnulerEntreForm(): void {
     this.annulerEntreForm = this.fb.group({
       codeAnnuler: ['', Validators.required],
-      typeAnnuler: ['', Validators.required],
+      typeAnnuler: [''],
       montant_rembourser: [0],
     });
   }

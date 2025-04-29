@@ -19,13 +19,12 @@ import { FormsModule } from '@angular/forms';
 import { EntreServiceService } from '../../services/entre/entre-service.service';
 import { HttpClient } from '@angular/common/http';
 import { CurrencyFormatPipe } from '../dasboard/currency-format.pipe';
+import { FormatNumberDirective } from '../../services/rembourser/format-number.directive';
 
 interface Result {
   date_creation: string;
   nom: string;
-  signe_1: string;
-  signe_2: string;
-  prix_2: number;
+  prix: number;
   montant_gnf: number;
   montant: number;
   id: number;
@@ -40,6 +39,7 @@ interface Result {
     DataTablesModule,
     FormsModule,
     CurrencyFormatPipe,
+    FormatNumberDirective
   ],
   templateUrl: './liste-rembourser.component.html',
   styleUrl: './liste-rembourser.component.css',
@@ -146,7 +146,7 @@ export class ListeRembourserComponent implements OnInit, AfterViewInit {
           { title: 'Nom', data: 'nom' },
           {
             title: 'Prix',
-            data: 'prix_2',
+            data: 'prix',
             render: (data: number, type: any, row: any) => {
               const formattedAmount = new Intl.NumberFormat('fr-FR', {
                 style: 'decimal',
@@ -155,10 +155,10 @@ export class ListeRembourserComponent implements OnInit, AfterViewInit {
               }).format(data); // Format le montant sans symbole de devise
 
               // Si vous avez besoin d'utiliser `signe_2`, vous pouvez l'ajouter ici
-              const signe = row.signe_1; // Récupérer la valeur de `signe_2`
+              // const signe = row.signe_1; // Récupérer la valeur de `signe_2`
 
               // Retourner le montant et le signe, par exemple
-              return `${formattedAmount} ${signe}`;
+              return `${formattedAmount} GNF`;
             },
           },
           {
@@ -172,10 +172,10 @@ export class ListeRembourserComponent implements OnInit, AfterViewInit {
               }).format(data); // Format le montant sans symbole de devise
 
               // Si vous avez besoin d'utiliser `signe_2`, vous pouvez l'ajouter ici
-              const signe = row.signe_2; // Récupérer la valeur de `signe_2`
+              // const signe = row.signe_2; // Récupérer la valeur de `signe_2`
 
               // Retourner le montant et le signe, par exemple
-              return `${formattedAmount} ${signe}`;
+              return `${formattedAmount} XOF`;
             },
           },
           {
@@ -189,9 +189,9 @@ export class ListeRembourserComponent implements OnInit, AfterViewInit {
               }).format(data); // Format le montant sans symbole de devise
 
               // Si vous avez besoin d'utiliser `signe_2`, vous pouvez l'ajouter ici
-              const signe = row.signe_1; // Récupérer la valeur de `signe_2`
+              // const signe = row.signe_1; // Récupérer la valeur de `signe_2`
               // Retourner le montant et le signe, par exemple
-              return `${formattedAmount} ${signe}`;
+              return `${formattedAmount} GNF`;
             },
           },
           {
@@ -204,7 +204,7 @@ export class ListeRembourserComponent implements OnInit, AfterViewInit {
           },
         ],
       });
-      this.cd.detectChanges(); // Force la détection des changements
+      this.cd.detectChanges(); 
     }, 100);
   }
 
@@ -268,9 +268,9 @@ export class ListeRembourserComponent implements OnInit, AfterViewInit {
     // Initialisation du formulaire avec les validations
     this.rembourserForm = this.fb.group({
       utilisateurId: [this.idUser],
-      deviseId: ['', Validators.required],
       partenaireId: ['', Validators.required],
-      nom: ['', Validators.required],
+      nom: [''],
+      prix: [0],
       montant: [0, [Validators.required, Validators.min(0)]],
     });
     this.fetchPartenaire();
@@ -307,7 +307,6 @@ export class ListeRembourserComponent implements OnInit, AfterViewInit {
       const formData = this.rembourserForm.value;
       const montant = parseInt(formData.montant.replace(/,/g, ''), 10);
 
-      // Appeler le service pour ajouter le partenaire
       this.rembourserService
         .ajouterRembourser({ ...formData, montant })
         .subscribe(
@@ -316,9 +315,9 @@ export class ListeRembourserComponent implements OnInit, AfterViewInit {
             console.log('Remboursement ajouté avec succès:', response);
             this.getAllRemboursement();
             this.rembourserForm.patchValue({
-              deviseId: '',
               partenaireId: '',
               nom: '',
+              prix: '',
               montant: '',
             });
             alert(response.message);
@@ -386,7 +385,7 @@ export class ListeRembourserComponent implements OnInit, AfterViewInit {
   dateFin: string = '';
   montantR: number = 0;
   prix: number = 0;
-  prix_1: number = 0; // Champ à saisir par l'utilisateur
+  prix_1: number = 0; 
   resultats: any;
   benefice: any;
 
@@ -395,19 +394,27 @@ export class ListeRembourserComponent implements OnInit, AfterViewInit {
   }
 
   onCalculer() {
-    this.calculService
-      .calculerBenefice(
+    const montantRNet = Number(this.montantR.toString().replace(/\s/g, ''));
+    const prix1Net = Number(this.prix_1.toString().replace(/\s/g, ''));
+    const prixNet = Number(this.prix.toString().replace(/\s/g, ''));
+  
+    this.calculService.calculerBenefice(
         this.dateDebut,
         this.dateFin,
-        this.montantR,
-        this.prix_1,
-        this.prix
+        montantRNet,
+        prix1Net,
+        prixNet
       )
       .subscribe(
         (response) => {
+          console.log(this.dateDebut);
+          console.log(this.dateFin);
+          console.log(montantRNet);
+          console.log(prix1Net);
+          console.log(prixNet);
           this.resultats = response;
           this.benefice = response.totalMontantGnf - response.montantGnfSaisi;
-          // console.log(this.resultats);
+          console.log(this.resultats);
         },
         (error) => {
           console.error('Erreur:', error);
@@ -437,27 +444,52 @@ export class ListeRembourserComponent implements OnInit, AfterViewInit {
   }
 
   filteredEntre: any[] = []; // Liste filtrée affichée dans le tableau
-
+montantTotal: any;
   // Fonction pour filtrer selon la date et le nom
+  // filtrerEntre() {
+  //   this.filteredEntre = this.allEntre.filter((entre: any) => {
+  //     const dateCreation = new Date(entre.date_creation); // Convertir la date en format Date JS
+  //     const debut = this.dateDebut ? new Date(this.dateDebut) : null;
+  //     const fin = this.dateFin ? new Date(this.dateFin) : null;
+  //      this.montantTotal += entre.montant;
+  //     // Vérifier si l'entrée est dans l'intervalle de dates
+  //     const estDansIntervalle =
+  //       (!debut || dateCreation >= debut) && (!fin || dateCreation <= fin);
+
+  //     // Vérifier si le nom du partenaire correspond à la recherche
+  //     const nomComplet =
+  //       `${entre.Partenaire.prenom} ${entre.Partenaire.nom}`.toLowerCase();
+  //     const correspondNom =
+  //       !this.searchNom || nomComplet.includes(this.searchNom.toLowerCase());
+
+  //     return estDansIntervalle && correspondNom;
+  //   });
+  // }
   filtrerEntre() {
+    this.montantTotal = 0; // Réinitialiser le montant total
+  
     this.filteredEntre = this.allEntre.filter((entre: any) => {
-      const dateCreation = new Date(entre.date_creation); // Convertir la date en format Date JS
+      const dateCreation = new Date(entre.date_creation);
       const debut = this.dateDebut ? new Date(this.dateDebut) : null;
       const fin = this.dateFin ? new Date(this.dateFin) : null;
-
-      // Vérifier si l'entrée est dans l'intervalle de dates
+  
       const estDansIntervalle =
         (!debut || dateCreation >= debut) && (!fin || dateCreation <= fin);
-
-      // Vérifier si le nom du partenaire correspond à la recherche
+  
       const nomComplet =
         `${entre.Partenaire.prenom} ${entre.Partenaire.nom}`.toLowerCase();
       const correspondNom =
         !this.searchNom || nomComplet.includes(this.searchNom.toLowerCase());
-
-      return estDansIntervalle && correspondNom;
+  
+      const valide = estDansIntervalle && correspondNom;
+      if (valide) {
+        this.montantTotal += entre.montant_cfa; // Ajouter seulement si l'entrée est valide
+      }
+  
+      return valide;
     });
   }
+  
 
   payerSelection() {
     const selectedEntries = this.allEntre

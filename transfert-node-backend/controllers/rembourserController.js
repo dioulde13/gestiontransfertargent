@@ -1,15 +1,15 @@
 const Rembourser = require("../models/rembourser"); // Modèle Rembourser
 const Utilisateur = require("../models/utilisateurs"); // Modèle Utilisateur
 const Partenaire = require("../models/partenaires"); // Modèle Partenaire
-const Devise = require("../models/devises");
+// const Devise = require("../models/devises");
 const { Sequelize } = require("sequelize");
 
 const ajouterRemboursement = async (req, res) => {
   try {
-    const { utilisateurId, deviseId, partenaireId, nom, montant } = req.body;
+    const { utilisateurId, prix, partenaireId, nom, montant } = req.body;
 
     // Vérification des champs requis
-    if (!utilisateurId || !partenaireId || !deviseId || !nom || !montant) {
+    if (!utilisateurId || !partenaireId || !montant) {
       return res
         .status(400)
         .json({ message: "Tous les champs sont obligatoires." });
@@ -28,39 +28,40 @@ const ajouterRemboursement = async (req, res) => {
     }
 
     // Récupérer les informations de la devise
-    const devise = await Devise.findByPk(deviseId);
-    if (!devise) {
-      return res.status(404).json({ message: "Devise introuvable." });
-    }
+    // const devise = await Devise.findByPk(deviseId);
+    // if (!devise) {
+    //   return res.status(404).json({ message: "Devise introuvable." });
+    // }
 
-    const Prix1 = devise.prix_1 || 0;
-    const Prix2 = devise.prix_2 || 0;
-    const Sign1 = devise.signe_1 || "N/A"; // Fournir une valeur par défaut si null
-    const Sign2 = devise.signe_2 || "N/A"; // Fournir une valeur par défaut si null
+    // const Prix1 = devise.prix_1 || 0;
+    // const Prix2 = devise.prix_2 || 0;
+    // const Sign1 = devise.signe_1 || "N/A"; // Fournir une valeur par défaut si null
+    // const Sign2 = devise.signe_2 || "N/A"; // Fournir une valeur par défaut si null
 
-    // Vérifications supplémentaires pour les signes
-    if (!Sign1 || !Sign2) {
-      return res
-        .status(400)
-        .json({ message: "Les informations de la devise sont incomplètes." });
-    }
+    // // Vérifications supplémentaires pour les signes
+    // if (!Sign1 || !Sign2) {
+    //   return res
+    //     .status(400)
+    //     .json({ message: "Les informations de la devise sont incomplètes." });
+    // }
 
     // Calcul du montant dû
-    const montant_due = (montant / Prix1) * Prix2;
+    const montant_due = (montant / 5000) * prix;
+
+    const prixInt = parseInt(prix, 10) || 0;
+
+    console.log(montant_due);
 
     if (partenaire.montant_preter >= montant) {
       if (utilisateur.solde > montant_due) {
         const remboursement = await Rembourser.create({
           utilisateurId,
           partenaireId,
-          deviseId,
-          montant_gnf: montant_due,
-          montant,
+          // deviseId,
+          montant_gnf: prix? montant_due: montant,
+          montant: prix? montant: 0,
           nom,
-          signe_1: Sign1,
-          signe_2: Sign2,
-          prix_1: Prix1,
-          prix_2: Prix2,
+          prix:prixInt,
         });
 
         // Mettre à jour le solde de l'utilisateur connecté
@@ -127,18 +128,18 @@ const listerRemboursements = async (req, res) => {
           model: Partenaire,
           attributes: ["id", "nom", "prenom", "montant_preter"], // Champs à inclure pour le partenaire
         },
-        {
-          model: Devise,
-          attributes: [
-            "id",
-            "paysDepart",
-            "paysArriver",
-            "signe_1",
-            "signe_2",
-            "prix_1",
-            "prix_2",
-          ], // Champs nécessaires de la devise
-        },
+        // {
+        //   model: Devise,
+        //   attributes: [
+        //     "id",
+        //     "paysDepart",
+        //     "paysArriver",
+        //     "signe_1",
+        //     "signe_2",
+        //     "prix_1",
+        //     "prix_2",
+        //   ], // Champs nécessaires de la devise
+        // },
       ],
     });
 

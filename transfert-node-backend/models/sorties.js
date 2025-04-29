@@ -108,20 +108,19 @@ const Sortie = sequelize.define("Sortie", {
   payement_type: {
     type: DataTypes.ENUM("COMPLET", "NON COMPLET"),
     allowNull: false,
-    defaultValue: "NON COMPLET", // Définir une valeur par défaut
+    defaultValue: "NON COMPLET",  
   },
   status: {
-    type: DataTypes.ENUM("NON PAYEE", "PAYEE", "ANNULEE"),
+    type: DataTypes.ENUM("NON PAYEE", "PAYEE", "EN COURS", "ANNULEE"),
     allowNull: false,
-    defaultValue: "NON PAYEE", // Définir une valeur par défaut
+    defaultValue: "NON PAYEE", 
   },
 });
 
-// Définir l'association : Une Entree appartient à un
 Sortie.belongsTo(Utilisateur, { foreignKey: "utilisateurId" });
-// Définir l'association : Une Entree appartient à un
+
 Sortie.belongsTo(Partenaire, { foreignKey: "partenaireId" });
-// Définir l'association : Une Entree appartient à un
+
 Sortie.belongsTo(Devise, { foreignKey: "deviseId" });
 
 module.exports = Sortie;

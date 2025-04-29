@@ -114,20 +114,20 @@ const ajouterSortie = async (req, res) => {
     const Sign1 = devise.signe_1;
     const Sign2 = devise.signe_2;
 
-    const montant_due = (montant / Prix1) * Prix2; // Calcul du montant dû
+    const montant_due = (montant / Prix1) * Prix2;
 
     const lastEntry = await Sortie.findOne({ order: [["id", "DESC"]] });
 
     let newCode = "ABS0001";
 
     if (lastEntry && lastEntry.code) {
-      const numericPart = parseInt(lastEntry.code.slice(3), 10); // Extraire la partie numérique après "ABS"
+      const numericPart = parseInt(lastEntry.code.slice(3), 10);
       if (!isNaN(numericPart)) {
         newCode = `ABS${(numericPart + 1).toString().padStart(4, "0")}`;
       }
     }
-    console.log(utilisateur.solde);
-    console.log(montant_due);
+    // console.log(utilisateur.solde);
+    // console.log(montant_due);
     if (utilisateur.solde > montant_due) {
       if (devise.paysArriver === partenaire.pays) {
         const sortie = await Sortie.create({
@@ -144,7 +144,7 @@ const ajouterSortie = async (req, res) => {
           montant_gnf: montant_due,
           signe_1: Sign1,
           signe_2: Sign2,
-          prix_1: Prix1, // Utiliser le prix_1 de Devise par défaut si non fourni
+          prix_1: Prix1,
           prix_2: Prix2,
           montant: montant,
         });
@@ -195,15 +195,17 @@ const ajouterAutreSortie = async (req, res) => {
       return res.status(404).json({ message: "Utilisateur introuvable." });
     }
 
+    const code = Math.floor(100000 + Math.random() * 900000).toString();
+
     if (utilisateur.solde > montantClient) {
-      // Créer une nouvelle entrée sans code généré automatiquement
       const sortie = await Sortie.create({
         utilisateurId,
         partenaireId: null,
         deviseId: null,
         pays_exp: "",
         pays_dest: "",
-        code: "", // Le champ code reste vide
+        code: code,
+        // code: "",
         codeEnvoyer: "",
         expediteur: "",
         nomCLient,
@@ -218,7 +220,6 @@ const ajouterAutreSortie = async (req, res) => {
         telephone_receveur: "",
         status: "PAYEE",
       });
-      // Mettre à jour le solde de l'utilisateur
       utilisateur.solde = (utilisateur.solde || 0) - montantClient;
       await utilisateur.save();
 
@@ -235,9 +236,9 @@ const ajouterAutreSortie = async (req, res) => {
           { minimumFractionDigits: 0, maximumFractionDigits: 0 }
         )} GNF,
       le solde dans la caisse est: ${solde.toLocaleString("fr-FR", {
-        minimumFractionDigits: 0,
-        maximumFractionDigits: 0,
-      })} GNF`,
+          minimumFractionDigits: 0,
+          maximumFractionDigits: 0,
+        })} GNF`,
       });
     }
   } catch (error) {
@@ -282,7 +283,7 @@ const validerSortie = async (req, res) => {
     }
 
     // Recalculer le montant en fonction du prix_2 s'il est fourni
-    let montant_due = sortie.montant_gnf; // Valeur par défaut (ancienne valeur)
+    let montant_due = sortie.montant_gnf;
     if (prix_2 !== undefined) {
       montant_due = (sortie.montant / sortie.prix_1) * prix_2;
     }
@@ -307,6 +308,9 @@ const validerSortie = async (req, res) => {
         })} GNF`,
       });
     }
+
+    utilisateur.solde = (utilisateur.solde || 0) - montant_due;
+    await utilisateur.save();
 
     // Mise à jour du montant prêté du partenaire
     partenaire.montant_preter =

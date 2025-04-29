@@ -218,6 +218,7 @@ export class PayementsComponent implements OnInit, AfterViewInit {
   onSubmit() {
     if (this.payementForm.valid) {
       const formData = this.payementForm.value;
+      console.log(formData);
       this.loading = true;
 
       const montant = parseInt(formData.montant.replace(/,/g, ''), 10);
@@ -225,15 +226,19 @@ export class PayementsComponent implements OnInit, AfterViewInit {
       this.payementService.ajouterPayement({ ...formData, montant }).subscribe(
         (response) => {
           this.loading = false;
-          this.payementForm.reset();
+          this.payementForm.patchValue({
+            code: '',
+            montant: '',
+            type: ''
+          });
           this.getAllPayement();
-          alert(response.message); // Afficher le message retourné par l'API
+          alert(response.message); 
         },
         (error) => {
           this.loading = false;
           const errorMessage =
             error.error?.message || "Erreur lors de l'ajout du paiement.";
-          alert(errorMessage); // Afficher le message d'erreur retourné par l'API
+          alert(errorMessage); 
         }
       );
     } else {

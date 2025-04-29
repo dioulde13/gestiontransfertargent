@@ -116,6 +116,12 @@ const ajouterPayement = async (req, res) => {
           utilisateur.solde = (utilisateur.solde || 0) - montant;
           await utilisateur.save();
 
+          if (sortie.montant_restant === 0) {
+            sortie.status = "PAYEE";
+          } else if (sortie.montant_payer < sortie.montant_gnf) {
+            sortie.status = "EN COURS";
+          }
+
           await sortie.save();
           res.status(201).json({
             message: "Payement ajouté avec succès.",
