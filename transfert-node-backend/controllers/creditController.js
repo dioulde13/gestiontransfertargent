@@ -3,81 +3,92 @@ const Utilisateur = require("../models/utilisateurs");
 
 const ajouterCredit = async (req, res) => {
   try {
-    const { utilisateurId, nom, montant } = req.body;
+    const { utilisateurId, type, nom, montant } = req.body;
 
     // Vérification des champs requis
-    if (!utilisateurId || !nom || !montant) {
-      return res
-        .status(400)
-        .json({ message: "Tous les champs sont obligatoires." });
+    if (!utilisateurId || !nom || !type || !montant) {
+      return res.status(400).json({ message: "Tous les champs sont obligatoires." });
     }
 
-    // Vérification de l'existence de l'utilisateur
+    // Vérification que montant est un nombre positif
+    if (isNaN(montant) || montant <= 0) {
+      return res.status(400).json({ message: "Le montant doit être un nombre positif." });
+    }
+
     const utilisateur = await Utilisateur.findByPk(utilisateurId);
     if (!utilisateur) {
       return res.status(404).json({ message: "Utilisateur introuvable." });
     }
 
+    // Génération du code unique
     const generateUniqueCode = async () => {
-      let newCode = "AB0001"; // Code par défaut
+      // Valeur initiale par défaut
+      let newCode = "REF0001";
+    
+      // Récupérer la dernière entrée triée par date de création
       const lastEntry = await Credit.findOne({
         order: [["createdAt", "DESC"]],
-      }); // Récupère le dernier crédit
-
-      if (lastEntry) {
-        const lastCode = lastEntry.code || "";
-        const numericPart = parseInt(lastCode.slice(2), 10);
-
+      });
+    
+      if (lastEntry && lastEntry.reference && lastEntry.reference.startsWith("REF")) {
+        const numericPart = parseInt(lastEntry.reference.slice(3), 10);
+    
         if (!isNaN(numericPart)) {
           const incrementedPart = (numericPart + 1).toString().padStart(4, "0");
-          newCode = `AB${incrementedPart}`;
+          newCode = `REF${incrementedPart}`;
         }
       }
-
-      // Vérification de l'unicité
-      const checkUniqueCode = async (code) => {
-        const existingCredit = await Credit.findOne({
-          where: { reference: code },
-        });
-        return existingCredit ? false : true;
-      };
-
-      // Si le code généré existe déjà, générer un autre aléatoire
-      while (!(await checkUniqueCode(newCode))) {
-        const randomSuffix = Math.random()
-          .toString(36)
-          .substring(2, 8)
-          .toUpperCase();
-        newCode = `REF${randomSuffix}`;
-      }
-
+    
       return newCode;
     };
+    
 
-    newCode = await generateUniqueCode();
+    const newCode = await generateUniqueCode();
+    let credit;
 
-    if (utilisateur.solde > montant) {
-      const credit = await Credit.create({
+    if (type === "SORTIE") {
+      if (utilisateur.solde < montant) {
+        return res.status(400).json({ message: "Solde insuffisant." });
+      }
+
+      credit = await Credit.create({
         utilisateurId,
         nom,
+        type,
         reference: newCode,
         montant,
       });
-      res.status(201).json({
-        message: "Crédit ajouté avec succès.",
-        credit,
+
+      utilisateur.solde -= montant;
+
+    } else if (type === "ENTRE") {
+      credit = await Credit.create({
+        utilisateurId,
+        nom,
+        type,
+        reference: newCode,
+        montant,
       });
+
+      utilisateur.solde += montant;
+
     } else {
-      return res.status(400).json({ message: "Solde est insuffisant." });
+      return res.status(400).json({ message: "Type de crédit invalide." });
     }
 
-    utilisateur.solde = (utilisateur.solde || 0) - montant;
     await utilisateur.save();
+
+    return res.status(201).json({
+      message: "Crédit ajouté avec succès.",
+      credit,
+    });
+
   } catch (error) {
     console.error("Erreur lors de l'ajout du crédit :", error);
-    res.status(500).json({ message: "Erreur interne du serveur." });
+    return res.status(500).json({ message: "Erreur interne du serveur." });
   }
 };
+
 
 const recupererCredit = async (req, res) => {
   try {

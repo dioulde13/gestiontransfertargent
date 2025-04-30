@@ -98,7 +98,7 @@
                     <th class="border px-4 py-2">Montant</th>
                     <th class="border px-4 py-2">Montant Paye</th>
                     <th class="border px-4 py-2">Montant Restant</th>
-                    <th class="border px-4 py-2">Surplus</th>
+                    <th class="border px-4 py-2">Type</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -123,8 +123,7 @@
                       GNF
                     </td>
                     <td class="border px-4 py-2">
-                      {{ result.montant_plus | currency : "" : "" : "1.0-0" }}
-                      GNF
+                      {{ result.type }}
                     </td>
                   </tr>
                 </tbody>
@@ -197,6 +196,14 @@
                 >Le montant doit être supérieur ou égal à 0.</small
               >
             </div>
+          </div>
+
+          <div class="form-group">
+            <label for="type">Type</label>
+            <select id="type" class="form-control" formControlName="type">
+              <option value="ENTRE">Entre</option>
+              <option value="SORTIE">Sortie</option>
+            </select>
           </div>
 
           <div class="modal-footer">

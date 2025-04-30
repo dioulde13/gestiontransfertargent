@@ -15,7 +15,7 @@ interface Result {
   montant: number;
   montantPaye: number;
   montantRestant: number;
-  montant_plus: number;
+  type: string;
   id: number;
 }
 
@@ -113,9 +113,10 @@ export class ListeCreditComponent implements OnInit {
 
       // Champ pour le nom, obligatoire
       nom: ['', Validators.required],
-
       // Champ pour le montant, obligatoire et doit être un nombre positif ou zéro
       montant: [0, [Validators.required, Validators.min(0)]],
+
+      type: ['', Validators.required],
     });
 
     this.getAllCredit();
@@ -224,17 +225,8 @@ export class ListeCreditComponent implements OnInit {
             },
           },
           {
-            title: 'Montant surPlus',
-            data: 'montant_plus',
-            render: (data: number) => {
-              const formattedAmount = new Intl.NumberFormat('fr-FR', {
-                style: 'decimal',
-                minimumFractionDigits: 0,
-                maximumFractionDigits: 0,
-              }).format(data);
-
-              return `${formattedAmount} GNF`;
-            },
+            title: 'Type',
+            data: 'type',
           },
         ],
       });
@@ -275,11 +267,13 @@ export class ListeCreditComponent implements OnInit {
           this.creditForm.patchValue({
             nom: '',
             montant: '',
+            type:''
           });
           this.loading = false;
           alert('Credit ajouté avec succès!');
         },
         (error) => {
+          this.loading = false;
           alert(error.error.message);
         }
       );
