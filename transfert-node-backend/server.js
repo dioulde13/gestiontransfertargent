@@ -1,5 +1,6 @@
 const express = require("express");
 const bodyParser = require("body-parser");
+// const sql = require("mssql");
 const cors = require("cors");
 const sequelize = require("./models/sequelize");
 const utilisateurRoutes = require("./routes/utilisateurRoutes");
@@ -20,8 +21,91 @@ const calculBeneficeRoute = require("./routes/calculBeneficeRoute"); // Importer
 
 const verifierCaisseRoute = require("./routes/verifierCaisseRoute"); // Importer les routes des entrées
 
+const dbConfig = require("./configs/dbConfig");
+
+
+
 const app = express();
 app.use(bodyParser.json());
+
+const sql = require("mssql/msnodesqlv8");
+
+app.post("/api/insertProduit", async (req, res) => {
+  try {
+    const { nomProduit, quantite } = req.body;
+
+    const pool = await sql.connect(dbConfig);
+
+    const result = await pool.request()
+      .input("nomProduit", sql.NVarChar, nomProduit)
+      .input("quantite", sql.Int, quantite)
+      .execute("insererProduit");  
+
+    res.status(200).json({ message: "Produit inséré avec succès !" });
+    
+  } catch (error) {
+    console.error("Erreur lors de l'insertion :", error);
+    res.status(500).json({ error: "Erreur lors de l'insertion du produit." });
+  }
+});
+
+
+// app.get("/api/getAllProduit", async (req, res) => {
+//   try {
+//     const pool = await sql.connect(dbConfig);
+
+//     const result = await pool.request().query("SELECT * FROM listProduit");
+
+//     res.status(200).json({
+//       status: 200,
+//       message: "Récupération réussie avec succès",
+//       data: result.recordset
+//     });
+//   } catch (error) {
+//     console.error(error); // Ajout pour afficher les erreurs dans la console
+//     res.status(500).json({
+//       status: 500,
+//       message: "Erreur lors de la récupération des produits",
+//       error: error.message
+//     });
+//   }
+// });
+
+
+// app.get("/check-db-connection", async (req, res) => {
+//   try {
+//     await sql.connect(dbConfig);
+//     res.json({
+//       success: true,
+//       message: "Connexion à la base de données réussie",
+//     });
+//   } catch (error) {
+//     res.status(500).json({
+//       success: false,
+//       message: "Erreur de connexion à la base de données",
+//       error: error.message,
+//     });
+//   }
+// });
+
+
+// sql.connect(dbConfig, function (err) {
+//   if (err) {
+//     console.log("Erreur de connexion :", err.message);
+//     return;
+//   }
+
+//   const request = new sql.Request();
+
+//   request.query("SELECT * FROM produit", function (err, result) {
+//     if (err) {
+//       console.log("Erreur dans la requête :", err.message);
+//     } else {
+//       console.log("Résultats :", result.recordset);
+//     }
+//   });
+// });
+
 
 app.use(
   cors({
@@ -41,24 +125,18 @@ sequelize
     console.error("Erreur lors de la création des tables :", error)
   );
 
-// Utilisation des routes
-app.use("/api/utilisateurs", utilisateurRoutes);
+ app.use("/api/utilisateurs", utilisateurRoutes);
 
-// Utilisation des routes
-app.use("/api/partenaires", partenaireRoutes);
+ app.use("/api/partenaires", partenaireRoutes);
 
 app.use("/api/verifierCaisse", verifierCaisseRoute);
 
-// Utilisation des routes pour les devises
-app.use("/api/devises", deviseRoutes);
+ app.use("/api/devises", deviseRoutes);
 
-// Utilisation des routes pour les entrées
-app.use("/api/entrees", entreRoutes);
+ app.use("/api/entrees", entreRoutes);
 
-// Utilisation des routes pour les sortie
-app.use("/api/sorties", sortieRoutes);
+ app.use("/api/sorties", sortieRoutes);
 
-// Utilisation des routes pour les sortie
 app.use("/api/rembourser", rembourserRoutes);
 
 app.use("/api/payement", payementRoutes);
@@ -77,7 +155,7 @@ app.use("/api/benefices", beneficeRoute);
 
 app.use("/api/calculBenefices", calculBeneficeRoute);
 
-app.use("/api/auth", authRoutes);
+ app.use("/api/auth", authRoutes);
 
 const PORT = 3000;
 app.listen(PORT, () => {
