@@ -189,6 +189,7 @@ export class ListePartenaireComponent implements OnInit {
             alert('Partenaire ajouté avec succès!');
           },
           (error) => {
+            this.isLoading = false;
             console.error("Erreur lors de l'ajout du partenaire:", error);
             alert("Erreur lors de l'ajout du partenaire.");
           }

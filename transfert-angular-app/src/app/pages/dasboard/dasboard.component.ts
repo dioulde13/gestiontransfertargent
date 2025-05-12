@@ -14,6 +14,7 @@ import { VerifierSoldeService } from '../../services/soldeVerifier/verifier-sold
 import { Subject } from 'rxjs';
 import { DataTablesModule } from 'angular-datatables';
 import { CurrencyFormatPipe } from './currency-format.pipe'; // Assurez-vous que le chemin est correct
+import { CalculBeneficeService } from '../../services/calculBenefices/calcul-benefice.service';
 
 
 
@@ -182,6 +183,7 @@ export class DasboardComponent implements OnInit, AfterViewInit, OnDestroy {
     private verifierCaisseService: VerifierSoldeService,
     private cd: ChangeDetectorRef,
     private fb: FormBuilder,
+    private beneficeService: CalculBeneficeService
   ) { }
 
 
@@ -199,6 +201,34 @@ export class DasboardComponent implements OnInit, AfterViewInit, OnDestroy {
     this.getAllVerifierCaise();
     this.getAllSoldeCaisseParJours();
   }
+
+
+
+
+  dateDebutBenefice = '';
+  dateFinBenefice = '';
+  resultatBefice: any = null;
+  erreurBenefice: string = '';
+
+
+  calculBenefice() {
+    if (!this.dateDebutBenefice || !this.dateFinBenefice) {
+      this.erreurBenefice = 'Veuillez sélectionner les deux dates.';
+      return;
+    }
+
+    this.beneficeService.getBenefice(this.dateDebutBenefice, this.dateFinBenefice).subscribe({
+      next: (res) => {
+        this.resultatBefice = res;
+        this.erreurBenefice = '';
+      },
+      error: (err) => {
+        this.erreurBenefice = err.error.message || 'Erreur lors du calcul du bénéfice.';
+        this.resultatBefice = null;
+      }
+    });
+  }
+
 
   userInfo: any = null;
   idUser: string = '';

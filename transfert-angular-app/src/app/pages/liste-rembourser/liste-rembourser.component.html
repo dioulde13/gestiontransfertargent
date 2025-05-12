@@ -5,7 +5,8 @@
         <div class="card bg-transparent">
           <div class="card-body p-0">
             <div class="profile-image relative">
-              <img src="/assets/images/top-header.png" class="img-fluid rounded w-full" alt="profile-image" />
+              <img src="/assets/images/transfert.jpg" class="img-fluid rounded w-full" alt="profile-image"
+                style="height: 200px; object-fit: cover;" />
             </div>
           </div>
         </div>
@@ -25,10 +26,10 @@
                       <a href="#" class="btn btn-primary" data-toggle="modal"
                         data-target="#payer-partenaire-modal">Payer</a>
                     </div>
-                    <div>
+                    <!-- <div>
                       <a href="#" class="btn btn-primary" data-toggle="modal"
                         data-target="#calculer-rembourser-modal">Calcul</a>
-                    </div>
+                    </div> -->
                     <div class="pr-3 btn-new border-left">
                       <a href="#" class="btn btn-primary" data-toggle="modal" data-target="#new-project-modal">Ajouter
                         nouveau</a>
@@ -55,9 +56,12 @@
                     Filtrer
                   </button>
                 </div>
-                <div class="col-md-3 d-flex">
+                <div class="col-md-3">
                   <div style="font-weight: bold; margin-top: 10px">
                     Total Montant : {{ totalMontant | number }} GNF
+                  </div>
+                  <div style="font-weight: bold; margin-top: 2px">
+                    Total Montant : {{ totalMontantDevise | number }} XOF
                   </div>
                 </div>
               </div>
@@ -99,7 +103,7 @@
                     </td>
                     <td class="border px-4 py-2">
                       {{
-                      result.Partenaire.prenom + " " + result.Partenaire.nom
+                      result.Partenaire.prenom + " " + result.Partenaire.nom +" "+ (result.Partenaire.pays)
                       }}
                     </td>
                   </tr>
@@ -113,75 +117,214 @@
   </div>
 </div>
 
+
 <div class="modal fade" id="payer-partenaire-modal" tabindex="-1" role="dialog" aria-labelledby="modalTitle"
   aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered modal-xl" role="document">
     <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title mr-2" id="modalTitle">Payer un partenaire</h5>
-        <button class="btn btn-success mb-2" (click)="payerSelection()">
-          Payer
-        </button>
-        <h1 class="ml-5" style="font-weight: bold;">{{ montantTotal | number:'1.0-0' }} XOF</h1>
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-          <span aria-hidden="true">&times;</span>
-        </button>
-      </div>
-      <div class="my-3 ml-2 row">
-        <div class="col-lg-4">
-          <input type="date" id="dateDebut" [(ngModel)]="dateDebut" class="form-control" />
-        </div>
-        <div class="col-lg-4">
-          <input type="date" id="dateFin" [(ngModel)]="dateFin" class="form-control" />
-        </div>
-        <div class="col-lg-4">
-          <button class="btn btn-primary mt-2" (click)="filtrerEntre()">
-            Filtrer
-          </button>
-        </div>
-      </div>
+      <ul class="nav nav-tabs" id="myTab" role="tablist">
+        <li class="nav-item">
+          <a class="nav-link active" id="details-tab" data-toggle="tab" href="#details" role="tab"
+            aria-controls="details" aria-selected="true">
+            Entre
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" id="paiement-tab" data-toggle="tab" href="#paiement" role="tab" aria-controls="paiement"
+            aria-selected="false">
+            Sortie
+          </a>
+        </li>
+      </ul>
 
-      <div class="modal-body">
-        <table class="table data-table table-striped table-flush" style="width: 100%">
-          <thead>
-            <tr class="text-muted">
-              <th class="border px-4 py-2">Type</th>
-              <th class="border px-4 py-2">Date</th>
-              <th class="border px-4 py-2">Montant</th>
-              <th class="border px-4 py-2">Prix</th>
-              <th class="border px-4 py-2">Montant GNF</th>
-              <th class="border px-4 py-2">Partenaire</th>
-              <th class="border px-4 py-2">Status</th>
-              <th class="border px-4 py-2">type</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr *ngFor="let result of filteredEntre" class="hover:bg-gray-100 even:bg-gray-50">
-              <td>
-                <input type="checkbox" [(ngModel)]="result.selected" />
-              </td>
-              <td>{{ result.date_creation | date : "dd/MM/yyyy HH:mm" }}</td>
-              <td>
-                {{ result.montant_cfa | currency : "" : "" : "1.0-0" }} XOF
-              </td>
-              <td>{{ result.prix_2 | currency : "" : "" : "1.0-0" }} GNF</td>
-              <td>
-                {{ result.montant_gnf | currency : "" : "" : "1.0-0" }} GNF
-              </td>
-              <td>
-                {{ result.Partenaire.prenom + " " + result.Partenaire.nom }}
-              </td>
-              <td>{{ result.status }}</td>
-              <td>{{ result.type }}</td>
-            </tr>
-          </tbody>
-        </table>
+      <div class="tab-content" id="myTabContent">
+        <div class="tab-pane fade show active" id="details" role="tabpanel" aria-labelledby="details-tab">
+          <div class="modal-header">
+            <h5 class="modal-title mr-2" id="modalTitle">Payer un partenaire</h5>
+            <button class="btn btn-success mb-2" (click)="payerSelectionEntre()">
+              Payer
+            </button>
+            <h1 class="ml-5" style="font-weight: bold;">{{ montantTotal | number:'1.0-0' }} XOF</h1>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="my-3 ml-2 row">
+            <div class="col-lg-4">
+              <input type="date" id="dateDebut" [(ngModel)]="dateDebut" class="form-control" />
+            </div>
+            <div class="col-lg-4">
+              <input type="date" id="dateFin" [(ngModel)]="dateFin" class="form-control" />
+            </div>
+            <div class="col-lg-4">
+              <button class="btn btn-primary mt-2" (click)="filtrerEntre()">
+                Filtrer
+              </button>
+            </div>
+          </div>
+
+          <div class="modal-body">
+
+            <table class="table data-table table-striped table-flush" style="width: 100%">
+              <thead>
+                <tr class="text-muted">
+                  <th class="border px-4 py-2">Code</th>
+                  <th class="border px-4 py-2">Type</th>
+                  <th class="border px-4 py-2">Date</th>
+                  <th class="border px-4 py-2">Montant</th>
+                  <th class="border px-4 py-2">Prix</th>
+                  <th class="border px-4 py-2">Montant GNF</th>
+                  <th class="border px-4 py-2">Partenaire</th>
+                  <th class="border px-4 py-2">Status</th>
+                  <th class="border px-4 py-2">type</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let result of filteredEntre" class="hover:bg-gray-100 even:bg-gray-50">
+                  <td>
+                    <input type="checkbox" [(ngModel)]="result.selected" />
+                  </td>
+                  <td>{{ result.code}}</td>
+                  <td>{{ result.date_creation | date : "dd/MM/yyyy HH:mm" }}</td>
+                  <td>
+                    {{ result.montant_cfa | currency : "" : "" : "1.0-0" }} XOF
+                  </td>
+                  <td>{{ result.prix_2 | currency : "" : "" : "1.0-0" }} GNF</td>
+                  <td>
+                    {{ result.montant_gnf | currency : "" : "" : "1.0-0" }} GNF
+                  </td>
+                  <td>
+                    {{ result.Partenaire.prenom + " " + result.Partenaire.nom }}
+                  </td>
+                  <td>{{ result.status }}</td>
+                  <td>{{ result.type }}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <div class="tab-pane fade" id="paiement" role="tabpanel" aria-labelledby="paiement-tab">
+          <div class="modal-header">
+            <h5 class="modal-title mr-2" id="modalTitle">Payer un partenaire</h5>
+            <div>
+              <button class="btn btn-primary" (click)="ouvrirModalRemboursement()">Payer</button>
+
+              <!-- <a href="#" class="btn btn-primary" data-toggle="modal" data-target="#payer-partenaire-sortie">Payer</a> -->
+            </div>
+            <!-- <div class="modal fade" id="payer-partenaire-sortie" tabindex="-1" role="dialog"
+              aria-labelledby="modalTitle" aria-hidden="true"> -->
+              <div class="modal fade show d-block" *ngIf="modalRemboursementOuvert" tabindex="-1" role="dialog" style="background: rgba(0,0,0,0.5);">
+              <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+                <div class="modal-content">
+                  <div class="modal-header">
+                    <h5 class="modal-title" id="modalTitle">Valider un remboursement</h5>
+                    <button type="button" class="close" (click)="fermerModalRemboursement()">&times;</button>
+                  </div>
+                  <div class="modal-body">
+                    <form [formGroup]="rembourserPartenaireForm" (ngSubmit)="payerSelectionSortie()">
+                      <div class="form-group mb-3">
+                        <label for="partenaireEntre">Partenaire Sénégal</label>
+                        <select class="form-control" id="partenaireEntre" formControlName="partenaireEntreId" required>
+                          <option value="" disabled selected>Sélectionnez un partenaire</option>
+                          <option *ngFor="let partenaire of allPartenaireEntre" [value]="partenaire.id">
+                            {{
+                              partenaire.prenom + " " +
+                              partenaire.nom + " " +
+                              (partenaire.montant_preter | currency : "" : "" : "1.0-0") + " XOF"
+                            }} ({{ partenaire.pays }})
+                          </option>
+                        </select>
+                      </div>
+
+                      <div class="form-group mb-3">
+                        <label for="partenaireSortie">Partenaire Guinée-Bissau</label>
+                        <select class="form-control" id="partenaireSortie" formControlName="partenaireSortieId" required>
+                          <option value="" disabled selected>Sélectionnez un partenaire</option>
+                          <option *ngFor="let partenaire of allPartenaireSortie" [value]="partenaire.id">
+                            {{
+                              partenaire.prenom + " " +
+                              partenaire.nom + " " +
+                              (partenaire.montant_preter | currency : "" : "" : "1.0-0") + " XOF"
+                            }} ({{ partenaire.pays }})
+                          </option>
+                        </select>
+                      </div>
+
+                      <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" (click)="fermerModalRemboursement()">Annuler</button>
+                        <button type="submit" class="btn btn-primary" [disabled]="!rembourserPartenaireForm.valid">Valider</button>
+                      </div>
+                    </form>
+                    
+                  </div>
+                </div>
+              </div>
+            </div>
+            <h1 class="ml-5" style="font-weight: bold;">{{ montantTotalSortie | number:'1.0-0' }} XOF</h1>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="my-3 ml-2 row">
+            <div class="col-lg-4">
+              <input type="date" id="dateDebutSortie" [(ngModel)]="dateDebutSortie" class="form-control" />
+            </div>
+            <div class="col-lg-4">
+              <input type="date" id="dateFinSortie" [(ngModel)]="dateFinSortie" class="form-control" />
+            </div>
+            <div class="col-lg-4">
+              <button class="btn btn-primary mt-2" (click)="filtrerSortie()">
+                Filtrer
+              </button>
+            </div>
+          </div>
+
+          <div class="modal-body">
+
+            <table class="table data-table table-striped table-flush" style="width: 100%">
+              <thead>
+                <tr class="text-muted">
+                  <th class="border px-4 py-2">Code</th>
+                  <th class="border px-4 py-2">Type</th>
+                  <th class="border px-4 py-2">Date</th>
+                  <th class="border px-4 py-2">Montant</th>
+                  <th class="border px-4 py-2">Prix</th>
+                  <th class="border px-4 py-2">Montant GNF</th>
+                  <th class="border px-4 py-2">Partenaire</th>
+                  <th class="border px-4 py-2">Status</th>
+                  <th class="border px-4 py-2">type</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let result of filteredSortie" class="hover:bg-gray-100 even:bg-gray-50">
+                  <td>
+                    <input type="checkbox" [(ngModel)]="result.selected" />
+                  </td>
+                  <td>{{ result.code}}</td>
+                  <td>{{ result.date_creation | date : "dd/MM/yyyy HH:mm" }}</td>
+                  <td>
+                    {{ result.montant | currency : "" : "" : "1.0-0" }} XOF
+                  </td>
+                  <td>{{ result.prix_2 | currency : "" : "" : "1.0-0" }} GNF</td>
+                  <td>
+                    {{ result.montant_gnf | currency : "" : "" : "1.0-0" }} GNF
+                  </td>
+                  <td>
+                    {{ result.Partenaire.prenom + " " + result.Partenaire.nom }}
+                  </td>
+                  <td>{{ result.status }}</td>
+                  <td>{{ result.type }}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
       </div>
     </div>
   </div>
 </div>
 
-<div class="modal fade" id="calculer-rembourser-modal" tabindex="-1" role="dialog" aria-labelledby="modalTitle"
+<!-- <div class="modal fade" id="calculer-rembourser-modal" tabindex="-1" role="dialog" aria-labelledby="modalTitle"
   aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
     <div class="modal-content">
@@ -210,29 +353,23 @@
           </div>
           <div class="form-group">
             <label for="montantR" class="form-label">Montant en devise</label>
-            <input
-              type="text"
-              id="montantR"
-              [(ngModel)]="montantR"
-              name="montantR"
-              appFormatNumber
-              required
-              class="form-control"
-              placeholder="Ex : 1 000 000"
-            />
+            <input type="text" id="montantR" [(ngModel)]="montantR" name="montantR" appFormatNumber required
+              class="form-control" placeholder="Ex : 1 000 000" />
           </div>
-          
+
           <div class="row">
             <div class="col-lg-6">
               <div class="form-group">
                 <label for="prix_1">Prix en devise</label>
-                <input type="text" id="prix_1" [(ngModel)]="prix_1" name="prix_1" class="form-control" appFormatNumber  required />
+                <input type="text" id="prix_1" [(ngModel)]="prix_1" name="prix_1" class="form-control" appFormatNumber
+                  required />
               </div>
             </div>
             <div class="col-lg-6">
               <div class="form-group">
                 <label for="prix">Prix (en GNF)</label>
-                <input type="text" id="prix" [(ngModel)]="prix" name="prix" appFormatNumber class="form-control" required />
+                <input type="text" id="prix" [(ngModel)]="prix" name="prix" appFormatNumber class="form-control"
+                  required />
               </div>
             </div>
           </div>
@@ -272,7 +409,7 @@
       </div>
     </div>
   </div>
-</div>
+</div> -->
 
 <div class="modal fade" id="new-project-modal" tabindex="-1" role="dialog" aria-labelledby="modalTitle"
   aria-hidden="true">
@@ -298,7 +435,7 @@
                 (partenaire.montant_preter | currency : "" : "" : "1.0-0") +
                 "
                 XOF"
-                }}
+                }} ({{partenaire.pays}})
               </option>
             </select>
           </div>
@@ -309,8 +446,7 @@
           <div class="form-group mb-3">
             <label for="prix">Prix</label>
             <input id="prix" formControlName="prix" class="form-control" type="text" [(ngModel)]="prix"
-              [ngModel]="prix"
-              />
+              [ngModel]="prix" />
 
           </div>
           <div class="form-group">

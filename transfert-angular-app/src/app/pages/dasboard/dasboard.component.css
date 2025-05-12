@@ -9,6 +9,10 @@
     display: flex;
     justify-content: space-between;
   }
+
+  .custom-gap > .col {
+    margin-bottom: 1px; /* ajuste selon le besoin */
+  }
   
   .form-group {
     margin-bottom: 15px;
@@ -48,6 +52,9 @@
 .custom-modal {
   max-width: 90%;
   width: 90%;
+}
+.card{
+  margin-bottom: 10px;
 }
 
 

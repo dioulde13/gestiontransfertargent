@@ -148,7 +148,6 @@ export class PayementComponent implements OnInit, AfterViewInit {
         data: this.allresultat,
         order: [[0, 'desc']],
         columns: [
-          // { title: 'Reference', data: 'reference' },
           {
             title: 'Date paiement',
             data: 'date_creation',
@@ -228,6 +227,7 @@ export class PayementComponent implements OnInit, AfterViewInit {
             this.loading = false;
           },
           (error) => {
+            this.loading = false;
             // Vérifie si l'erreur contient un message spécifique
             const errorMessage =
               error.error?.message ||

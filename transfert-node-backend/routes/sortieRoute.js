@@ -17,4 +17,6 @@ router.put("/annuler/:code", sortieController.annulerSortie);
 
 router.put("/valider/:code", sortieController.validerSortie);
 
+router.post('/payer', sortieController.payerSorties);
+
 module.exports = router;

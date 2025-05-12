@@ -72,21 +72,21 @@ app.post("/api/insertProduit", async (req, res) => {
 // });
 
 
-// app.get("/check-db-connection", async (req, res) => {
-//   try {
-//     await sql.connect(dbConfig);
-//     res.json({
-//       success: true,
-//       message: "Connexion à la base de données réussie",
-//     });
-//   } catch (error) {
-//     res.status(500).json({
-//       success: false,
-//       message: "Erreur de connexion à la base de données",
-//       error: error.message,
-//     });
-//   }
-// });
+app.get("/check-db-connection", async (req, res) => {
+  try {
+    await sql.connect(dbConfig);
+    res.json({
+      success: true,
+      message: "Connexion à la base de données réussie",
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: "Erreur de connexion à la base de données",
+      error: error.message,
+    });
+  }
+});
 
 
 // sql.connect(dbConfig, function (err) {

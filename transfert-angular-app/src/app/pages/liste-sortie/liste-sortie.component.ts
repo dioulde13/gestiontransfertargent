@@ -114,6 +114,7 @@ export class ListeSortieComponent implements OnInit, AfterViewInit, OnDestroy {
   endDate: Date | null = null;
 
   totalMontant: number = 0; // Initialisation
+  totalMontantDevise: number = 0; // Initialisation
 
   filtrerSortieDates(): void {
     const startDateInput = (
@@ -128,12 +129,14 @@ export class ListeSortieComponent implements OnInit, AfterViewInit, OnDestroy {
 
     // Réinitialiser le total
     this.totalMontant = 0;
+    this.totalMontantDevise = 0;
 
     // Filtrer d'abord par date
     let filteredResults = this.allresultat.filter(
-      (result: { date_creation: string }) => {
+      (result: { date_creation: string , status: string }) => {
         const resultDate = new Date(result.date_creation);
         return (
+          result.status !== 'ANNULEE' &&
           (!this.startDate || resultDate >= this.startDate) &&
           (!this.endDate || resultDate <= this.endDate)
         );
@@ -145,7 +148,7 @@ export class ListeSortieComponent implements OnInit, AfterViewInit, OnDestroy {
 
     // Attendre que DataTable applique son propre filtre (search)
     setTimeout(() => {
-      const filteredDataTable: { montant_gnf: number }[] = this.dataTable
+      const filteredDataTable = this.dataTable
         .rows({ search: 'applied' })
         .data()
         .toArray();
@@ -158,10 +161,16 @@ export class ListeSortieComponent implements OnInit, AfterViewInit, OnDestroy {
         0
       );
 
-      console.log(
-        'Total Montant après filtre et recherche :',
-        this.totalMontant
+       // Calculer le total montant en devise (CFA)
+      this.totalMontantDevise = filteredDataTable.reduce(
+        (sum: number, row: { montant: number }) => sum + (row.montant || 0),
+        0
       );
+
+      // console.log(
+      //   'Total Montant après filtre et recherche :',
+      //   this.totalMontant
+      // );
     }, 200); // Timeout pour attendre la mise à jour de DataTable
   }
 
@@ -170,7 +179,7 @@ export class ListeSortieComponent implements OnInit, AfterViewInit, OnDestroy {
     this.sortieService.getAllSortie().subscribe({
       next: (response) => {
         this.allresultat = response;
-        // console.log(this.allresultat);
+        console.log(this.allresultat);
         this.initDataTable();
         this.cd.detectChanges();
       },
@@ -222,6 +231,7 @@ export class ListeSortieComponent implements OnInit, AfterViewInit, OnDestroy {
           this.isLoadingValiderSortie = false;
         },
         error: (error) => {
+          this.isLoadingValiderSortie = false;
           alert(error.error.message);
         },
       });
@@ -339,8 +349,17 @@ export class ListeSortieComponent implements OnInit, AfterViewInit, OnDestroy {
             },
           },
           {
-            title: 'Statut de paiement',
+            title: 'Status',
             data: 'status',
+            render: (data: string, type: string, row: any) => {
+              console.log(row); 
+              if (row.montant === 0){
+                return `${row.status} (${row.type_annuler})`;
+              } else if(row.montant > 0 && row.type ==="R"){
+                return `${row.status} (${row.type})`;
+              }
+              return data + (data === `ANNULEE` ? `(${row.type})` : ``);
+            },
           },
         ],
       });

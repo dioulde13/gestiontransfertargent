@@ -19,7 +19,8 @@ import { FormsModule } from '@angular/forms';
 import { EntreServiceService } from '../../services/entre/entre-service.service';
 import { HttpClient } from '@angular/common/http';
 import { CurrencyFormatPipe } from '../dasboard/currency-format.pipe';
-import { FormatNumberDirective } from '../../services/rembourser/format-number.directive';
+// import { FormatNumberDirective } from '../../services/rembourser/format-number.directive';
+import { SortieService } from '../../services/sortie/sortie.service';
 
 interface Result {
   date_creation: string;
@@ -39,7 +40,7 @@ interface Result {
     DataTablesModule,
     FormsModule,
     CurrencyFormatPipe,
-    FormatNumberDirective
+    // FormatNumberDirective
   ],
   templateUrl: './liste-rembourser.component.html',
   styleUrl: './liste-rembourser.component.css',
@@ -63,6 +64,8 @@ export class ListeRembourserComponent implements OnInit, AfterViewInit {
   endDate: Date | null = null;
 
   totalMontant: number = 0; // Initialisation
+  totalMontantDevise: number = 0; // Initialisation
+
   filtrerEntreDates(): void {
     const startDateInput = (
       document.getElementById('startDate') as HTMLInputElement
@@ -90,7 +93,7 @@ export class ListeRembourserComponent implements OnInit, AfterViewInit {
 
     // Attendre que DataTable applique son propre filtre (search)
     setTimeout(() => {
-      const filteredDataTable: { montant_gnf: number }[] = this.dataTable
+        const filteredDataTable = this.dataTable
         .rows({ search: 'applied' })
         .data()
         .toArray();
@@ -103,11 +106,12 @@ export class ListeRembourserComponent implements OnInit, AfterViewInit {
         0
       );
 
-      console.log(
-        'Total Montant après filtre et recherche :',
-        this.totalMontant
+       this.totalMontantDevise = filteredDataTable.reduce(
+        (sum: number, row: { montant: number }) => sum + (row.montant || 0),
+        0
       );
-    }, 200); // Timeout pour attendre la mise à jour de DataTable
+    
+    }, 200); 
   }
 
   private initDataTable(): void {
@@ -186,11 +190,7 @@ export class ListeRembourserComponent implements OnInit, AfterViewInit {
                 style: 'decimal',
                 minimumFractionDigits: 0,
                 maximumFractionDigits: 0,
-              }).format(data); // Format le montant sans symbole de devise
-
-              // Si vous avez besoin d'utiliser `signe_2`, vous pouvez l'ajouter ici
-              // const signe = row.signe_1; // Récupérer la valeur de `signe_2`
-              // Retourner le montant et le signe, par exemple
+              }).format(data); 
               return `${formattedAmount} GNF`;
             },
           },
@@ -199,7 +199,7 @@ export class ListeRembourserComponent implements OnInit, AfterViewInit {
             data: null,
             render: (data: number, type: any, row: any) => {
               if (!data || !row.Partenaire) return '';
-              return ` ${row.Partenaire.prenom} ${row.Partenaire.nom}`;
+              return ` ${row.Partenaire.prenom} ${row.Partenaire.nom} (${row.Partenaire.pays})`;
             },
           },
         ],
@@ -222,6 +222,7 @@ export class ListeRembourserComponent implements OnInit, AfterViewInit {
     private rembourserService: RembourserService,
     private calculService: CalculBeneficeService,
     private entreService: EntreServiceService,
+    private sortieService: SortieService,
     private cd: ChangeDetectorRef,
     private http: HttpClient
   ) {}
@@ -273,10 +274,17 @@ export class ListeRembourserComponent implements OnInit, AfterViewInit {
       prix: [0],
       montant: [0, [Validators.required, Validators.min(0)]],
     });
+    this.rembourserPartenaireForm = this.fb.group({
+      partenaireEntreId: ['', Validators.required],
+      partenaireSortieId: ['', Validators.required]
+    });
+    this.fetchPartenaireEntre();
+    this.fetchPartenaireSortie();
     this.fetchPartenaire();
     this.fetchDevise();
-    this.getUserInfo(); // Récupération des infos utilisateur
+    this.getUserInfo(); 
     this.getAllEntre();
+    this.getAllSortie();
   }
 
   getUserInfo() {
@@ -348,6 +356,41 @@ export class ListeRembourserComponent implements OnInit, AfterViewInit {
     );
   }
 
+  allPartenaireSortie: any[] = [];
+
+  // Récupération des devises
+  fetchPartenaireSortie(): void {
+    this.partenaireService.getAllPartenaire().subscribe(
+      (response) => {
+        this.allPartenaireSortie = response.filter(
+          (partenaire: any) => partenaire.pays === 'Guinée-Bissau'
+        );
+        console.log('Liste des partenaires:', this.allPartenaireSortie);
+      },
+      (error) => {
+        console.error('Erreur lors de la récupération des partenaires:', error);
+      }
+    );
+  }
+
+
+  allPartenaireEntre: any[] = [];
+
+  // Récupération des devises
+  fetchPartenaireEntre(): void {
+    this.partenaireService.getAllPartenaire().subscribe(
+      (response) => {
+        this.allPartenaireEntre = response.filter(
+          (partenaire: any) => partenaire.pays === 'Sénégal'
+        );
+        console.log('Liste des partenaires:', this.allPartenaireEntre);
+      },
+      (error) => {
+        console.error('Erreur lors de la récupération des partenaires:', error);
+      }
+    );
+  }
+
   allPartenaire: any[] = [];
 
   // Récupération des devises
@@ -365,6 +408,7 @@ export class ListeRembourserComponent implements OnInit, AfterViewInit {
       }
     );
   }
+  
 
   private getAllRemboursement(): void {
     // Appel à l'API et gestion des réponses
@@ -393,34 +437,34 @@ export class ListeRembourserComponent implements OnInit, AfterViewInit {
     this.montantR = event.target.value.replace(/[^0-9,]/g, '');
   }
 
-  onCalculer() {
-    const montantRNet = Number(this.montantR.toString().replace(/\s/g, ''));
-    const prix1Net = Number(this.prix_1.toString().replace(/\s/g, ''));
-    const prixNet = Number(this.prix.toString().replace(/\s/g, ''));
+  // onCalculer() {
+  //   const montantRNet = Number(this.montantR.toString().replace(/\s/g, ''));
+  //   const prix1Net = Number(this.prix_1.toString().replace(/\s/g, ''));
+  //   const prixNet = Number(this.prix.toString().replace(/\s/g, ''));
   
-    this.calculService.calculerBenefice(
-        this.dateDebut,
-        this.dateFin,
-        montantRNet,
-        prix1Net,
-        prixNet
-      )
-      .subscribe(
-        (response) => {
-          console.log(this.dateDebut);
-          console.log(this.dateFin);
-          console.log(montantRNet);
-          console.log(prix1Net);
-          console.log(prixNet);
-          this.resultats = response;
-          this.benefice = response.totalMontantGnf - response.montantGnfSaisi;
-          console.log(this.resultats);
-        },
-        (error) => {
-          console.error('Erreur:', error);
-        }
-      );
-  }
+  //   this.calculService.calculerBenefice(
+  //       this.dateDebut,
+  //       this.dateFin,
+  //       montantRNet,
+  //       prix1Net,
+  //       prixNet
+  //     )
+  //     .subscribe(
+  //       (response) => {
+  //         console.log(this.dateDebut);
+  //         console.log(this.dateFin);
+  //         console.log(montantRNet);
+  //         console.log(prix1Net);
+  //         console.log(prixNet);
+  //         this.resultats = response;
+  //         this.benefice = response.totalMontantGnf - response.montantGnfSaisi;
+  //         // console.log(this.resultats);
+  //       },
+  //       (error) => {
+  //         console.error('Erreur:', error);
+  //       }
+  //     );
+  // }
 
   dateDebutPayer: string = ''; // Stocke la date de début
   dateFinPayer: string = ''; // Stocke la date de fin
@@ -429,11 +473,12 @@ export class ListeRembourserComponent implements OnInit, AfterViewInit {
   private getAllEntre(): void {
     this.entreService.getAllEntree().subscribe({
       next: (response) => {
+        console.log(response);
         // Appliquer le filtre de base (exclure "ANNULEE" et "R")
         this.allEntre = response.filter(
-          (entre: any) => entre.status !== 'ANNULEE' && entre.type !== 'R'
+          (entre: any) => entre.status !== 'NON PAYEE' && entre.status !== 'ANNULEE' && entre.type === 'NON R' && entre.montant_cfa > 0
         );
-
+     console.log(this.allEntre);
         // Appliquer les filtres supplémentaires
         this.filtrerEntre();
       },
@@ -443,28 +488,10 @@ export class ListeRembourserComponent implements OnInit, AfterViewInit {
     });
   }
 
+ 
+
   filteredEntre: any[] = []; // Liste filtrée affichée dans le tableau
 montantTotal: any;
-  // Fonction pour filtrer selon la date et le nom
-  // filtrerEntre() {
-  //   this.filteredEntre = this.allEntre.filter((entre: any) => {
-  //     const dateCreation = new Date(entre.date_creation); // Convertir la date en format Date JS
-  //     const debut = this.dateDebut ? new Date(this.dateDebut) : null;
-  //     const fin = this.dateFin ? new Date(this.dateFin) : null;
-  //      this.montantTotal += entre.montant;
-  //     // Vérifier si l'entrée est dans l'intervalle de dates
-  //     const estDansIntervalle =
-  //       (!debut || dateCreation >= debut) && (!fin || dateCreation <= fin);
-
-  //     // Vérifier si le nom du partenaire correspond à la recherche
-  //     const nomComplet =
-  //       `${entre.Partenaire.prenom} ${entre.Partenaire.nom}`.toLowerCase();
-  //     const correspondNom =
-  //       !this.searchNom || nomComplet.includes(this.searchNom.toLowerCase());
-
-  //     return estDansIntervalle && correspondNom;
-  //   });
-  // }
   filtrerEntre() {
     this.montantTotal = 0; // Réinitialiser le montant total
   
@@ -483,15 +510,128 @@ montantTotal: any;
   
       const valide = estDansIntervalle && correspondNom;
       if (valide) {
-        this.montantTotal += entre.montant_cfa; // Ajouter seulement si l'entrée est valide
+        this.montantTotal += entre.montant_cfa; 
       }
   
       return valide;
     });
   }
+
+  allSortie: any[] = [];
+
+  private getAllSortie(): void {
+    this.sortieService.getAllSortie().subscribe({
+      next: (response) => {
+        console.log(response);
+        this.allSortie = response.filter(
+          (entre: any) => entre.status !== 'NON PAYEE' && entre.status !== 'ANNULEE' && entre.type === 'NON R' && entre.montant > 0 && entre.status === 'PAYEE'
+        );
+     console.log(this.allSortie);
+     this.filtrerSortie();
+      },
+      error: (error) => {
+        console.error('Erreur lors de la récupération des sorties :', error);
+      },
+    });
+  }
+
+
+  dateDebutSortie: string = '';
+  dateFinSortie: string = '';
+
+  filteredSortie: any[] = []; 
+  montantTotalSortie: any;
+    filtrerSortie() {
+      this.montantTotalSortie = 0; 
+    
+      this.filteredSortie = this.allSortie.filter((sortie: any) => {
+        const dateCreation = new Date(sortie.date_creation);
+        const debut = this.dateDebutSortie ? new Date(this.dateDebutSortie) : null;
+        const fin = this.dateFinSortie ? new Date(this.dateFinSortie) : null;
+    
+        const estDansIntervalle =
+          (!debut || dateCreation >= debut) && (!fin || dateCreation <= fin);
+    
+        const nomComplet =
+          `${sortie.Partenaire.prenom} ${sortie.Partenaire.nom}`.toLowerCase();
+        const correspondNom =
+          !this.searchNom || nomComplet.includes(this.searchNom.toLowerCase());
+    
+        const valide = estDansIntervalle && correspondNom;
+        if (valide) {
+          this.montantTotalSortie += sortie.montant; 
+        }
+    
+        return valide;
+      });
+    }
+
+
+    modalRemboursementOuvert = false;
+
+    ouvrirModalRemboursement() {
+      this.modalRemboursementOuvert = true;
+    }
+  
+    fermerModalRemboursement() {
+      this.modalRemboursementOuvert = false;
+    }
+
+    rembourserPartenaireForm!: FormGroup;
+
+    payerSelectionSortie() {
+      const selectedSorties = this.allSortie
+        .filter(sortie => sortie.selected)
+        .map(sortie => sortie.id);
+    
+      if (selectedSorties.length === 0) {
+        alert('Veuillez sélectionner au moins une ligne.');
+        return;
+      }
+    
+      const partenaireEntreId = this.rembourserPartenaireForm.value.partenaireEntreId;
+
+    const  partenaireSortieId = this.rembourserPartenaireForm.value.partenaireSortieId;
+    
+      if (!partenaireEntreId) {
+        alert('Veuillez sélectionner un partenaire.');
+        return;
+      }
+
+      if (!partenaireSortieId) {
+        alert('Veuillez sélectionner un partenaire.');
+        return;
+      }
+    
+      const payload = {
+        ids: selectedSorties,
+        partenaireEntreId: partenaireEntreId,
+        partenaireSortieId: partenaireSortieId
+      };
+
+      console.log(payload);
+    
+      this.http.post('http://localhost:3000/api/sorties/payer', payload)
+        .subscribe({
+          next: (response: any) => {
+            alert(response.message);
+            this.getAllSortie(); // recharge les données après paiement
+          },
+          error: (error) => {
+            const errorMessage = error.error?.message || 'Une erreur est survenue.';
+            alert(errorMessage);
+          }
+        });
+    }
+    
+
+  toggleAllSelectionSortie(event: any) {
+    const checked = event.target.checked;
+    this.allSortie.forEach((sortie) => (sortie.selected = checked));
+  }
   
 
-  payerSelection() {
+  payerSelectionEntre() {
     const selectedEntries = this.allEntre
       .filter((entry) => entry.selected)
       .map((entry) => entry.id);
@@ -520,7 +660,7 @@ montantTotal: any;
       });
   }
 
-  toggleAllSelection(event: any) {
+  toggleAllSelectionEntre(event: any) {
     const checked = event.target.checked;
     this.allEntre.forEach((entry) => (entry.selected = checked));
   }

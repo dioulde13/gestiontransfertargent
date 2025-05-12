@@ -202,13 +202,13 @@ const ajouterAutreEntre = async (req, res) => {
     });
 
     // Mettre à jour le solde de l'utilisateur
-    utilisateur.solde = (utilisateur.solde || 0) + montantClient;
+    utilisateur.autre_solde = (utilisateur.autre_solde || 0) + montantClient;
     await utilisateur.save();
 
     res.status(201).json({
       message: "Entrée créée avec succès.",
       entre,
-      solde: utilisateur.solde,
+      solde: utilisateur.autre_solde,
     });
   } catch (error) {
     console.error("Erreur lors de l'ajout de l'entrée :", error);
@@ -240,7 +240,7 @@ const compterEntreesDuJour = async (req, res) => {
   }
 };
 
-const annulerEntre = async (req,res) => { 
+const annulerEntre = async (req, res) => {
   try {
 
     const { code } = req.params;
@@ -261,104 +261,15 @@ const annulerEntre = async (req,res) => {
     console.log(type_annuler);
     console.log(montant_rembourser);
 
-    if (entre.status === 'ANNULEE' && entre.type_annuler === 'Rembourser') {
-      res.status(200).json({ message: "Cette entrée est deja annulée." });
+    if (entre.status === "ANNULEE" && type_annuler === 'Non Rembourser' && entre.type_annuler === 'EN COURS' && montant_rembourser === null) {
+      res.status(400).json({ message: "Veuillez sélectionner le type 'Rembourser'." });
     }
-    if (Number(utilisateur.solde) >= Number(montant_rembourser)) {
-      if (
-        Number(entre.montant_cfa) === 0 &&
-        Number(entre.montantClient) > 0 &&
-        Number.isInteger(parseInt(code)) &&
-        Number(montant_rembourser) === 0 &&
-        type_annuler === '' &&
-        entre.status === 'PAYEE'
-      ) {
-        entre.status = "ANNULEE";
-        entre.type_annuler = "Rembourser";
-        await entre.save();
-        utilisateur.solde = (utilisateur.solde || 0) - Number(entre.montantClient);
-        await utilisateur.save();
-        res.status(200).json({ message: "Entrée annulée avec succès." });
-      } else
-        if (
-          Number(entre.montant_cfa) === 0 &&
-          Number(entre.montantClient) > 0 &&
-          Number.isInteger(parseInt(code)) &&
-          Number(montant_rembourser) === 0 &&
-          type_annuler === 'Non Rembourser' &&
-          entre.status === 'PAYEE'
-        ) {
-          entre.status = "ANNULEE";
-          entre.type_annuler = type_annuler;
-          await entre.save();
-          res.status(200).json({ message: "Entrée annulée avec succès." });
-        }
-        else
-          if (
-            Number(entre.montant_cfa) === 0 &&
-            Number(entre.montantClient) > 0 &&
-            Number(montant_rembourser) > 0 &&
-            Number.isInteger(parseInt(code)) &&
-            type_annuler === 'EN COURS' &&
-            entre.status === 'ANNULEE'
-          ) {
-            const montantEnCoursPayement =
-              (Number(entre.montant_rembourser) || 0) + Number(montant_rembourser);
 
-            if (Number(montantEnCoursPayement) > Number(entre.montantClient)) {
-              return res.status(400).json({
-                message: `Le montant restant à rembourser est de : ${(Number(entre.montantClient) || 0) -
-                  Number(entre.montant_rembourser)
-                  }`,
-              });
-            }
-            entre.status = "ANNULEE";
-            entre.type_annuler = type_annuler;
-            entre.montant_rembourser = montantEnCoursPayement;
-            utilisateur.solde = (utilisateur.solde || 0) - Number(montant_rembourser);
-            await utilisateur.save();
-            await entre.save();
-            res.status(200).json({ message: "Entrée annulée avec succès." });
-          } else
-             if (
-        entre.montant_cfa === 0 &&
-        entre.montantClient > 0 &&
-        Number(montant_rembourser) > 0 &&
-        Number.isInteger(parseInt(code)) &&
-        type_annuler === 'Rembourser' &&
-        entre.status === 'ANNULEE'
-      ) {
-        const montantEnCoursPayement =
-          (Number(entre.montant_rembourser) || 0) + Number(montant_rembourser);
-
-        if (montantEnCoursPayement > entre.montantClient) {
-          return res.status(400).json({
-            message: `Le montant restant à rembourser est de : ${(Number(entre.montantClient) || 0) -
-              Number(entre.montant_rembourser)
-              }`,
-          });
-        }
-        entre.status = "ANNULEE";
-        if (Number(montantEnCoursPayement) < Number(entre.montantClient)) {
-          entre.type_annuler = "EN COURS"
-        }
-        else
-          if (Number(montantEnCoursPayement) === Number(entre.montantClient)) {
-            entre.type_annuler = type_annuler;
-          }
-        entre.montant_rembourser = montantEnCoursPayement;
-        utilisateur.solde = (utilisateur.solde || 0) - Number(montant_rembourser);
-        await utilisateur.save();
-        await entre.save();
-        res.status(200).json({ message: "Entrée annulée avec succès." });
-      }
-      else if (
-        Number(entre.nomCLient) === '' &&
-        Number(entre.montantClient) === 0 &&
-        Number(montant_rembourser) === 0 &&
-        entre.type_annuler === 'Non Rembourser' &&
-        entre.status === 'NON PAYEE'
-      ) {
+    if (entre.status === "ANNULEE" && entre.type_annuler === 'Rembourser') {
+      res.status(400).json({ message: "Cette entrée est déjà annulée." });
+    }
+    else {
+      if (entre.status === "NON PAYEE" && montant_rembourser === 0) {
         const [partenaire] = await Promise.all([
           Partenaire.findByPk(entre.partenaireId),
         ]);
@@ -370,181 +281,433 @@ const annulerEntre = async (req,res) => {
         partenaire.montant_preter = (partenaire.montant_preter || 0) - entre.montant_cfa;
         await partenaire.save();
         res.status(200).json({ message: "Entrée annulée avec succès." });
-      }
-      else
-        if (entre.status === 'PAYEE' && type_annuler === "Non Rembourser") {
+      } else if (entre.status === "PAYEE" && montant_rembourser === 0 && type_annuler === "") {
+        if (Number(utilisateur.solde) >= Number(entre.montant_gnf)) {
           const [partenaire] = await Promise.all([
             Partenaire.findByPk(entre.partenaireId),
           ]);
           if (!partenaire)
             return res.status(404).json({ message: "Partenaire introuvable." });
-          // console.log("je suis ici");
+          entre.status = "ANNULEE";
+          entre.type_annuler = "Rembourser";
+          entre.montant_rembourser = Number(entre.montant_gnf)
+          await entre.save();
+          utilisateur.solde = (utilisateur.solde || 0) - Number(entre.montant_gnf);
+          await utilisateur.save();
+          partenaire.montant_preter = (partenaire.montant_preter || 0) - entre.montant_cfa;
+          await partenaire.save();
+          res.status(400).json({ message: "Entrée annulée avec succès." });
+        }
+        else {
+          res.status(400).json({ message: "Solde insufisant." });
+        }
+      } else if (entre.status === "EN COURS" && montant_rembourser === 0 && type_annuler === "") {
+        if (Number(utilisateur.solde) >= Number(entre.montant_payer)) {
+          const [partenaire] = await Promise.all([
+            Partenaire.findByPk(entre.partenaireId),
+          ]);
+          if (!partenaire)
+            return res.status(404).json({ message: "Partenaire introuvable." });
+          entre.status = "ANNULEE";
+          entre.type_annuler = "Rembourser";
+          entre.montant_rembourser = Number(entre.montant_payer)
+          await entre.save();
+          utilisateur.solde = (utilisateur.solde || 0) - Number(entre.montant_payer);
+          await utilisateur.save();
+          partenaire.montant_preter = (partenaire.montant_preter || 0) - entre.montant_cfa;
+          await partenaire.save();
+          res.status(400).json({ message: "Entrée annulée avec succès." });
+        }
+        else {
+          res.status(400).json({ message: "Solde insuffisant." });
+        }
+      } else
+        if (entre.status === "PAYEE" && montant_rembourser === 0 && type_annuler === "Non Rembourser") {
+          const [partenaire] = await Promise.all([
+            Partenaire.findByPk(entre.partenaireId),
+          ]);
+          if (!partenaire)
+            return res.status(404).json({ message: "Partenaire introuvable." });
           entre.status = "ANNULEE";
           entre.type_annuler = type_annuler;
           await entre.save();
           partenaire.montant_preter = (partenaire.montant_preter || 0) - entre.montant_cfa;
           await partenaire.save();
-          res.status(400).json({ message: "Entrée annulée avec succès." });
-        }
-        else
-          if (entre.status === 'PAYEE' && type_annuler === "Rembourser" && Number(entre.montant_payer) === Number(montant_rembourser)) {
-            const [partenaire] = await Promise.all([
-              Partenaire.findByPk(entre.partenaireId),
-            ]);
-            if (!partenaire)
-              return res.status(404).json({ message: "Partenaire introuvable." });
-            entre.status = "ANNULEE";
-            entre.type_annuler = "Rembourser";
-            entre.montant_rembourser = Number(montant_rembourser)
-            await entre.save();
-            utilisateur.solde = (utilisateur.solde || 0) - Number(entre.montant_payer);
-            await utilisateur.save();
-            partenaire.montant_preter = (partenaire.montant_preter || 0) - entre.montant_cfa;
-            await partenaire.save();
-            res.status(400).json({ message: "Entrée annulée avec succès." });
-          }
-          else
-            if (entre.status === 'PAYEE' && type_annuler === "" && montant_rembourser === 0) {
-              const [partenaire] = await Promise.all([
-                Partenaire.findByPk(entre.partenaireId),
-              ]);
-              if (!partenaire)
-                return res.status(404).json({ message: "Partenaire introuvable." });
-              entre.status = "ANNULEE";
-              entre.type_annuler = "Rembourser";
-              await entre.save();
-              utilisateur.solde = (utilisateur.solde || 0) - Number(entre.montant_payer);
-              await utilisateur.save();
-              partenaire.montant_preter = (partenaire.montant_preter || 0) - entre.montant_cfa;
-              await partenaire.save();
-              res.status(400).json({ message: "Entrée annulée avec succès." });
-            }
-            else
-              if (entre.status === 'EN COURS' && type_annuler === "Non Rembourser") {
-                const [partenaire] = await Promise.all([
-                  Partenaire.findByPk(entre.partenaireId),
-                ]);
-                if (!partenaire)
-                  return res.status(404).json({ message: "Partenaire introuvable." });
-                entre.status = "ANNULEE";
-                entre.type_annuler = type_annuler;
-                await entre.save();
-                partenaire.montant_preter = (partenaire.montant_preter || 0) - entre.montant_cfa;
-                await partenaire.save();
-                res.status(400).json({ message: "Entrée annulée avec succès." });
+          res.status(200).json({ message: "Entrée annulée avec succès." });
+        } else
+          if (entre.status === "ANNULEE" && montant_rembourser > 0 && type_annuler === "Rembourser") {
+            if (Number(utilisateur.solde) >= Number(montant_rembourser)) {
+              const montantEnCoursPayement =
+                (Number(entre.montant_rembourser) || 0) + Number(montant_rembourser);
+
+              if (montantEnCoursPayement > entre.montant_payer) {
+                return res.status(400).json({
+                  message: `Le montant restant à rembourser est de : ${(Number(entre.montant_payer) || 0) -
+                    Number(entre.montant_rembourser)
+                    }`,
+                });
+              }
+              if (Number(montantEnCoursPayement) < Number(entre.montant_payer)) {
+                entre.type_annuler = "EN COURS"
               }
               else
-                if (entre.status === 'EN COURS' && Number(entre.montant_payer) === Number(montant_rembourser) && type_annuler === "Rembourser") {
-                  const [partenaire] = await Promise.all([
-                    Partenaire.findByPk(entre.partenaireId),
-                  ]);
-                  if (!partenaire)
-                    return res.status(404).json({ message: "Partenaire introuvable." });
-                  entre.status = "ANNULEE";
+                if (Number(montantEnCoursPayement) === Number(entre.montant_payer)) {
                   entre.type_annuler = type_annuler;
-                  await entre.save();
-                  utilisateur.solde = (utilisateur.solde || 0) - Number(entre.montant_payer);
-                  await utilisateur.save();
-                  partenaire.montant_preter = (partenaire.montant_preter || 0) - entre.montant_cfa;
-                  await partenaire.save();
-                  res.status(400).json({ message: "Entrée annulée avec succès." });
                 }
-                else
-                  if (entre.status === 'PAYEE ' && Number(entre.montant_payer) === Number(montant_rembourser) && type_annuler === "Rembourser") {
-                    const [partenaire] = await Promise.all([
-                      Partenaire.findByPk(entre.partenaireId),
-                    ]);
-                    if (!partenaire)
-                      return res.status(404).json({ message: "Partenaire introuvable." });
-                    entre.status = "ANNULEE";
-                    entre.type_annuler = type_annuler;
-                    await entre.save();
-                    utilisateur.solde = (utilisateur.solde || 0) - Number(entre.montant_payer);
-                    await utilisateur.save();
-                    partenaire.montant_preter = (partenaire.montant_preter || 0) - entre.montant_cfa;
-                    await partenaire.save();
-                    res.status(400).json({ message: "Entrée annulée avec succès." });
-                  }
-                  else
-                    if (entre.status === 'EN COURS' && type_annuler === "EN COURS") {
-                      const [partenaire] = await Promise.all([
-                        Partenaire.findByPk(entre.partenaireId),
-                      ]);
-                      if (!partenaire)
-                        return res.status(404).json({ message: "Partenaire introuvable." });
-                      const montantEnCoursPayement =
-                        (Number(entre.montant_rembourser) || 0) + Number(montant_rembourser);
+              entre.montant_rembourser = montantEnCoursPayement;
+              utilisateur.solde = (utilisateur.solde || 0) - Number(montant_rembourser);
+              await utilisateur.save();
+              await entre.save();
+              res.status(200).json({ message: "Entrée annulée avec succès." });
+            }
+            else {
+              res.status(400).json({ message: "Solde insuffisant." });
+            }
+          }
+      if (entre.status === "EN COURS" && montant_rembourser === 0 && type_annuler === "Non Rembourser") {
+        const [partenaire] = await Promise.all([
+          Partenaire.findByPk(entre.partenaireId),
+        ]);
+        if (!partenaire)
+          return res.status(404).json({ message: "Partenaire introuvable." });
+        entre.status = "ANNULEE";
+        entre.type_annuler = type_annuler;
+        await entre.save();
+        partenaire.montant_preter = (partenaire.montant_preter || 0) - entre.montant_cfa;
+        await partenaire.save();
+        res.status(200).json({ message: "Entrée annulée avec succès." });
+      }
+      if (entre.status === "EN COURS" && montant_rembourser > 0 && type_annuler === "Rembourser") {
+        const [partenaire] = await Promise.all([
+          Partenaire.findByPk(entre.partenaireId),
+        ]);
+        if (!partenaire)
+          return res.status(404).json({ message: "Partenaire introuvable." });
+        entre.status = "ANNULEE";
+        entre.type_annuler = type_annuler;
+        await entre.save();
+        partenaire.montant_preter = (partenaire.montant_preter || 0) - entre.montant_cfa;
+        await partenaire.save();
 
-                      if (montantEnCoursPayement > entre.montant_payer) {
-                        return res.status(400).json({
-                          message: `Le montant restant à rembourser est de : ${(Number(entre.montant_payer) || 0) -
-                            Number(entre.montant_rembourser)
-                            }`,
-                        });
-                      }
-                      entre.status = "ANNULEE";
-                      entre.type_annuler = type_annuler;
-                      entre.montant_rembourser = montantEnCoursPayement;
-                      await entre.save();
-                      utilisateur.solde = (utilisateur.solde || 0) - Number(montant_rembourser);
-                      await utilisateur.save();
-                      partenaire.montant_preter = (partenaire.montant_preter || 0) - entre.montant_cfa;
-                      await partenaire.save();
-                      res.status(200).json({ message: "Entrée annulée avec succès." });
-                    }
-                    else
-                      if (entre.status === 'ANNULEE' && type_annuler === "EN COURS") {
-                        const montantEnCoursPayement =
-                          (Number(entre.montant_rembourser) || 0) + Number(montant_rembourser);
+        if (Number(utilisateur.solde) >= Number(montant_rembourser)) {
+          const montantEnCoursPayement =
+            (Number(entre.montant_rembourser) || 0) + Number(montant_rembourser);
 
-                        if (montantEnCoursPayement > entre.montant_payer) {
-                          return res.status(400).json({
-                            message: `Le montant restant à rembourser est de : ${(Number(entre.montant_payer) || 0) -
-                              Number(entre.montant_rembourser)
-                              }`,
-                          });
-                        }
-                        entre.status = "ANNULEE";
-                        entre.type_annuler = type_annuler;
-                        entre.montant_rembourser = montantEnCoursPayement;
-                        await entre.save();
-                        utilisateur.solde = (utilisateur.solde || 0) - Number(montant_rembourser);
-                        await utilisateur.save();
-                        // partenaire.montant_preter = (partenaire.montant_preter || 0) - entre.montant_cfa;
-                        // await partenaire.save();
-                        res.status(200).json({ message: "Entrée annulée avec succès." });
-                      }
-                      else
-                        if (entre.status === 'ANNULEE' && type_annuler === "Rembourser") {
-                          const montantEnCoursPayement =
-                            (Number(entre.montant_rembourser) || 0) + Number(montant_rembourser);
-
-                          if (montantEnCoursPayement > entre.montant_payer) {
-                            return res.status(400).json({
-                              message: `Le montant restant à rembourser est de : ${(Number(entre.montant_payer) || 0) -
-                                Number(entre.montant_rembourser)
-                                }`,
-                            });
-                          }
-                          entre.status = "ANNULEE";
-                          if (Number(montantEnCoursPayement) < Number(entre.montant_payer)) {
-                            entre.type_annuler = "EN COURS"
-                          }
-                          else
-                            if (Number(montantEnCoursPayement) === Number(entre.montant_payer)) {
-                              entre.type_annuler = type_annuler;
-                            }
-                          entre.montant_rembourser = montantEnCoursPayement;
-                          await entre.save();
-                          utilisateur.solde = (utilisateur.solde || 0) - Number(montant_rembourser);
-                          await utilisateur.save();
-                          res.status(200).json({ message: "Entrée annulée avec succès." });
-                        }
-    } else {
-      res.status(400).json({ message: "Le solde disponible dans la caisse est insuffisant pour effectuer cette opération." });
+          if (montantEnCoursPayement > entre.montant_payer) {
+            return res.status(400).json({
+              message: `Le montant restant à rembourser est de : ${(Number(entre.montant_payer) || 0) -
+                Number(entre.montant_rembourser)
+                }`,
+            });
+          }
+          if (Number(montantEnCoursPayement) < Number(entre.montant_payer)) {
+            entre.type_annuler = "EN COURS"
+          }
+          else
+            if (Number(montantEnCoursPayement) === Number(entre.montant_payer)) {
+              entre.type_annuler = type_annuler;
+            }
+          entre.montant_rembourser = montantEnCoursPayement;
+          utilisateur.solde = (utilisateur.solde || 0) - Number(montant_rembourser);
+          await utilisateur.save();
+          await entre.save();
+          res.status(200).json({ message: "Entrée annulée avec succès." });
+        }
+        else {
+          res.status(400).json({ message: "Solde insuffisant." });
+        }
+      } else if (entre.status === "ANNULEE" && type_annuler === "") {
+        res.status(400).json({ message: "Veuillez saisir un type." });
+      }
     }
+
+    // if (entre.status === 'ANNULEE' && entre.type_annuler === 'Rembourser') {
+    //    res.status(400).json({ message: "Cette entrée est déjà annulée." });
+    // }
+
+    // if (entre.type === 'NON R') {
+    //   if (Number(utilisateur.solde) >= Number(montant_rembourser)) {
+    //     if (
+    //     Number(entre.montant_cfa) === 0 &&
+    //     Number(entre.montantClient) > 0 &&
+    //     Number.isInteger(parseInt(code)) &&
+    //     Number(montant_rembourser) === 0 &&
+    //     type_annuler === '' &&
+    //     entre.status === 'PAYEE'
+    //   ) {
+    //     entre.status = "ANNULEE";
+    //     entre.type_annuler = "Rembourser";
+    //     await entre.save();
+    //     utilisateur.solde = (utilisateur.solde || 0) - Number(entre.montantClient);
+    //     await utilisateur.save();
+    //     res.status(200).json({ message: "Entrée annulée avec succès." });
+    //   } else
+    //     if (
+    //       Number(entre.montant_cfa) === 0 &&
+    //       Number(entre.montantClient) > 0 &&
+    //       Number.isInteger(parseInt(code)) &&
+    //       Number(montant_rembourser) === 0 &&
+    //       type_annuler === 'Non Rembourser' &&
+    //       entre.status === 'PAYEE'
+    //     ) {
+    //       entre.status = "ANNULEE";
+    //       entre.type_annuler = type_annuler;
+    //       await entre.save();
+    //       res.status(200).json({ message: "Entrée annulée avec succès." });
+    //     }
+    //     else
+    //       if (
+    //         Number(entre.montant_cfa) === 0 &&
+    //         Number(entre.montantClient) > 0 &&
+    //         Number(montant_rembourser) > 0 &&
+    //         Number.isInteger(parseInt(code)) &&
+    //         type_annuler === 'EN COURS' &&
+    //         entre.status === 'ANNULEE'
+    //       ) {
+    //         const montantEnCoursPayement =
+    //           (Number(entre.montant_rembourser) || 0) + Number(montant_rembourser);
+
+    //         if (Number(montantEnCoursPayement) > Number(entre.montantClient)) {
+    //           return res.status(400).json({
+    //             message: `Le montant restant à rembourser est de : ${(Number(entre.montantClient) || 0) -
+    //               Number(entre.montant_rembourser)
+    //               }`,
+    //           });
+    //         }
+    //         entre.status = "ANNULEE";
+    //         entre.type_annuler = type_annuler;
+    //         entre.montant_rembourser = montantEnCoursPayement;
+    //         utilisateur.solde = (utilisateur.solde || 0) - Number(montant_rembourser);
+    //         await utilisateur.save();
+    //         await entre.save();
+    //         res.status(200).json({ message: "Entrée annulée avec succès." });
+    //       } else
+    //          if (
+    //     entre.montant_cfa === 0 &&
+    //     entre.montantClient > 0 &&
+    //     Number(montant_rembourser) > 0 &&
+    //     Number.isInteger(parseInt(code)) &&
+    //     type_annuler === 'Rembourser' &&
+    //     entre.status === 'ANNULEE'
+    //   ) {
+    //     const montantEnCoursPayement =
+    //       (Number(entre.montant_rembourser) || 0) + Number(montant_rembourser);
+
+    //     if (montantEnCoursPayement > entre.montantClient) {
+    //       return res.status(400).json({
+    //         message: `Le montant restant à rembourser est de : ${(Number(entre.montantClient) || 0) -
+    //           Number(entre.montant_rembourser)
+    //           }`,
+    //       });
+    //     }
+    //     entre.status = "ANNULEE";
+    //     if (Number(montantEnCoursPayement) < Number(entre.montantClient)) {
+    //       entre.type_annuler = "EN COURS"
+    //     }
+    //     else
+    //       if (Number(montantEnCoursPayement) === Number(entre.montantClient)) {
+    //         entre.type_annuler = type_annuler;
+    //       }
+    //     entre.montant_rembourser = montantEnCoursPayement;
+    //     utilisateur.solde = (utilisateur.solde || 0) - Number(montant_rembourser);
+    //     await utilisateur.save();
+    //     await entre.save();
+    //     res.status(200).json({ message: "Entrée annulée avec succès." });
+    //   }
+    //   else if (
+    //     Number(entre.nomCLient) === '' &&
+    //     Number(entre.montantClient) === 0 &&
+    //     Number(montant_rembourser) === 0 &&
+    //     entre.type_annuler === 'Non Rembourser' &&
+    //     entre.status === 'NON PAYEE'
+    //   ) {
+    //     const [partenaire] = await Promise.all([
+    //       Partenaire.findByPk(entre.partenaireId),
+    //     ]);
+    //     if (!partenaire)
+    //       return res.status(404).json({ message: "Partenaire introuvable." });
+    //     entre.status = "ANNULEE";
+    //     entre.type_annuler = "Rembourser";
+    //     await entre.save();
+    //     partenaire.montant_preter = (partenaire.montant_preter || 0) - entre.montant_cfa;
+    //     await partenaire.save();
+    //     res.status(200).json({ message: "Entrée annulée avec succès." });
+    //   }
+    //   else
+    //     if (entre.status === 'PAYEE' && type_annuler === "Non Rembourser") {
+    //       const [partenaire] = await Promise.all([
+    //         Partenaire.findByPk(entre.partenaireId),
+    //       ]);
+    //       if (!partenaire)
+    //         return res.status(404).json({ message: "Partenaire introuvable." });
+    //       // console.log("je suis ici");
+    //       entre.status = "ANNULEE";
+    //       entre.type_annuler = type_annuler;
+    //       await entre.save();
+    //       partenaire.montant_preter = (partenaire.montant_preter || 0) - entre.montant_cfa;
+    //       await partenaire.save();
+    //       res.status(400).json({ message: "Entrée annulée avec succès." });
+    //     }
+    //     else
+    //       if (entre.status === 'PAYEE' && type_annuler === "Rembourser" && Number(entre.montant_payer) === Number(montant_rembourser)) {
+    //         const [partenaire] = await Promise.all([
+    //           Partenaire.findByPk(entre.partenaireId),
+    //         ]);
+    //         if (!partenaire)
+    //           return res.status(404).json({ message: "Partenaire introuvable." });
+    //         entre.status = "ANNULEE";
+    //         entre.type_annuler = "Rembourser";
+    //         entre.montant_rembourser = Number(montant_rembourser)
+    //         await entre.save();
+    //         utilisateur.solde = (utilisateur.solde || 0) - Number(entre.montant_payer);
+    //         await utilisateur.save();
+    //         partenaire.montant_preter = (partenaire.montant_preter || 0) - entre.montant_cfa;
+    //         await partenaire.save();
+    //         res.status(400).json({ message: "Entrée annulée avec succès." });
+    //       }
+    //       else
+    //         if (entre.status === 'PAYEE' && type_annuler === "" && montant_rembourser === 0) {
+    //           const [partenaire] = await Promise.all([
+    //             Partenaire.findByPk(entre.partenaireId),
+    //           ]);
+    //           if (!partenaire)
+    //             return res.status(404).json({ message: "Partenaire introuvable." });
+    //           entre.status = "ANNULEE";
+    //           entre.type_annuler = "Rembourser";
+    //           await entre.save();
+    //           utilisateur.solde = (utilisateur.solde || 0) - Number(entre.montant_payer);
+    //           await utilisateur.save();
+    //           partenaire.montant_preter = (partenaire.montant_preter || 0) - entre.montant_cfa;
+    //           await partenaire.save();
+    //           res.status(400).json({ message: "Entrée annulée avec succès." });
+    //         }
+    //         else
+    //           if (entre.status === 'EN COURS' && type_annuler === "Non Rembourser") {
+    //             const [partenaire] = await Promise.all([
+    //               Partenaire.findByPk(entre.partenaireId),
+    //             ]);
+    //             if (!partenaire)
+    //               return res.status(404).json({ message: "Partenaire introuvable." });
+    //             entre.status = "ANNULEE";
+    //             entre.type_annuler = type_annuler;
+    //             await entre.save();
+    //             partenaire.montant_preter = (partenaire.montant_preter || 0) - entre.montant_cfa;
+    //             await partenaire.save();
+    //             res.status(400).json({ message: "Entrée annulée avec succès." });
+    //           }
+    //           else
+    //             if (entre.status === 'EN COURS' && Number(entre.montant_payer) === Number(montant_rembourser) && type_annuler === "Rembourser") {
+    //               const [partenaire] = await Promise.all([
+    //                 Partenaire.findByPk(entre.partenaireId),
+    //               ]);
+    //               if (!partenaire)
+    //                 return res.status(404).json({ message: "Partenaire introuvable." });
+    //               entre.status = "ANNULEE";
+    //               entre.type_annuler = type_annuler;
+    //               await entre.save();
+    //               utilisateur.solde = (utilisateur.solde || 0) - Number(entre.montant_payer);
+    //               await utilisateur.save();
+    //               partenaire.montant_preter = (partenaire.montant_preter || 0) - entre.montant_cfa;
+    //               await partenaire.save();
+    //               res.status(400).json({ message: "Entrée annulée avec succès." });
+    //             }
+    //             else
+    //               if (entre.status === 'PAYEE ' && Number(entre.montant_payer) === Number(montant_rembourser) && type_annuler === "Rembourser") {
+    //                 const [partenaire] = await Promise.all([
+    //                   Partenaire.findByPk(entre.partenaireId),
+    //                 ]);
+    //                 if (!partenaire)
+    //                   return res.status(404).json({ message: "Partenaire introuvable." });
+    //                 entre.status = "ANNULEE";
+    //                 entre.type_annuler = type_annuler;
+    //                 await entre.save();
+    //                 utilisateur.solde = (utilisateur.solde || 0) - Number(entre.montant_payer);
+    //                 await utilisateur.save();
+    //                 partenaire.montant_preter = (partenaire.montant_preter || 0) - entre.montant_cfa;
+    //                 await partenaire.save();
+    //                 res.status(400).json({ message: "Entrée annulée avec succès." });
+    //               }
+    //               else
+    //                 if (entre.status === 'EN COURS' && type_annuler === "EN COURS") {
+    //                   const [partenaire] = await Promise.all([
+    //                     Partenaire.findByPk(entre.partenaireId),
+    //                   ]);
+    //                   if (!partenaire)
+    //                     return res.status(404).json({ message: "Partenaire introuvable." });
+    //                   const montantEnCoursPayement =
+    //                     (Number(entre.montant_rembourser) || 0) + Number(montant_rembourser);
+
+    //                   if (montantEnCoursPayement > entre.montant_payer) {
+    //                     return res.status(400).json({
+    //                       message: `Le montant restant à rembourser est de : ${(Number(entre.montant_payer) || 0) -
+    //                         Number(entre.montant_rembourser)
+    //                         }`,
+    //                     });
+    //                   }
+    //                   entre.status = "ANNULEE";
+    //                   entre.type_annuler = type_annuler;
+    //                   entre.montant_rembourser = montantEnCoursPayement;
+    //                   await entre.save();
+    //                   utilisateur.solde = (utilisateur.solde || 0) - Number(montant_rembourser);
+    //                   await utilisateur.save();
+    //                   partenaire.montant_preter = (partenaire.montant_preter || 0) - entre.montant_cfa;
+    //                   await partenaire.save();
+    //                   res.status(200).json({ message: "Entrée annulée avec succès." });
+    //                 }
+    //                 else
+    //                   if (entre.status === 'ANNULEE' && type_annuler === "EN COURS") {
+    //                     const montantEnCoursPayement =
+    //                       (Number(entre.montant_rembourser) || 0) + Number(montant_rembourser);
+
+    //                     if (montantEnCoursPayement > entre.montant_payer) {
+    //                       return res.status(400).json({
+    //                         message: `Le montant restant à rembourser est de : ${(Number(entre.montant_payer) || 0) -
+    //                           Number(entre.montant_rembourser)
+    //                           }`,
+    //                       });
+    //                     }
+    //                     entre.status = "ANNULEE";
+    //                     entre.type_annuler = type_annuler;
+    //                     entre.montant_rembourser = montantEnCoursPayement;
+    //                     await entre.save();
+    //                     utilisateur.solde = (utilisateur.solde || 0) - Number(montant_rembourser);
+    //                     await utilisateur.save();
+    //                     res.status(200).json({ message: "Entrée annulée avec succès." });
+    //                   }
+    //                   else
+    //                     if (entre.status === 'ANNULEE' && type_annuler === "Rembourser") {
+    //                       const montantEnCoursPayement =
+    //                         (Number(entre.montant_rembourser) || 0) + Number(montant_rembourser);
+
+    //                       if (montantEnCoursPayement > entre.montant_payer) {
+    //                         return res.status(400).json({
+    //                           message: `Le montant restant à rembourser est de : ${(Number(entre.montant_payer) || 0) -
+    //                             Number(entre.montant_rembourser)
+    //                             }`,
+    //                         });
+    //                       }
+    //                       entre.status = "ANNULEE";
+    //                       if (Number(montantEnCoursPayement) < Number(entre.montant_payer)) {
+    //                         entre.type_annuler = "EN COURS"
+    //                       }
+    //                       else
+    //                         if (Number(montantEnCoursPayement) === Number(entre.montant_payer)) {
+    //                           entre.type_annuler = type_annuler;
+    //                         }
+    //                       entre.montant_rembourser = montantEnCoursPayement;
+    //                       await entre.save();
+    //                       utilisateur.solde = (utilisateur.solde || 0) - Number(montant_rembourser);
+    //                       await utilisateur.save();
+    //                       res.status(200).json({ message: "Entrée annulée avec succès." });
+    //                     }
+    // } else {
+    //   res.status(400).json({ message: "Le solde disponible dans la caisse est insuffisant pour effectuer cette opération." });
+    // }
+    // } else{
+    //    res.status(400).json({ message: "On ne peut pas annuler une entrée retournée." });
+    // }
   } catch (error) {
-    
+
   }
 }
 

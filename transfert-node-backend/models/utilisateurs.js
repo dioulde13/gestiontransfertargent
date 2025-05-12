@@ -41,6 +41,11 @@ const Utilisateur = sequelize.define('Utilisateur', {
     allowNull: false,
     defaultValue: 0,
   },
+   autre_solde: {
+    type: DataTypes.BIGINT,
+    allowNull: false,
+    defaultValue: 0,
+  },
   encien_solde: {
     type: DataTypes.BIGINT,
     allowNull: false,

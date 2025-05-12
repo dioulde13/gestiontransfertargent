@@ -6,7 +6,7 @@ const { Sequelize } = require("sequelize");
 
 const ajouterRemboursement = async (req, res) => {
   try {
-    const { utilisateurId, prix, partenaireId, nom, montant } = req.body;
+    const { utilisateurId, prix, partenaireId, nom, montant} = req.body;
 
     // Vérification des champs requis
     if (!utilisateurId || !partenaireId || !montant) {
@@ -27,24 +27,6 @@ const ajouterRemboursement = async (req, res) => {
       return res.status(404).json({ message: "Partenaire introuvable." });
     }
 
-    // Récupérer les informations de la devise
-    // const devise = await Devise.findByPk(deviseId);
-    // if (!devise) {
-    //   return res.status(404).json({ message: "Devise introuvable." });
-    // }
-
-    // const Prix1 = devise.prix_1 || 0;
-    // const Prix2 = devise.prix_2 || 0;
-    // const Sign1 = devise.signe_1 || "N/A"; // Fournir une valeur par défaut si null
-    // const Sign2 = devise.signe_2 || "N/A"; // Fournir une valeur par défaut si null
-
-    // // Vérifications supplémentaires pour les signes
-    // if (!Sign1 || !Sign2) {
-    //   return res
-    //     .status(400)
-    //     .json({ message: "Les informations de la devise sont incomplètes." });
-    // }
-
     // Calcul du montant dû
     const montant_due = (montant / 5000) * prix;
 
@@ -58,9 +40,10 @@ const ajouterRemboursement = async (req, res) => {
           utilisateurId,
           partenaireId,
           // deviseId,
-          montant_gnf: prix? montant_due: montant,
-          montant: prix? montant: 0,
+          montant_gnf: prix? montant_due : 0,
+          montant,
           nom,
+          type:prixInt?'R':'NON R',
           prix:prixInt,
         });
 
@@ -126,7 +109,7 @@ const listerRemboursements = async (req, res) => {
         },
         {
           model: Partenaire,
-          attributes: ["id", "nom", "prenom", "montant_preter"], // Champs à inclure pour le partenaire
+          attributes: ["id", "nom", "prenom", "montant_preter", "pays"], // Champs à inclure pour le partenaire
         },
         // {
         //   model: Devise,

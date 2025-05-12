@@ -6,9 +6,10 @@
           <div class="card-body p-0">
             <div class="profile-image relative">
               <img
-                src="/assets/images/top-header.png"
-                class="img-fluid rounded w-full"
-                alt="profile-image"
+              src="/assets/images/transfert.jpg"
+              class="img-fluid rounded w-full"
+              alt="profile-image"
+              style="height: 200px; object-fit: cover;"
               />
             </div>
           </div>
@@ -105,9 +106,12 @@
                     Filtrer
                   </button>
                 </div>
-                <div class="col-md-3 d-flex">
+                <div class="col-md-3">
                   <div style="font-weight: bold; margin-top: 10px">
                     Total Montant : {{ totalMontant | number }} GNF
+                  </div>
+                  <div style="font-weight: bold; margin-top: 2px">
+                    Total Montant : {{ totalMontantDevise | number }} XOF
                   </div>
                 </div>
               </div>

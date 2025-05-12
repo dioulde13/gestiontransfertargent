@@ -93,38 +93,46 @@ export class ListeEntreComponent implements OnInit, AfterViewInit, OnDestroy {
     this.totalMontant = 0;
     this.totalMontantDevise = 0;
 
-    // Filtrer d'abord par date
     let filteredResults = this.allresultat.filter(
-      (result: { date_creation: string }) => {
+      (result: { date_creation: string, status: string }) => {
         const resultDate = new Date(result.date_creation);
         return (
+          result.status !== 'ANNULEE' &&
           (!this.startDate || resultDate >= this.startDate) &&
           (!this.endDate || resultDate <= this.endDate)
         );
       }
     );
 
-    // Mettre à jour DataTable avec les résultats filtrés par date
+    // Mettre à jour la DataTable avec les résultats filtrés
     this.dataTable.clear().rows.add(filteredResults).draw();
 
-    // Attendre que DataTable applique son propre filtre (search)
+    // Attendre la fin de l’application du filtre de recherche par DataTable
     setTimeout(() => {
-      const filteredDataTable: { montant_gnf: number }[] = this.dataTable
+      const filteredDataTable = this.dataTable
         .rows({ search: 'applied' })
         .data()
         .toArray();
 
-      // Recalculer le total avec des types explicitement définis
+      // Calculer le total montant en GNF
       this.totalMontant = filteredDataTable.reduce(
-        (sum: number, row: { montant_gnf: number }) => {
-          return sum + row.montant_gnf;
-        },
+        (sum: number, row: { montant_gnf: number }) => sum + (row.montant_gnf || 0),
+        0
+      );
+
+      // Calculer le total montant en devise (CFA)
+      this.totalMontantDevise = filteredDataTable.reduce(
+        (sum: number, row: { montant_cfa: number }) => sum + (row.montant_cfa || 0),
         0
       );
 
       console.log(
         'Total Montant après filtre et recherche :',
         this.totalMontant
+      );
+      console.log(
+        'Total Montant Devise après filtre et recherche :',
+        this.totalMontantDevise
       );
     }, 200);
   }
@@ -186,9 +194,8 @@ export class ListeEntreComponent implements OnInit, AfterViewInit, OnDestroy {
             data: 'montant_cfa',
             render: (data: number, type: string, row: any) => {
               if (data === 0) return '';
-              return `${new Intl.NumberFormat('fr-FR').format(data)} ${
-                row.signe_2
-              }`;
+              return `${new Intl.NumberFormat('fr-FR').format(data)} ${row.signe_2
+                }`;
             },
           },
           {
@@ -197,9 +204,8 @@ export class ListeEntreComponent implements OnInit, AfterViewInit, OnDestroy {
             render: (data: number, type: string, row: any) => {
               return data === 0
                 ? ''
-                : `${new Intl.NumberFormat('fr-FR').format(data)} ${
-                    row.montant_cfa === 0 ? '' : 'GNF'
-                  }`;
+                : `${new Intl.NumberFormat('fr-FR').format(data)} ${row.montant_cfa === 0 ? '' : 'GNF'
+                }`;
             },
           },
           {
@@ -241,13 +247,13 @@ export class ListeEntreComponent implements OnInit, AfterViewInit, OnDestroy {
             },
           },
           {
-            title: 'Statut de paiement',
+            title: 'Status',
             data: 'status',
             render: (data: string, type: string, row: any) => {
-              console.log(row); 
-              if (row.montant_cfa === 0){
+              console.log(row);
+              if (row.montant_cfa === 0) {
                 return `${row.status} (${row.type_annuler})`;
-              } else if(row.montant_cfa > 0 && row.type ==="R"){
+              } else if (row.montant_cfa > 0 && row.type === "R") {
                 return `${row.status} (${row.type})`;
               }
               return data + (data === `ANNULEE` ? `(${row.type_annuler})` : ``);
@@ -377,7 +383,7 @@ export class ListeEntreComponent implements OnInit, AfterViewInit, OnDestroy {
     private partenaireService: PartenaireServiceService,
     private cd: ChangeDetectorRef,
     private fb: FormBuilder
-  ) {}
+  ) { }
 
   onEdit(devise: any) {
     this.selectedDevise = devise;
@@ -483,28 +489,10 @@ export class ListeEntreComponent implements OnInit, AfterViewInit, OnDestroy {
     });
   }
 
-  indicatifs = [
-    {
-      code: '+221',
-      pays: 'Sénégal',
-      regex: /^[7][05678][0-9]{7}$/,
-      min: 9,
-      max: 9,
-    },
-    {
-      code: '+245',
-      pays: 'Guinée-Bissau',
-      regex: /^[5][0-9]{8}$/,
-      min: 9,
-      max: 9,
-    },
-    { code: '+33', pays: 'France', regex: /^[67][0-9]{8}$/, min: 9, max: 9 },
-    { code: '+1', pays: 'USA', regex: /^[2-9][0-9]{9}$/, min: 10, max: 10 },
-  ];
+
 
   private initForm(): void {
     this.entreForm = this.fb.group({
-      indicatif: [this.indicatifs[0].code], // Par défaut France
       utilisateurId: [this.idUser], // Liaison utilisateurId
       partenaireId: ['', Validators.required],
       deviseId: ['', Validators.required], // Initialisé à vide
@@ -514,34 +502,11 @@ export class ListeEntreComponent implements OnInit, AfterViewInit, OnDestroy {
       montant: [0, Validators.required],
       telephone_receveur: [
         '',
-        [Validators.required, this.validatePhone.bind(this)],
+        [Validators.required],
       ],
     });
-    this.entreForm.get('indicatif')?.valueChanges.subscribe(() => {
-      this.entreForm.get('telephone_receveur')?.updateValueAndValidity();
-    });
   }
 
-  validatePhone(control: AbstractControl) {
-    const selectedIndicatif = this.entreForm?.get('indicatif')?.value;
-    const country = this.indicatifs.find((i) => i.code === selectedIndicatif);
-
-    if (country) {
-      const numValue = control.value;
-
-      // Vérifier la longueur du numéro
-      if (numValue.length < country.min || numValue.length > country.max) {
-        return { invalidLength: true };
-      }
-
-      // Vérifier si le format correspond au regex du pays
-      if (!country.regex.test(numValue)) {
-        return { invalidPhone: true };
-      }
-    }
-
-    return null;
-  }
 
   allPartenaire: any[] = [];
 

@@ -4,5 +4,7 @@ const calculBeneficeController = require('../controllers/calculBeneficeControlle
 const router = express.Router();
 
 router.post('/benefice', calculBeneficeController.calculBenefice);
+router.get('/benefice/authomatique', calculBeneficeController.calculBeneficeAuthomatique);
+
 
 module.exports = router;

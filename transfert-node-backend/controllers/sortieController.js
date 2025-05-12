@@ -128,50 +128,50 @@ const ajouterSortie = async (req, res) => {
     }
     // console.log(utilisateur.solde);
     // console.log(montant_due);
-    if (utilisateur.solde > montant_due) {
-      if (devise.paysArriver === partenaire.pays) {
-        const sortie = await Sortie.create({
-          utilisateurId,
-          partenaireId,
-          deviseId,
-          pays_exp: devise.paysArriver,
-          pays_dest: devise.paysDepart,
-          code: newCode,
-          expediteur,
-          codeEnvoyer,
-          telephone_receveur,
-          receveur,
-          montant_gnf: montant_due,
-          signe_1: Sign1,
-          signe_2: Sign2,
-          prix_1: Prix1,
-          prix_2: Prix2,
-          montant: montant,
-        });
+    // if (utilisateur.solde > montant_due) {
+    if (devise.paysArriver === partenaire.pays) {
+      const sortie = await Sortie.create({
+        utilisateurId,
+        partenaireId,
+        deviseId,
+        pays_exp: devise.paysArriver,
+        pays_dest: devise.paysDepart,
+        code: newCode,
+        expediteur,
+        codeEnvoyer,
+        telephone_receveur,
+        receveur,
+        montant_gnf: montant_due,
+        signe_1: Sign1,
+        signe_2: Sign2,
+        prix_1: Prix1,
+        prix_2: Prix2,
+        montant: montant,
+      });
 
-        return res.status(201).json({
-          message: "Sortie créée avec succès.",
-          sortie,
-          // montant_preter: partenaire.montant_preter,
-        });
-      } else {
-        res.status(400).json({
-          message: `Le pays de destination ne correspond pas au pays du partenaire.`,
-        });
-      }
+      return res.status(201).json({
+        message: "Sortie créée avec succès.",
+        sortie,
+        // montant_preter: partenaire.montant_preter,
+      });
     } else {
-      const solde = Number(utilisateur.solde);
       res.status(400).json({
-        message: `On ne peut pas faire une sortie de ${montant_due.toLocaleString(
-          "fr-FR",
-          { minimumFractionDigits: 0, maximumFractionDigits: 0 }
-        )} GNF,
-        le solde dans la caisse est: ${solde.toLocaleString("fr-FR", {
-          minimumFractionDigits: 0,
-          maximumFractionDigits: 0,
-        })} GNF`,
+        message: `Le pays de destination ne correspond pas au pays du partenaire.`,
       });
     }
+    // } else {
+    //   const solde = Number(utilisateur.solde);
+    //   res.status(400).json({
+    //     message: `On ne peut pas faire une sortie de ${montant_due.toLocaleString(
+    //       "fr-FR",
+    //       { minimumFractionDigits: 0, maximumFractionDigits: 0 }
+    //     )} GNF,
+    //     le solde dans la caisse est: ${solde.toLocaleString("fr-FR", {
+    //       minimumFractionDigits: 0,
+    //       maximumFractionDigits: 0,
+    //     })} GNF`,
+    //   });
+    // }
   } catch (error) {
     console.error("Erreur lors de l'ajout de la sortie :", error);
     res.status(500).json({ message: "Erreur interne du serveur." });
@@ -197,7 +197,7 @@ const ajouterAutreSortie = async (req, res) => {
 
     const code = Math.floor(100000 + Math.random() * 900000).toString();
 
-    if (utilisateur.solde > montantClient) {
+    if (utilisateur.autre_solde > montantClient) {
       const sortie = await Sortie.create({
         utilisateurId,
         partenaireId: null,
@@ -220,22 +220,22 @@ const ajouterAutreSortie = async (req, res) => {
         telephone_receveur: "",
         status: "PAYEE",
       });
-      utilisateur.solde = (utilisateur.solde || 0) - montantClient;
+      utilisateur.autre_solde = (utilisateur.autre_solde || 0) - montantClient;
       await utilisateur.save();
 
       res.status(201).json({
         message: "Sortie créée avec succès.",
         sortie,
-        solde: utilisateur.solde,
+        solde: utilisateur.autre_solde,
       });
     } else {
-      const solde = Number(utilisateur.solde);
+      const solde = Number(utilisateur.autre_solde);
       res.status(400).json({
         message: `On ne peut pas faire une sortie de ${montantClient.toLocaleString(
           "fr-FR",
           { minimumFractionDigits: 0, maximumFractionDigits: 0 }
         )} GNF,
-      le solde dans la caisse est: ${solde.toLocaleString("fr-FR", {
+      le solde dans la caisse est: ${autre_solde.toLocaleString("fr-FR", {
           minimumFractionDigits: 0,
           maximumFractionDigits: 0,
         })} GNF`,
@@ -296,6 +296,18 @@ const validerSortie = async (req, res) => {
         montant_gnf: montant_due,
         status: "PAYEE",
       });
+      utilisateur.solde = (utilisateur.solde || 0) - montant_due;
+      await utilisateur.save();
+
+      // Mise à jour du montant prêté du partenaire
+      partenaire.montant_preter =
+        (partenaire.montant_preter || 0) + sortie.montant;
+      await partenaire.save();
+
+      res.status(200).json({
+        message: "Sortie validée avec succès.",
+        sortie,
+      });
     } else {
       const solde = Number(utilisateur.solde);
       res.status(400).json({
@@ -308,19 +320,6 @@ const validerSortie = async (req, res) => {
         })} GNF`,
       });
     }
-
-    utilisateur.solde = (utilisateur.solde || 0) - montant_due;
-    await utilisateur.save();
-
-    // Mise à jour du montant prêté du partenaire
-    partenaire.montant_preter =
-      (partenaire.montant_preter || 0) + sortie.montant;
-    await partenaire.save();
-
-    res.status(200).json({
-      message: "Sortie validée avec succès.",
-      sortie,
-    });
   } catch (error) {
     console.error("Erreur lors de la validation de la sortie :", error);
     res.status(500).json({ message: "Erreur interne du serveur." });
@@ -377,6 +376,80 @@ const annulerSortie = async (req, res) => {
   }
 };
 
+const payerSorties = async (req, res) => {
+  try {
+    const { ids, partenaireEntreId, partenaireSortieId } = req.body;
+
+    if (!ids || ids.length === 0) {
+      return res.status(400).json({ message: "Aucune entrée sélectionnée." });
+    }
+
+    const partenaireEntre = await Partenaire.findByPk(partenaireEntreId);
+    if (!partenaireEntre) {
+      return res.status(404).json({ message: "Partenaire entre introuvable." });
+    }
+
+    const partenaireSortie = await Partenaire.findByPk(partenaireSortieId);
+    if (!partenaireSortie) {
+      return res.status(404).json({ message: "Partenaire sortie introuvable." });
+    }
+
+    console.log(partenaireEntre.montant_preter);
+    console.log(partenaireSortie.montant_preter);
+
+    const sortiesExistantes = await Sortie.findAll({
+      where: { id: ids },
+      attributes: ["id", "type", "montant"],
+    });
+
+    console.log(sortiesExistantes);
+
+    const totalMontant = sortiesExistantes.reduce((total, sortie) => {
+      return total + sortie.dataValues.montant;
+    }, 0);
+
+    console.log("Total des montants :", totalMontant);
+
+
+    const dejaPayees = sortiesExistantes.filter((sortie) => sortie.type === "R");
+
+    if (dejaPayees.length > 0) {
+      return res.status(400).json({
+        message:
+          "Certaines sorties ont déjà été payées et ne peuvent être payées deux fois.",
+        sortie: dejaPayees.map((sortie) => sortie.id),
+      });
+    }
+
+    if (totalMontant > partenaireSortie.montant_preter) {
+      return res.status(400).json({
+        message: "Le montant selectionner est supperieur au montant restant"
+      });
+    }
+
+    if (totalMontant > partenaireEntre.montant_preter) {
+      return res.status(400).json({
+        message: "Le montant selectionner est supperieur au montant restant"
+      });
+    }
+
+    await Sortie.update({ type: "R" }, { where: { id: ids } });
+
+    partenaireSortie.montant_preter =
+      (partenaireSortie.montant_preter || 0) - totalMontant;
+    await partenaireSortie.save();
+
+    partenaireEntre.montant_preter =
+      (partenaireEntre.montant_preter || 0) - totalMontant;
+    await partenaireEntre.save();
+
+    res.status(200).json({ message: "Paiement effectué avec succès." });
+  } catch (error) {
+    console.error("Erreur lors du paiement des entrées :", error);
+    res.status(500).json({ message: "Erreur interne du serveur." });
+  }
+};
+
 module.exports = {
   ajouterSortie,
   recupererSortiesAvecAssocies,
@@ -384,4 +457,5 @@ module.exports = {
   annulerSortie,
   validerSortie,
   ajouterAutreSortie,
+  payerSorties
 };

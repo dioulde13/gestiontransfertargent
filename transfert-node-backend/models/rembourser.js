@@ -42,34 +42,17 @@ const Rembourser = sequelize.define('Rembourser', {
     allowNull: false,
     defaultValue: DataTypes.NOW, 
   },
-  // prix_1: {
-  //   type: DataTypes.INTEGER,
-  //   allowNull: false,
-  //   defaultValue: 0,
-  // },
-  // prix_2: {
-  //   type: DataTypes.INTEGER,
-  //   allowNull: false,
-  //   defaultValue: 0,
-  // },
-  // signe_1: {
-  //   type: DataTypes.STRING,
-  //   allowNull: false,
-  //   defaultValue: 0,
-  // },
-  // signe_2: {
-  //   type: DataTypes.STRING,
-  //   allowNull: false,
-  //   defaultValue: 0,
-  // },
+  type: {
+    type: DataTypes.ENUM("R", "NON R"),
+    allowNull: false,
+    defaultValue: "NON R",
+  },
 });
 
 
 Rembourser.belongsTo(Utilisateur, { foreignKey: 'utilisateurId' });
 
 Rembourser.belongsTo(Partenaire, { foreignKey: 'partenaireId' });
-
-// Rembourser.belongsTo(Devise, { foreignKey: 'deviseId' });
 
 
 module.exports = Rembourser;

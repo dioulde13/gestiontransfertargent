@@ -115,6 +115,11 @@ const Sortie = sequelize.define("Sortie", {
     allowNull: false,
     defaultValue: "NON PAYEE", 
   },
+  type: {
+    type: DataTypes.ENUM("R", "NON R"),
+    allowNull: false,
+    defaultValue: "NON R",
+  },
 });
 
 Sortie.belongsTo(Utilisateur, { foreignKey: "utilisateurId" });
