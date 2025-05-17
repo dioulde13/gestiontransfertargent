@@ -24,24 +24,24 @@ const ajouterCredit = async (req, res) => {
     const generateUniqueCode = async () => {
       // Valeur initiale par défaut
       let newCode = "REF0001";
-    
+
       // Récupérer la dernière entrée triée par date de création
       const lastEntry = await Credit.findOne({
         order: [["createdAt", "DESC"]],
       });
-    
+
       if (lastEntry && lastEntry.reference && lastEntry.reference.startsWith("REF")) {
         const numericPart = parseInt(lastEntry.reference.slice(3), 10);
-    
+
         if (!isNaN(numericPart)) {
           const incrementedPart = (numericPart + 1).toString().padStart(4, "0");
           newCode = `REF${incrementedPart}`;
         }
       }
-    
+
       return newCode;
     };
-    
+
 
     const newCode = await generateUniqueCode();
     let credit;
@@ -49,18 +49,17 @@ const ajouterCredit = async (req, res) => {
     if (type === "SORTIE") {
       if (utilisateur.solde < montant) {
         return res.status(400).json({ message: "Solde insuffisant." });
+      } else {
+        credit = await Credit.create({
+          utilisateurId,
+          nom,
+          type,
+          reference: newCode,
+          montant,
+        });
+
+        utilisateur.solde -= montant;
       }
-
-      credit = await Credit.create({
-        utilisateurId,
-        nom,
-        type,
-        reference: newCode,
-        montant,
-      });
-
-      utilisateur.solde -= montant;
-
     } else if (type === "ENTRE") {
       credit = await Credit.create({
         utilisateurId,
@@ -86,6 +85,58 @@ const ajouterCredit = async (req, res) => {
   } catch (error) {
     console.error("Erreur lors de l'ajout du crédit :", error);
     return res.status(500).json({ message: "Erreur interne du serveur." });
+  }
+};
+
+const annulerCredit = async (req, res) => {
+  try {
+    const { reference } = req.body;
+
+    const credit = await Credit.findOne({ where: { reference } });
+    if (!credit) return res.status(404).json({ message: "crédit introuvable." });
+
+    const [utilisateur] = await Promise.all([
+      Utilisateur.findByPk(credit.utilisateurId),
+    ]);
+    if (!utilisateur) return res.status(404).json({ message: "Utilisateur introuvable." });
+
+    if (credit.type === "SORTIE") {
+      if (utilisateur.solde >= credit.montant) {
+        if (credit.montantPaye === 0) {
+          utilisateur.solde += Number(credit.montant);
+          credit.type = "ANNULEE";
+          await utilisateur.save();
+          await credit.save();
+        } else {
+          utilisateur.solde += Number(credit.montantPaye);
+          credit.type = "ANNULEE";
+          await utilisateur.save();
+          await credit.save();
+        }
+        res.status(200).json({ message: "crédit annulée avec succès." });
+      } else {
+        return res.status(400).json({ message: "Solde insuffisant." });
+      }
+    } else if (credit.type === "ENTRE") {
+      if (utilisateur.solde >= credit.montant) {
+        if (credit.montantPaye === 0) {
+          utilisateur.solde -= Number(credit.montant);
+          credit.type = "ANNULEE";
+        } else {
+          utilisateur.solde -= Number(credit.montantPaye);
+          credit.type = "ANNULEE";
+        }
+        await utilisateur.save();
+        await credit.save();
+        res.status(200).json({ message: "crédit annulée avec succès." });
+      } else {
+        return res.status(400).json({ message: "Solde insuffisant." });
+      }
+    } else {
+      res.status(200).json({ message: "Ce crédit est déjà annulée." });
+    }
+  } catch (error) {
+    res.status(500).json({ message: "Erreur interne du serveur." });
   }
 };
 
@@ -115,4 +166,5 @@ const recupererCredit = async (req, res) => {
   }
 };
 
-module.exports = { ajouterCredit, recupererCredit };
+
+module.exports = { ajouterCredit, recupererCredit, annulerCredit };

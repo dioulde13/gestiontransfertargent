@@ -1,70 +1,197 @@
-const Utilisateur = require("../models/utilisateurs"); // Modèle Utilisateur
-const Entre = require("../models/entres"); // Modèle Partenaire
+const Utilisateur = require("../models/utilisateurs");
+const Entre = require("../models/entres");
 const Payement = require("../models/payement");
 const { Sequelize } = require("sequelize");
 const Sortie = require("../models/sorties");
 
 const ajouterPayement = async (req, res) => {
   try {
-    const { utilisateurId, code, montant, type } = req.body;
+    let { utilisateurId, code, montant, prix, type, signe } = req.body;
+    prix = prix ?? 0;
+    signe = signe ?? 0;
 
-    // Vérification des champs requis
     if (!utilisateurId || !code || !montant || !type) {
       return res
         .status(400)
         .json({ message: "Tous les champs sont obligatoires." });
     }
 
-    // Vérifier si l'utilisateur existe
     const utilisateur = await Utilisateur.findByPk(utilisateurId);
     if (!utilisateur) {
       return res.status(404).json({ message: "Utilisateur introuvable." });
     }
+    console.log(signe);
+    console.log(prix);
 
     if (type === "ENTREE") {
-      // Vérifier si l'entrée (Entre) existe à travers le code
       const entre = await Entre.findOne({ where: { code } });
       if (!entre) {
         return res
           .status(404)
           .json({ message: "Entre introuvable avec ce code." });
       }
+      if (prix === 0) {
+        const montantEnCoursPayement = montant + entre.montant_payer;
+        if (montantEnCoursPayement > entre.montant_gnf) {
+          return res.status(400).json({
+            message: `Le montant payé est supérieur au montant restant qui est : ${entre.montant_restant.toLocaleString(
+              "fr-FR",
+              { minimumFractionDigits: 0, maximumFractionDigits: 0 }
+            )}`,
+          });
+        } else {
+          entre.montant_payer = (entre.montant_payer ?? 0) + montant;
+          entre.montant_restant = (entre.montant_gnf ?? 0) - entre.montant_payer;
+          const payement = await Payement.create({
+            utilisateurId,
+            entreId: entre.id,
+            code: code,
+            montant,
+            type,
+            prix,
+            signe
+          });
 
-      const montantEnCoursPayement = montant + entre.montant_payer;
-      if (montantEnCoursPayement > entre.montant_gnf) {
-        return res.status(400).json({
-          message: "Le montant payé est supérieur au montant restant.",
-        });
+          utilisateur.solde = (utilisateur.solde || 0) + montant;
+          await utilisateur.save();
+
+          if (entre.montant_restant === 0) {
+            entre.status = "PAYEE";
+          } else if (entre.montant_payer < entre.montant_gnf) {
+            entre.status = "EN COURS";
+          }
+          await entre.save();
+          res.status(201).json({
+            message: "Payement ajouté avec succès.",
+            payement,
+          });
+        }
       } else {
-        // Mettre à jour le montant payé et restant dans l'entrée
-        entre.montant_payer = (entre.montant_payer ?? 0) + montant;
-        entre.montant_restant = (entre.montant_gnf ?? 0) - entre.montant_payer;
+        if (signe === "USD") {
+
+          const montantDeviseGnf = montant / 100 * prix
+          const montantEnCoursPayement = montantDeviseGnf + entre.montant_payer;
+          if (montantEnCoursPayement > entre.montant_gnf) {
+            return res.status(400).json({
+              message: `Le montant payé est supérieur au montant restant qui est : ${entre.montant_restant.toLocaleString(
+                "fr-FR",
+                { minimumFractionDigits: 0, maximumFractionDigits: 0 }
+              )}`,
+            });
+          } else {
+            entre.montant_payer = (entre.montant_payer ?? 0) + montantDeviseGnf;
+            entre.montant_restant = (entre.montant_gnf ?? 0) - entre.montant_payer;
+            const payement = await Payement.create({
+              utilisateurId,
+              entreId: entre.id,
+              code: code,
+              montant,
+              type,
+              prix,
+              signe
+            });
+
+            utilisateur.solde = (utilisateur.solde || 0) + montantDeviseGnf;
+            await utilisateur.save();
+
+            if (entre.montant_restant === 0) {
+              entre.status = "PAYEE";
+            } else if (entre.montant_payer < entre.montant_gnf) {
+              entre.status = "EN COURS";
+            }
+            await entre.save();
+            res.status(201).json({
+              message: "Payement ajouté avec succès.",
+              payement,
+            });
+          }
+        }
+        else if (signe === "EURO") {
+
+          const montantDeviseGnf = montant / 100 * prix
+          console.log(montantDeviseGnf);
+          const montantEnCoursPayement = montantDeviseGnf + entre.montant_payer;
+          if (montantEnCoursPayement > entre.montant_gnf) {
+            return res.status(400).json({
+              message: `Le montant payé est supérieur au montant restant qui est : ${entre.montant_restant.toLocaleString(
+                "fr-FR",
+                { minimumFractionDigits: 0, maximumFractionDigits: 0 }
+              )}`,
+            });
+          } else {
+            entre.montant_payer = (entre.montant_payer ?? 0) + montantDeviseGnf;
+            entre.montant_restant = (entre.montant_gnf ?? 0) - entre.montant_payer;
+            // Ajouter une entrée dans la table Payement
+            const payement = await Payement.create({
+              utilisateurId,
+              entreId: entre.id, // Inclure entreId
+              code: code, // Inclure entreId
+              montant,
+              type,
+              prix,
+              signe
+            });
+
+            // Mettre à jour le solde de l'utilisateur connecté
+            utilisateur.solde = (utilisateur.solde || 0) + montantDeviseGnf;
+            await utilisateur.save();
+
+            // Vérification du montant restant pour définir le type de paiement
+            if (entre.montant_restant === 0) {
+              entre.status = "PAYEE";
+            } else if (entre.montant_payer < entre.montant_gnf) {
+              entre.status = "EN COURS";
+            }
+            await entre.save();
+            res.status(201).json({
+              message: "Payement ajouté avec succès.",
+              payement,
+            });
+          }
+        } else if (signe === "XOF") {
+          const montantDeviseGnf = montant / 5000 * prix
+          const montantEnCoursPayement = montantDeviseGnf + entre.montant_payer;
+          if (montantEnCoursPayement > entre.montant_gnf) {
+            return res.status(400).json({
+              message: `Le montant payé est supérieur au montant restant qui est : ${entre.montant_restant.toLocaleString(
+                "fr-FR",
+                { minimumFractionDigits: 0, maximumFractionDigits: 0 }
+              )}`,
+            });
+          } else {
+            entre.montant_payer = (entre.montant_payer ?? 0) + montantDeviseGnf;
+            entre.montant_restant = (entre.montant_gnf ?? 0) - entre.montant_payer;
+            const payement = await Payement.create({
+              utilisateurId,
+              entreId: entre.id,
+              code: code,
+              montant,
+              type,
+              prix,
+              signe
+            });
+
+            utilisateur.solde = (utilisateur.solde || 0) + montantDeviseGnf;
+            await utilisateur.save();
+
+            if (entre.montant_restant === 0) {
+              entre.status = "PAYEE";
+            } else if (entre.montant_payer < entre.montant_gnf) {
+              entre.status = "EN COURS";
+            }
+            await entre.save();
+            res.status(201).json({
+              message: "Payement ajouté avec succès.",
+              payement,
+            });
+          }
+        }
+        else {
+          return res
+            .status(404)
+            .json({ message: "Signe non renseigner." });
+        }
       }
-
-      // Ajouter une entrée dans la table Payement
-      const payement = await Payement.create({
-        utilisateurId,
-        entreId: entre.id, // Inclure entreId
-        code: code, // Inclure entreId
-        montant,
-        type,
-      });
-
-      // Mettre à jour le solde de l'utilisateur connecté
-      utilisateur.solde = (utilisateur.solde || 0) + montant;
-      await utilisateur.save();
-
-      // Vérification du montant restant pour définir le type de paiement
-      if (entre.montant_restant === 0) {
-        entre.status = "PAYEE";
-      } else if (entre.montant_payer < entre.montant_gnf) {
-        entre.status = "EN COURS";
-      }
-      await entre.save();
-      res.status(201).json({
-        message: "Payement ajouté avec succès.",
-        payement,
-      });
     } else if (type === "SORTIE") {
       const sortie = await Sortie.findOne({ where: { code } });
       if (!sortie) {
@@ -73,60 +200,60 @@ const ajouterPayement = async (req, res) => {
           .json({ message: "Sortie introuvable avec ce code." });
       }
 
-      if (sortie.status === "PAYEE") {
-        if (utilisateur.solde >= montant) {
-          const montantEnCoursPayement = montant + sortie.montant_payer;
-          if (montantEnCoursPayement > sortie.montant_gnf) {
+
+      if (prix === 0) {
+        if (Number(utilisateur.solde) >= Number(montant)) {
+          const montantEnCoursPayement = Number(montant) + Number(sortie.montant_payer);
+          if (montantEnCoursPayement > Number(sortie.montant_gnf)) {
+            const montantGnf = Number(sortie.montant_gnf);
+            const montantRestant = Number(sortie.montant_restant);
             res.status(400).json({
               message: `Le montant payé ${montant.toLocaleString("fr-FR", {
                 minimumFractionDigits: 0,
                 maximumFractionDigits: 0,
-              })} GNF, est supérieur au montant restant qui est: ${
-                sortie.montant_gnf === 0
-                  ? Number(
-                      sortie.montant_gnf.toLocaleString("fr-FR", {
-                        minimumFractionDigits: 0,
-                        maximumFractionDigits: 0,
-                      })
-                    )
-                  : Number(
-                      sortie.montant_restant.toLocaleString("fr-FR", {
-                        minimumFractionDigits: 0,
-                        maximumFractionDigits: 0,
-                      })
-                    )
-              } GNF`,
+              })} GNF, est supérieur au montant restant qui est: ${Number(sortie.montant_payer) === 0
+                ?
+                montantGnf.toLocaleString("fr-FR", {
+                  minimumFractionDigits: 0,
+                  maximumFractionDigits: 0,
+                })
+                :
+                montantRestant.toLocaleString("fr-FR", {
+                  minimumFractionDigits: 0,
+                  maximumFractionDigits: 0,
+                })
+                } GNF`,
             });
           } else {
-            sortie.montant_payer = (sortie.montant_payer ?? 0) + montant;
+            sortie.montant_payer = Number(sortie.montant_payer ?? 0) + Number(montant);
             sortie.montant_restant =
-              (sortie.montant_gnf ?? 0) - sortie.montant_payer;
+              Number(sortie.montant_gnf ?? 0) - Number(sortie.montant_payer);
+
+            // Ajouter une entrée dans la table Payement
+            const payement = await Payement.create({
+              utilisateurId,
+              sortieId: sortie.id, // Inclure entreId
+              code: code, // Inclure entreId
+              montant,
+              type,
+            });
+
+            // Mettre à jour le solde de l'utilisateur connecté
+            utilisateur.solde = Number(utilisateur.solde || 0) - Number(montant);
+            await utilisateur.save();
+
+            if (Number(sortie.montant_restant) === 0) {
+              sortie.status = "PAYEE";
+            } else if (Number(sortie.montant_payer) < Number(sortie.montant_gnf)) {
+              sortie.status = "EN COURS";
+            }
+
+            await sortie.save();
+            res.status(201).json({
+              message: "Payement ajouté avec succès.",
+              payement,
+            });
           }
-
-          // Ajouter une entrée dans la table Payement
-          const payement = await Payement.create({
-            utilisateurId,
-            sortieId: sortie.id, // Inclure entreId
-            code: code, // Inclure entreId
-            montant,
-            type,
-          });
-
-          // Mettre à jour le solde de l'utilisateur connecté
-          utilisateur.solde = (utilisateur.solde || 0) - montant;
-          await utilisateur.save();
-
-          if (sortie.montant_restant === 0) {
-            sortie.status = "PAYEE";
-          } else if (sortie.montant_payer < sortie.montant_gnf) {
-            sortie.status = "EN COURS";
-          }
-
-          await sortie.save();
-          res.status(201).json({
-            message: "Payement ajouté avec succès.",
-            payement,
-          });
         } else {
           const solde = Number(utilisateur.solde);
           // console.log(solde);
@@ -143,11 +270,230 @@ const ajouterPayement = async (req, res) => {
             )} GNF`,
           });
         }
-      } else {
-        res.status(400).json({
-          message: `On ne peut pas payer une sortie non validée.`,
-        });
       }
+      else if(signe === "EURO"){
+          const montantDeviseGnf = montant / 100 * prix
+         if (Number(utilisateur.solde) >= Number(montantDeviseGnf)) {
+          const montantEnCoursPayement = Number(montantDeviseGnf) + Number(sortie.montant_payer);
+          if (montantEnCoursPayement > Number(sortie.montant_gnf)) {
+            const montantGnf = Number(sortie.montant_gnf);
+            const montantRestant = Number(sortie.montant_restant);
+            res.status(400).json({
+              message: `Le montant payé ${montantDeviseGnf.toLocaleString("fr-FR", {
+                minimumFractionDigits: 0,
+                maximumFractionDigits: 0,
+              })} GNF, est supérieur au montant restant qui est: ${Number(sortie.montant_payer) === 0
+                ?
+                montantGnf.toLocaleString("fr-FR", {
+                  minimumFractionDigits: 0,
+                  maximumFractionDigits: 0,
+                })
+                :
+                montantRestant.toLocaleString("fr-FR", {
+                  minimumFractionDigits: 0,
+                  maximumFractionDigits: 0,
+                })
+                } GNF`,
+            });
+          } else {
+            sortie.montant_payer = Number(sortie.montant_payer ?? 0) + Number(montantDeviseGnf);
+            sortie.montant_restant =
+              Number(sortie.montant_gnf ?? 0) - Number(sortie.montant_payer);
+
+            // Ajouter une entrée dans la table Payement
+            const payement = await Payement.create({
+              utilisateurId,
+              sortieId: sortie.id, // Inclure entreId
+              code: code, // Inclure entreId
+              montant,
+              type,
+              prix,
+              signe
+            });
+
+            // Mettre à jour le solde de l'utilisateur connecté
+            utilisateur.solde = Number(utilisateur.solde || 0) - Number(montantDeviseGnf);
+            await utilisateur.save();
+
+            if (Number(sortie.montant_restant) === 0) {
+              sortie.status = "PAYEE";
+            } else if (Number(sortie.montant_payer) < Number(sortie.montant_gnf)) {
+              sortie.status = "EN COURS";
+            }
+
+            await sortie.save();
+            res.status(201).json({
+              message: "Payement ajouté avec succès.",
+              payement,
+            });
+          }
+        } else {
+          const solde = Number(utilisateur.solde);
+          // console.log(solde);
+          res.status(400).json({
+            message: `On ne peut pas faire un payement de ${montantDeviseGnf.toLocaleString(
+              "fr-FR",
+              { minimumFractionDigits: 0, maximumFractionDigits: 0 }
+            )} GNF, le solde dans la caisse est: ${solde.toLocaleString(
+              "fr-FR",
+              {
+                minimumFractionDigits: 0,
+                maximumFractionDigits: 0,
+              }
+            )} GNF`,
+          });
+        }
+      }else if(signe === "USD"){
+          const montantDeviseGnf = montant / 100 * prix
+         if (Number(utilisateur.solde) >= Number(montantDeviseGnf)) {
+          const montantEnCoursPayement = Number(montantDeviseGnf) + Number(sortie.montant_payer);
+          if (montantEnCoursPayement > Number(sortie.montant_gnf)) {
+            const montantGnf = Number(sortie.montant_gnf);
+            const montantRestant = Number(sortie.montant_restant);
+            res.status(400).json({
+              message: `Le montant payé ${montantDeviseGnf.toLocaleString("fr-FR", {
+                minimumFractionDigits: 0,
+                maximumFractionDigits: 0,
+              })} GNF, est supérieur au montant restant qui est: ${Number(sortie.montant_payer) === 0
+                ?
+                montantGnf.toLocaleString("fr-FR", {
+                  minimumFractionDigits: 0,
+                  maximumFractionDigits: 0,
+                })
+                :
+                montantRestant.toLocaleString("fr-FR", {
+                  minimumFractionDigits: 0,
+                  maximumFractionDigits: 0,
+                })
+                } GNF`,
+            });
+          } else {
+            sortie.montant_payer = Number(sortie.montant_payer ?? 0) + Number(montantDeviseGnf);
+            sortie.montant_restant =
+              Number(sortie.montant_gnf ?? 0) - Number(sortie.montant_payer);
+
+            // Ajouter une entrée dans la table Payement
+            const payement = await Payement.create({
+              utilisateurId,
+              sortieId: sortie.id, // Inclure entreId
+              code: code, // Inclure entreId
+              montant,
+              type,
+              prix,
+              signe
+            });
+
+            // Mettre à jour le solde de l'utilisateur connecté
+            utilisateur.solde = Number(utilisateur.solde || 0) - Number(montantDeviseGnf);
+            await utilisateur.save();
+
+            if (Number(sortie.montant_restant) === 0) {
+              sortie.status = "PAYEE";
+            } else if (Number(sortie.montant_payer) < Number(sortie.montant_gnf)) {
+              sortie.status = "EN COURS";
+            }
+
+            await sortie.save();
+            res.status(201).json({
+              message: "Payement ajouté avec succès.",
+              payement,
+            });
+          }
+        } else {
+          const solde = Number(utilisateur.solde);
+          // console.log(solde);
+          res.status(400).json({
+            message: `On ne peut pas faire un payement de ${montantDeviseGnf.toLocaleString(
+              "fr-FR",
+              { minimumFractionDigits: 0, maximumFractionDigits: 0 }
+            )} GNF, le solde dans la caisse est: ${solde.toLocaleString(
+              "fr-FR",
+              {
+                minimumFractionDigits: 0,
+                maximumFractionDigits: 0,
+              }
+            )} GNF`,
+          });
+        }
+      }
+      else if(signe === "XOF"){
+          const montantDeviseGnf = montant / 5000 * prix
+         if (Number(utilisateur.solde) >= Number(montantDeviseGnf)) {
+          const montantEnCoursPayement = Number(montantDeviseGnf) + Number(sortie.montant_payer);
+          if (montantEnCoursPayement > Number(sortie.montant_gnf)) {
+            const montantGnf = Number(sortie.montant_gnf);
+            const montantRestant = Number(sortie.montant_restant);
+            res.status(400).json({
+              message: `Le montant payé ${montantDeviseGnf.toLocaleString("fr-FR", {
+                minimumFractionDigits: 0,
+                maximumFractionDigits: 0,
+              })} GNF, est supérieur au montant restant qui est: ${Number(sortie.montant_payer) === 0
+                ?
+                montantGnf.toLocaleString("fr-FR", {
+                  minimumFractionDigits: 0,
+                  maximumFractionDigits: 0,
+                })
+                :
+                montantRestant.toLocaleString("fr-FR", {
+                  minimumFractionDigits: 0,
+                  maximumFractionDigits: 0,
+                })
+                } GNF`,
+            });
+          } else {
+            sortie.montant_payer = Number(sortie.montant_payer ?? 0) + Number(montantDeviseGnf);
+            sortie.montant_restant =
+              Number(sortie.montant_gnf ?? 0) - Number(sortie.montant_payer);
+
+            // Ajouter une entrée dans la table Payement
+            const payement = await Payement.create({
+              utilisateurId,
+              sortieId: sortie.id, // Inclure entreId
+              code: code, // Inclure entreId
+              montant,
+              type,
+              prix,
+              signe
+            });
+
+            // Mettre à jour le solde de l'utilisateur connecté
+            utilisateur.solde = Number(utilisateur.solde || 0) - Number(montantDeviseGnf);
+            await utilisateur.save();
+
+            if (Number(sortie.montant_restant) === 0) {
+              sortie.status = "PAYEE";
+            } else if (Number(sortie.montant_payer) < Number(sortie.montant_gnf)) {
+              sortie.status = "EN COURS";
+            }
+
+            await sortie.save();
+            res.status(201).json({
+              message: "Payement ajouté avec succès.",
+              payement,
+            });
+          }
+        } else {
+          const solde = Number(utilisateur.solde);
+          // console.log(solde);
+          res.status(400).json({
+            message: `On ne peut pas faire un payement de ${montantDeviseGnf.toLocaleString(
+              "fr-FR",
+              { minimumFractionDigits: 0, maximumFractionDigits: 0 }
+            )} GNF, le solde dans la caisse est: ${solde.toLocaleString(
+              "fr-FR",
+              {
+                minimumFractionDigits: 0,
+                maximumFractionDigits: 0,
+              }
+            )} GNF`,
+          });
+        }
+      }
+      else {
+          return res
+            .status(404)
+            .json({ message: "Signe non renseigner." });
+        }
     }
   } catch (error) {
     console.error("Erreur lors de l'ajout du payement :", error);

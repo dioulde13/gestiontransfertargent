@@ -38,6 +38,39 @@ const ajouterPartenaire = async (req, res) => {
   }
 };
 
+
+// Modifier un partenaire
+const modifierPartenaire = async (req, res) => {
+  try {
+    const { id } = req.params; // ID du partenaire à modifier
+    const { utilisateurId, nom, prenom, pays, montant_preter } = req.body;
+
+    // Vérifier si le partenaire existe
+    const partenaire = await Partenaire.findByPk(id);
+    if (!partenaire) {
+      return res.status(404).json({ message: 'Partenaire non trouvée.' });
+    }
+
+    // Mettre à jour les champs fournis
+    await partenaire.update({
+      utilisateurId: utilisateurId || partenaire.utilisateurId,
+      nom: nom || partenaire.nom,
+      prenom: prenom || partenaire.prenom,
+      pays: pays || partenaire.pays,
+      montant_preter: montant_preter || partenaire.montant_preter
+    });
+
+    res.status(200).json({
+      message: 'Ppartenaire mise à jour avec succès.',
+      partenaire,
+    });
+  } catch (error) {
+    console.error('Erreur lors de la mise à jour du partenaire :', error);
+    res.status(500).json({ message: 'Erreur interne du serveur.' });
+  }
+};
+
+
 const recupererPartenaires = async (req, res) => {
   try {
     // Récupérer tous les partenaires avec les informations de l'utilisateur associé
@@ -122,4 +155,4 @@ const rembourserDevise = async (req, res) => {
   }
 };
 
-module.exports = { ajouterPartenaire, recupererPartenaires, rembourserDevise };
+module.exports = { ajouterPartenaire, recupererPartenaires, rembourserDevise, modifierPartenaire };

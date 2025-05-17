@@ -29,7 +29,7 @@ export class ListeDeviseComponent implements OnInit {
   dtoptions: any = {};
   dtTrigger: Subject<any> = new Subject<any>();
 
-  selectedDevise: any = null; // Devise sélectionnée pour modification
+  selectedDevise: any = null; 
 
   isLoading: boolean = false;
 
@@ -55,7 +55,7 @@ export class ListeDeviseComponent implements OnInit {
     });
 
     this.editDeviseForm = this.fb.group({
-      paysArriver: ['', Validators.required],
+      paysArriver: [{ value: 0, disabled: true }, Validators.required],
       signe_2: ['', Validators.required],
       prix_1: ['', Validators.required],
       prix_2: ['', Validators.required],

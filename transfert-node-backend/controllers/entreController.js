@@ -202,13 +202,13 @@ const ajouterAutreEntre = async (req, res) => {
     });
 
     // Mettre à jour le solde de l'utilisateur
-    utilisateur.autre_solde = (utilisateur.autre_solde || 0) + montantClient;
+    utilisateur.solde = (utilisateur.solde || 0) + montantClient;
     await utilisateur.save();
 
     res.status(201).json({
       message: "Entrée créée avec succès.",
       entre,
-      solde: utilisateur.autre_solde,
+      solde: utilisateur.solde,
     });
   } catch (error) {
     console.error("Erreur lors de l'ajout de l'entrée :", error);

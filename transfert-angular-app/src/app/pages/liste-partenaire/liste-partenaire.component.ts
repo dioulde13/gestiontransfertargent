@@ -31,6 +31,8 @@ export class ListePartenaireComponent implements OnInit {
   partenaireForm!: FormGroup;
 
   dtoptions: any = {};
+  modifierPartenaireForm!: FormGroup;
+
 
   dtTrigger: Subject<any> = new Subject<any>();
 
@@ -44,6 +46,14 @@ export class ListePartenaireComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
+
+     this.modifierPartenaireForm = this.fb.group({
+      nom: ['', Validators.required],
+      prenom: ['', Validators.required],
+      pays: [{ value: 0, disabled: true }, Validators.required],
+     montant_preter: [{ value: 0, disabled: true }, [Validators.required, Validators.min(0)]],
+    });
+
     this.dtoptions = {
       paging: true, // Activer la pagination
       pagingType: 'full_numbers', // Type de pagination
@@ -109,10 +119,45 @@ export class ListePartenaireComponent implements OnInit {
     });
   }
 
+   selectedPartenaireEdit: any = null;
+
+  onEdit(partenaire: any) {
+    this.selectedPartenaireEdit = partenaire;
+    this.modifierPartenaireForm.patchValue({
+      nom: partenaire.nom,
+      prenom: partenaire.prenom,
+      pays: partenaire.pays,
+      montant_preter: partenaire.montant_preter,
+    });
+  }
+isDisabled: boolean = true; // ou false
+
+  isLoadingModif: boolean = false;
+
+  onUpdate() {
+    this.isLoadingModif = true;
+    if (this.modifierPartenaireForm.valid && this.selectedPartenaireEdit) {
+      const updatedData = this.modifierPartenaireForm.value;
+      this.partenaireService.modifierPartenaire(this.selectedPartenaireEdit.id, updatedData)
+        .subscribe({
+          next: (response) => {
+            this.getAllPartenaire();
+            this.isLoadingModif = false;
+            alert('Partenaire modifiée avec succès!');
+          },
+          error: (error) => {
+            this.isLoadingModif = false;
+            console.error('Erreur lors de la modification du devise:', error);
+            alert('Erreur lors de la modification du devise.');
+          },
+        });
+    }
+  }
+
   editPartenaireForm!: FormGroup;
 
   private initPartenaire(): void {
-    this.editPartenaireForm = this.fb.group({
+    this.editPartenaireForm = this.fb.group({ 
       deviseId: ['', Validators.required],
       utilisateurId: [this.idUser],
     });

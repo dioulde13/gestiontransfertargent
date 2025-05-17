@@ -6,12 +6,8 @@
         <div class="card bg-transparent">
           <div class="card-body p-0">
             <div class="profile-image relative">
-              <img
-              src="/assets/images/transfert.jpg"
-              class="img-fluid rounded w-full"
-                alt="profile-image"
-                style="height: 200px; object-fit: cover;"
-              />
+              <img src="/assets/images/transfert.jpg" class="img-fluid rounded w-full" alt="profile-image"
+                style="height: 200px; object-fit: cover;" />
             </div>
           </div>
         </div>
@@ -162,7 +158,7 @@
                         <td class="p-1 border">
                           {{ result.status }} {{
                           (result.montant_cfa > 0 && result.type ==="R")?
-                            result.type
+                          result.type
                           :""
                           }}
                           <span *ngIf="result.status === 'ANNULEE'">{{
@@ -172,16 +168,79 @@
                             ")"
                             }}</span>
                         </td>
+
+                        <!-- <td class="td-name">
+                          <button (click)="printRow(result)" ngxPrint [printSectionId]="'print-section-' + result.id">
+                            <i class="las la-print"></i>
+                          </button>
+                        </td> -->
                       </tr>
                     </tbody>
                   </table>
                 </div>
+
               </div>
             </div>
           </div>
         </div>
       </div>
     </div>
+
+    <!-- SECTIONS D'IMPRESSION (invisibles à l'écran) -->
+    <div *ngFor="let result of allresultat">
+      <div [id]="'print-section-' + result.id" class="print-section">
+        <div style="display: flex; justify-content: space-between;">
+          <div><img src="../assets/images/orange.png"></div>
+          <div><img src="../assets/images/lo.png"></div>
+        </div>
+        <div style="display: flex; justify-content: space-between;">
+          <div>
+            <p><strong>Réf reçu :</strong> {{ result.code }}</p>
+            <p><strong>Matricule élève :</strong> {{ result.code }}</p>
+            <p><strong>Date :</strong> {{ result.date_creation | date : 'dd/MM/yyyy' }}</p>
+            <p><strong>Mode paiement :</strong> Orange Money</p>
+          </div>
+          <div>
+            <p><strong>Nom école :</strong> Ecole 1</p>
+            <p><strong>Adresse :</strong> Conakry/Commune: Ratoma/Quartier</p>
+            <p><strong>Contact :</strong> +224 666000000 / 621000000</p>
+            <p><strong>Email :</strong> exemplegmail.com</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+
+    <!-- <div class="container">
+      <div [id]="'print-section-' + allresultat.id" class="print-section" [hidden]="selectedRowId !== allresultat.id">
+        <div style="display: flex; justify-content: space-between;">
+          <div>
+            <img src="../assets/images/orange.png">
+          </div>
+          <div>
+            <img src="../assets/images/lo.png">
+          </div>
+        </div>
+        <div style="display: flex; justify-content: space-between;">
+          <div>
+            <div>
+              <p><strong>Réf reçu :</strong> 001</p>
+              <p><strong>Matricule élève :</strong> 001</p>
+              <p><strong>Date :</strong> 11/12/2019</p>
+              <p><strong>Mode paiement :</strong> Orange Money</p>
+            </div>
+          </div>
+          <div>
+            <div>
+              <p><strong>Nom école :</strong> Ecole 1 </p>
+              <p><strong>Adresse :</strong> Conakry/Commune: Ratoma/Quartier </p>
+              <p><strong>Contact :</strong> +224 666000000 / 621000000 </p>
+              <p><strong>Email :</strong> exemplegmail.com </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div> -->
 
     <div class="modal fade" id="modifier-devise-modal" tabindex="-1" role="dialog" aria-labelledby="modalTitle"
       aria-hidden="true">
@@ -357,13 +416,13 @@
                     <div class="form-group col-md-6">
                       <label for="telephoneReceveur">Téléphone du receveur</label>
                       <div class="input-group">
-                       
+
                         <input type="text" class="form-control" id="telephone_receveur"
                           formControlName="telephone_receveur" placeholder="Téléphone" />
                       </div>
-        
+
                     </div>
-                    
+
 
                     <div class="form-group col-md-6">
                       <label for="devise">Pays de destination</label>

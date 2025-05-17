@@ -23,4 +23,8 @@ export class PartenaireServiceService {
   rembourserDevise(id:number, dataRembourser:any): Observable<any>{
     return this.http.put(`${this.apiUrl}/api/partenaires/rembourserDevise/${id}`, dataRembourser);
   }
+
+  modifierPartenaire(id: number, partenaireData: any): Observable<any> {
+    return this.http.put(`${this.apiUrl}/api/partenaires/modifierPartenaire/${id}`, partenaireData);
+  }
 }

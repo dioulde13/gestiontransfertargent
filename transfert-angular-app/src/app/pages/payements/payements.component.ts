@@ -17,6 +17,7 @@ import { PayementService } from '../../services/payements/payement.service';
 import { AuthService } from '../../services/auth/auth-service.service';
 import { Subject } from 'rxjs';
 import { CurrencyFormatPipe } from '../dasboard/currency-format.pipe';
+import { sign } from 'node:crypto';
 
 interface Result {
   code: string;
@@ -50,18 +51,86 @@ export class PayementsComponent implements OnInit, AfterViewInit {
     private payementService: PayementService,
     private authService: AuthService,
     private cd: ChangeDetectorRef
-  ) {}
+  ) { }
 
   ngOnInit(): void {
+    this.initFormCaisse();
     this.payementForm = this.fb.group({
       utilisateurId: [this.idUser],
       code: ['', Validators.required],
       montant: ['', Validators.required],
       type: ['', Validators.required],
+      prix: [''],
+      signe: [''],
     });
     this.filteredResults = [...this.allresultat];
     this.getUserInfo();
     this.getAllPayement();
+  }
+
+  conversionDeviseForm!: FormGroup;
+
+
+   private initFormCaisse(): void {
+    this.conversionDeviseForm = this.fb.group({
+      montantDevise: ['', Validators.required],
+      prixDevise: ['', Validators.required],
+      signe1: ['', Validators.required],
+      signe2: ['', Validators.required],
+    });
+  }
+
+
+  soldeTotal: number = 0;
+  montantDevise: number = 0;
+  prixDevise: number = 0;
+   signe2: string = '';
+
+  onInputChangeMontantDevise(event: any): void {
+    this.montantDevise = event.target.value.replace(/[^0-9,]/g, '');
+  }
+   onInputChangePrixDevise(event: any): void {
+    this.prixDevise = event.target.value.replace(/[^0-9,]/g, '');
+  }
+
+ conversionDevise(): void {
+    const formData = this.conversionDeviseForm.value;
+
+    const montant = parseFloat(formData.montantDevise.toString().replace(/,/g, ''));
+    const prix = parseFloat(formData.prixDevise.toString().replace(/,/g, ''));
+    const signe1 = formData.signe1;
+    const signe2 = formData.signe2;
+
+    if (!montant || !prix || !signe1 || !signe2) {
+      this.soldeTotal = 0;
+      return;
+    }
+
+    if (signe1 === "EURO" && signe2 === "GNF") {
+      this.soldeTotal = montant * prix / 100;
+    } else if (signe1 === "USD" && signe2 === "GNF") {
+      this.soldeTotal = montant * prix / 100;
+    } else if (signe1 === "XOF" && signe2 === "GNF") {
+      this.soldeTotal = montant * prix / 5000;
+    } else if (signe1 === "GNF" && signe2 === "XOF") {
+      this.soldeTotal = montant / prix * 5000;
+    } else if (signe1 === "GNF" && signe2 === "EURO") {
+      this.soldeTotal = montant / prix * 100;
+    } else if (signe1 === "GNF" && signe2 === "USD") {
+      this.soldeTotal = montant / prix * 100;
+    } else {
+      this.soldeTotal = 0;
+    }
+  }
+
+  showUserModal: boolean = false;
+
+  openUserModal() {
+    this.showUserModal = true;
+  }
+
+  closeUserModal() {
+    this.showUserModal = false;
   }
 
   filteredResults: any[] = [];
@@ -161,30 +230,43 @@ export class PayementsComponent implements OnInit, AfterViewInit {
                 hour: '2-digit',
                 minute: '2-digit',
               });
-              return `${
-                row.entreId === null ? row.Sortie.pays_exp : row.Entre.pays_dest
-              } / ${
-                row.entreId === null ? row.Sortie.code : row.Entre.code
-              } / ${
-                row.entreId === null
+              return `${row.entreId === null ? row.Sortie.pays_exp : row.Entre.pays_dest
+                } / ${row.entreId === null ? row.Sortie.code : row.Entre.code
+                } / ${row.entreId === null
                   ? row.Sortie.expediteur
                   : row.Entre.expediteur
-              } / ${formattedDate}`;
+                } / ${formattedDate}`;
             },
           },
           {
             title: 'Montant',
             data: 'montant',
-            render: (data: number) => {
-              return (
-                new Intl.NumberFormat('fr-FR', {
-                  style: 'decimal',
-                  minimumFractionDigits: 0,
-                  maximumFractionDigits: 0,
-                }).format(data) + ' GNF'
-              );
+            render: (data: number, type: any, row: any) => {
+              const prix = (row.prix);
+              const formatted = new Intl.NumberFormat('fr-FR', {
+                style: 'decimal',
+                minimumFractionDigits: 0,
+                maximumFractionDigits: 0,
+              }).format(data);
+
+              const formattedPrix = new Intl.NumberFormat('fr-FR', {
+                style: 'decimal',
+                minimumFractionDigits: 0,
+                maximumFractionDigits: 0,
+              }).format(prix);
+
+              const devise = row.signe === "EURO" ? "€" :
+                row.signe === "USD" ? "$" :
+                  row.signe === "XOF" ? "XOF" : "GNF";
+
+              const montantTotal = Number(prix / 100) * Number(data);
+
+              return Number(prix) === 0
+                ? `${formatted} ${devise}`
+                : `${formatted} ${devise} -> ${formattedPrix} GNF = ${montantTotal.toLocaleString('fr-FR')} GNF`;
             },
-          },
+          }
+          ,
           {
             title: 'Type',
             data: 'type',
@@ -215,6 +297,12 @@ export class PayementsComponent implements OnInit, AfterViewInit {
     this.montant = event.target.value.replace(/[^0-9,]/g, '');
   }
 
+  prix: number = 0;
+
+  onInputChangePrix(event: any): void {
+    this.prix = event.target.value.replace(/[^0-9,]/g, '');
+  }
+
   onSubmit() {
     if (this.payementForm.valid) {
       const formData = this.payementForm.value;
@@ -223,22 +311,27 @@ export class PayementsComponent implements OnInit, AfterViewInit {
 
       const montant = parseInt(formData.montant.replace(/,/g, ''), 10);
 
-      this.payementService.ajouterPayement({ ...formData, montant }).subscribe(
+      const prix = parseInt(formData.prix.replace(/,/g, ''), 10);
+
+
+      this.payementService.ajouterPayement({ ...formData, montant, prix }).subscribe(
         (response) => {
           this.loading = false;
           this.payementForm.patchValue({
             code: '',
             montant: '',
-            type: ''
+            type: '',
+            prix: '',
+            signe: ''
           });
           this.getAllPayement();
-          alert(response.message); 
+          alert(response.message);
         },
         (error) => {
           this.loading = false;
           const errorMessage =
             error.error?.message || "Erreur lors de l'ajout du paiement.";
-          alert(errorMessage); 
+          alert(errorMessage);
         }
       );
     } else {
@@ -249,6 +342,7 @@ export class PayementsComponent implements OnInit, AfterViewInit {
   ngOnDestroy(): void {
     this.dtTrigger.unsubscribe(); // Nettoyage
   }
+
 }
 
 // // Détruire l'ancienne instance de DataTable si elle existe

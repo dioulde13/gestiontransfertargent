@@ -21,4 +21,8 @@ export class CreditService {
     return this.http.post(`${this.apiUrl}/api/credit/create`, creditData);
   }
 
+  annulerCreditParCode(reference: string): Observable<any> {
+    const body = { reference };
+    return this.http.put(`${this.apiUrl}/api/credit/annuler`, body);
+  }
 }

@@ -13,8 +13,7 @@ import {
   FormGroup,
   FormsModule,
   ReactiveFormsModule,
-  Validators,
-  AbstractControl,
+  Validators
 } from '@angular/forms';
 import { AuthService } from '../../services/auth/auth-service.service';
 import { DeviseService } from '../../services/devise/devise.service';
@@ -24,6 +23,7 @@ import { Subject } from 'rxjs';
 import { DataTablesModule } from 'angular-datatables';
 import { NgxPrintModule } from 'ngx-print';
 import { CurrencyFormatPipe } from '../dasboard/currency-format.pipe';
+
 
 interface Result {
   code: string;
@@ -57,7 +57,7 @@ interface Result {
     DataTablesModule,
     NgxPrintModule,
     NgxIntlTelInputModule,
-    CurrencyFormatPipe,
+    CurrencyFormatPipe
   ],
   templateUrl: './liste-entre.component.html',
   styleUrls: ['./liste-entre.component.css'],
@@ -332,6 +332,7 @@ export class ListeEntreComponent implements OnInit, AfterViewInit, OnDestroy {
       next: (response) => {
         console.log('Entrée ajoutée avec succès:', response);
         this.fetchAllEntre();
+        this.fetchPartenaire();
         this.entreForm.patchValue({
           partenaireId: '',
           deviseId: '',
@@ -456,6 +457,7 @@ export class ListeEntreComponent implements OnInit, AfterViewInit, OnDestroy {
           console.log('Réponse du serveur:', response);
           this.isLoadingAnnuler = false;
           this.fetchAllEntre();
+          this.fetchPartenaire();
           this.annulerEntreForm.reset();
           alert(response.message);
         },

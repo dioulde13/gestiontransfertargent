@@ -60,8 +60,8 @@
                     <th class="border px-4 py-2">Prenom</th>
                     <th class="border px-4 py-2">Pays</th>
                     <th class="border px-4 py-2">Solde</th>
-                    <!-- <th class="border px-4 py-2">Solde avec echange</th>
-                    <th>Action</th> -->
+                    <!-- <th class="border px-4 py-2">Solde avec echange</th> -->
+                    <th>Action</th> 
                   </tr>
                 </thead>
                 <tbody>
@@ -82,6 +82,16 @@
                           ? "EURO"
                           : "USD"
                       }}
+                    </td>
+                     <td>
+                      <button
+                        class="btn btn-warning btn-sm"
+                        data-toggle="modal"
+                        data-target="#edit-project-modal"
+                        (click)="onEdit(result)"
+                      >
+                        Modifier
+                      </button>
                     </td>
                     <!-- <td class="border px-4 py-2">
                       <p>
@@ -121,6 +131,84 @@
             </div>
           </div>
         </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<div
+  class="modal fade"
+  id="edit-project-modal"
+  tabindex="-1"
+  role="dialog"
+  aria-labelledby="editProjectModalLabel"
+  aria-hidden="true"
+>
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header bg-warning text-white">
+        <h5 class="modal-title">Modifier un Partenaire</h5>
+        <button type="button" class="close" data-dismiss="modal">
+          &times;
+        </button>
+      </div>
+      <div class="modal-body">
+        <form [formGroup]="modifierPartenaireForm" (ngSubmit)="onUpdate()">
+          <div class="form-group">
+            <label for="nom">Nom</label>
+            <input
+              id="nom"
+              formControlName="nom"
+              class="form-control"
+              type="text"
+            />
+          </div>
+          <div class="form-group">
+            <label for="prenom">Prenom</label>
+            <input
+              id="prenom"
+              formControlName="prenom"
+              class="form-control"
+              type="text"
+            />
+          </div>
+          <div class="form-group">
+            <label for="pays">Pays</label>
+            <input
+              id="pays"
+              formControlName="pays"
+              class="form-control"
+              type="text"
+            />
+          </div>
+          <div class="form-group">
+            <label for="montant_preter">Montant</label>
+            <input
+              id="montant_preter"
+              formControlName="montant_preter"
+              class="form-control"
+              type="number"
+            />
+          </div>
+          <div class="modal-footer">
+            <button
+              type="button"
+              class="btn btn-secondary"
+              data-dismiss="modal"
+            >
+              Annuler
+            </button>
+            <button
+              type="submit"
+              class="btn btn-primary"
+              [disabled]="modifierPartenaireForm.invalid || isLoadingModif"
+            >
+              <span *ngIf="isLoadingModif">Modification en cours...</span>
+              <span *ngIf="!isLoadingModif">Modifier</span>
+            </button>
+          </div>
+        </form>
       </div>
     </div>
   </div>
@@ -214,8 +302,8 @@
             <select id="pays" class="form-control" formControlName="pays">
               <option value="Sénégal">Sénégal</option>
               <option value="Guinée-Bissau">Guinée-Bissau</option>
-              <option value="France">France</option>
-              <option value="ETATS-UNIS">ETATS-UNIS</option>
+              <!-- <option value="France">France</option>
+              <option value="ETATS-UNIS">ETATS-UNIS</option> -->
             </select>
           </div>
           <div class="form-group">
@@ -228,6 +316,7 @@
               [(ngModel)]="montant_preter"
               [ngModel]="montant_preter | currencyFormat"
               (input)="onInputChange($event)"
+              [disabled]="isDisabled"
             />
           </div>
           <div class="modal-footer">
