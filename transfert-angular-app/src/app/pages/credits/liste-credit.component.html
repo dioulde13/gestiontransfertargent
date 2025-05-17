@@ -33,6 +33,10 @@
                       <div
                         class="d-flex flex-wrap items-center justify-between"
                       >
+                       <div>
+                      <a href="#" class="btn btn-primary" data-toggle="modal" data-target="#annuler-credit-modal">Annuler
+                        crédit</a>
+                    </div>
                         <div class="pl-3 btn-new border-left">
                           <a
                             href="#"
@@ -81,9 +85,12 @@
                     Filtrer
                   </button>
                 </div>
-                <div class="col-md-3 d-flex">
-                  <div style="font-weight: bold; margin-top: 10px">
-                    Total Montant : {{ totalMontant | number }} GNF
+                <div class="col-md-3">
+                  <div style="font-weight: bold; font-size: 15px; margin-top: 10px">
+                    Montant entre : {{ totalMontantEntre | number }} GNF
+                  </div>
+                  <div style="font-weight: bold; font-size: 15px; margin-top: 10px">
+                    Montant sortie : {{ totalMontantSortie | number }} GNF
                   </div>
                 </div>
               </div>
@@ -137,6 +144,54 @@
     </div>
   </div>
 </div>
+
+
+<!-- Modal d'annulation -->
+    <div class="modal fade" id="annuler-credit-modal" tabindex="-1" role="dialog" aria-labelledby="modalTitle"
+      aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="modalTitle">Annuler un crédit</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+
+          <div class="modal-body">
+            <form [formGroup]="annulerCreditForm" (ngSubmit)="annulerCredit()">
+              <div class="form-row">
+                <!-- Champ Code -->
+                <div class="form-group col-md-12">
+                  <label for="reference">Code</label>
+                  <input type="text" id="reference" class="form-control" formControlName="reference"
+                    placeholder="Entrez le code" />
+                  <div *ngIf="
+                      annulerCreditForm?.get('reference')?.invalid &&
+                      annulerCreditForm?.get('reference')?.touched
+                    " class="text-danger">
+                    Ce champ est obligatoire. Ce champ est obligatoire.
+                  </div>
+                </div>
+              </div>
+
+              <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">
+                  Annuler
+                </button>
+                <button type="submit" class="btn btn-danger" [disabled]="annulerCreditForm.invalid || isLoadingAnnuler">
+                  <span *ngIf="isLoadingAnnuler">Annulation en cours...</span>
+                  <span *ngIf="!isLoadingAnnuler">Valider</span>
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+
+
+
 <div
   class="modal fade"
   id="new-project-modal"

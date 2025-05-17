@@ -451,7 +451,6 @@ export class DasboardComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   showMontantModal: boolean = false;
-  showUserModal: boolean = false;
   showListeModal: boolean = false;
 
 
@@ -462,6 +461,8 @@ export class DasboardComponent implements OnInit, AfterViewInit, OnDestroy {
   closeMontantModal() {
     this.showMontantModal = false;
   }
+
+  showUserModal: boolean = false;
 
   openUserModal() {
     this.showUserModal = true;

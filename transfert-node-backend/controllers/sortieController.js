@@ -197,7 +197,7 @@ const ajouterAutreSortie = async (req, res) => {
 
     const code = Math.floor(100000 + Math.random() * 900000).toString();
 
-    if (utilisateur.autre_solde > montantClient) {
+    if (utilisateur.solde > montantClient) {
       const sortie = await Sortie.create({
         utilisateurId,
         partenaireId: null,
@@ -220,22 +220,22 @@ const ajouterAutreSortie = async (req, res) => {
         telephone_receveur: "",
         status: "PAYEE",
       });
-      utilisateur.autre_solde = (utilisateur.autre_solde || 0) - montantClient;
+      utilisateur.autre_solde = (utilisateur.solde || 0) - montantClient;
       await utilisateur.save();
 
       res.status(201).json({
         message: "Sortie créée avec succès.",
         sortie,
-        solde: utilisateur.autre_solde,
+        solde: utilisateur.solde,
       });
     } else {
-      const solde = Number(utilisateur.autre_solde);
+      const solde = Number(utilisateur.solde);
       res.status(400).json({
         message: `On ne peut pas faire une sortie de ${montantClient.toLocaleString(
           "fr-FR",
           { minimumFractionDigits: 0, maximumFractionDigits: 0 }
         )} GNF,
-      le solde dans la caisse est: ${autre_solde.toLocaleString("fr-FR", {
+      le solde dans la caisse est: ${solde.toLocaleString("fr-FR", {
           minimumFractionDigits: 0,
           maximumFractionDigits: 0,
         })} GNF`,
@@ -294,10 +294,10 @@ const validerSortie = async (req, res) => {
         partenaireId: partenaireId || sortie.partenaireId,
         prix_2: prix_2 || sortie.prix_2,
         montant_gnf: montant_due,
-        status: "PAYEE",
+        // status: "PAYEE",
       });
-      utilisateur.solde = (utilisateur.solde || 0) - montant_due;
-      await utilisateur.save();
+      // utilisateur.solde = (utilisateur.solde || 0) - montant_due;
+      // await utilisateur.save();
 
       // Mise à jour du montant prêté du partenaire
       partenaire.montant_preter =

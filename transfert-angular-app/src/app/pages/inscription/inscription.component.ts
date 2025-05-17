@@ -40,9 +40,9 @@ export class InscriptionComponent implements OnInit {
         [Validators.required, Validators.pattern(/^[0-9]{8,15}$/)],
       ],
       email: ['', [Validators.required, Validators.email]],
-      sign: ['', Validators.required],
-      sign_dollar: ['', Validators.required],
-      sign_euro: ['', Validators.required],
+      // sign: ['', Validators.required],
+      // sign_dollar: ['', Validators.required],
+      // sign_euro: ['', Validators.required],
       password: ['', [Validators.required, Validators.minLength(6)]],
     });
   }

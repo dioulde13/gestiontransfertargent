@@ -11,5 +11,6 @@ router.get('/liste', partenaireController.recupererPartenaires);
 
 router.put('/rembourserDevise/:id', partenaireController.rembourserDevise);
 
+router.put('/modifierPartenaire/:id', partenaireController.modifierPartenaire);
 
 module.exports = router;

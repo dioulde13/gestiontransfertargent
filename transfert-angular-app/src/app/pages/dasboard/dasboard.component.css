@@ -8,6 +8,7 @@
     background-color: #f9f9f9;
     display: flex;
     justify-content: space-between;
+    justify-content: center;
   }
 
   .custom-gap > .col {

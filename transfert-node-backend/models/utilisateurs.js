@@ -20,18 +20,18 @@ const Utilisateur = sequelize.define('Utilisateur', {
     type: DataTypes.STRING,
     allowNull: false,
   },
-  sign: {
-    type: DataTypes.STRING,
-    allowNull: false,
-  },
-  sign_dollar: {
-    type: DataTypes.STRING,
-    allowNull: false,
-  },
-  sign_euro: {
-    type: DataTypes.STRING,
-    allowNull: false,
-  },
+  // sign: {
+  //   type: DataTypes.STRING,
+  //   allowNull: false,
+  // },
+  // sign_dollar: {
+  //   type: DataTypes.STRING,
+  //   allowNull: false,
+  // },
+  // sign_euro: {
+  //   type: DataTypes.STRING,
+  //   allowNull: false,
+  // },
   telephone: {
     type: DataTypes.STRING,
     allowNull: false,
@@ -51,21 +51,21 @@ const Utilisateur = sequelize.define('Utilisateur', {
     allowNull: false,
     defaultValue: 0,
   },
-  solde_echange: {
-    type: DataTypes.BIGINT,
-    allowNull: false,
-    defaultValue: 0,
-  },
-  solde_echange_dollar: {
-    type: DataTypes.BIGINT,
-    allowNull: false,
-    defaultValue: 0,
-  },
-  solde_echange_euro: {
-    type: DataTypes.BIGINT,
-    allowNull: false,
-    defaultValue: 0,
-  },
+  // solde_echange: {
+  //   type: DataTypes.BIGINT,
+  //   allowNull: false,
+  //   defaultValue: 0,
+  // },
+  // solde_echange_dollar: {
+  //   type: DataTypes.BIGINT,
+  //   allowNull: false,
+  //   defaultValue: 0,
+  // },
+  // solde_echange_euro: {
+  //   type: DataTypes.BIGINT,
+  //   allowNull: false,
+  //   defaultValue: 0,
+  // },
   email: {
     type: DataTypes.STRING,
     allowNull: false,

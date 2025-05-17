@@ -36,6 +36,15 @@ const Payement = sequelize.define("Payement", {
     allowNull: false,
     defaultValue: 0,
   },
+  prix: {
+    type: DataTypes.BIGINT,
+    allowNull: true,
+    defaultValue: 0,
+  },
+  signe: {
+    type: DataTypes.STRING,
+    allowNull: true,
+  },
   type: {
     type: DataTypes.ENUM("ENTREE", "SORTIE"),
     allowNull: false,

@@ -147,9 +147,9 @@ const ajouterUtilisateur = async (req, res) => {
       prenom,
       telephone,
       email,
-      sign,
-      sign_dollar,
-      sign_euro,
+      // sign,
+      // sign_dollar,
+      // sign_euro,
       password,
     } = req.body;
 
@@ -158,10 +158,7 @@ const ajouterUtilisateur = async (req, res) => {
       !nom ||
       !prenom ||
       !telephone ||
-      !sign ||
-      !sign_dollar ||
       !email ||
-      !sign_euro ||
       !password
     ) {
       return res.status(400).json({
@@ -179,10 +176,7 @@ const ajouterUtilisateur = async (req, res) => {
       nom,
       prenom,
       telephone,
-      email, // Assurez-vous d'inclure email
-      sign,
-      sign_dollar,
-      sign_euro,
+      email, 
       password: hashedPassword,
     });
 

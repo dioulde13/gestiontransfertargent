@@ -92,12 +92,12 @@ const Entre = sequelize.define("Entre", {
     defaultValue: 0,
   },
   prix_1: {
-    type: DataTypes.INTEGER,
+    type: DataTypes.BIGINT,
     allowNull: false,
     defaultValue: 0,
   },
   prix_2: {
-    type: DataTypes.INTEGER,
+    type: DataTypes.BIGINT,
     allowNull: false,
     defaultValue: 0,
   },

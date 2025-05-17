@@ -16,42 +16,53 @@
     </div>
 </div> -->
 <div class="container">
-  <button class="btn btn-light p-1" (click)="openUserModal()">
-    Ajouter solde
-  </button>
-  <button class="btn btn-light p-1" (click)="openListeModal()">
-    Liste total solde
-  </button>
-  <button class="btn btn-light p-1" (click)="openMontantModal()">
-    Benefice
-  </button>
+  <div class="row mb-2 text-center">
+    <div class="col-12 col-md-4 mb-2 mb-md-0">
+      <button class="btn btn-light w-100 p-2" (click)="openUserModal()">
+        Ajouter
+      </button>
+    </div>
+    <div class="col-12 col-md-4 mb-2 mb-md-0">
+      <button class="btn btn-light w-100 p-2" (click)="openListeModal()">
+        Liste
+      </button>
+    </div>
+    <div class="col-12 col-md-4">
+      <button class="btn btn-light w-100 p-2" (click)="openMontantModal()">
+        Bénéfice
+      </button>
+    </div>
+  </div>
 </div>
+
 
 <!-- Modal Utilisateur -->
 <div *ngIf="showMontantModal" class="modal fade show d-block" tabindex="-1" role="dialog">
   <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable" role="document">
-    <div class="modal-content">
+    <div class="modal-content" style="max-height: 80vh; overflow-y: auto;">
       <form class="p-4 shadow rounded" [formGroup]="formRecharger" (ngSubmit)="rechargerSolde()">
-        <div class="modal-body" style="max-height: 80vh; overflow-y: auto;">
-          <div>        
+        <div class="modal-body">
+          <div>
             <form (ngSubmit)="calculBenefice()">
               <div class="row mb-2">
                 <div class="col-md-6">
                   <label for="dateDebutBenefice" class="form-label">Date début :</label>
-                  <input type="date" class="form-control" [(ngModel)]="dateDebutBenefice" name="dateDebutBenefice" required />
+                  <input type="date" class="form-control" [(ngModel)]="dateDebutBenefice" name="dateDebutBenefice"
+                    required />
                 </div>
-        
+
                 <div class="col-md-6">
                   <label for="dateFinBenefice" class="form-label">Date fin :</label>
-                  <input type="date" class="form-control" [(ngModel)]="dateFinBenefice" name="dateFinBenefice" required />
+                  <input type="date" class="form-control" [(ngModel)]="dateFinBenefice" name="dateFinBenefice"
+                    required />
                 </div>
               </div>
-        
+
               <div class="d-grid gap-2">
                 <button type="submit" class="btn btn-primary">🔍 Calculer</button>
               </div>
             </form>
-        
+
             <div *ngIf="erreurBenefice" class="alert alert-danger mt-3">
               {{ erreurBenefice }}
             </div>
@@ -62,52 +73,58 @@
                   <div class="card text-center shadow-sm border-success">
                     <div class="card-body p-1">
                       <h6 class="card-title mb-1">Total Entré</h6>
-                      <p class="card-text text-muted small" style="font-weight: bold; font-size: 15px;">{{ resultatBefice.totalMontantEntreXof | number }} XOF</p>
+                      <p class="card-text text-muted small" style="font-weight: bold; font-size: 15px;">{{
+                        resultatBefice.totalMontantEntreXof | number }} XOF</p>
                     </div>
                   </div>
                 </div>
-            
+
                 <div class="col">
                   <div class="card text-center shadow-sm border-success">
                     <div class="card-body p-1">
                       <h6 class="card-title mb-1">Total Entré</h6>
-                      <p class="card-text text-muted small" style="font-weight: bold; font-size: 15px;">{{ resultatBefice.totalMontantEntreGnf | number }} GNF</p>
+                      <p class="card-text text-muted small" style="font-weight: bold; font-size: 15px;">{{
+                        resultatBefice.totalMontantEntreGnf | number }} GNF</p>
                     </div>
                   </div>
                 </div>
-            
+
                 <div class="col">
                   <div class="card text-center shadow-sm border-success">
                     <div class="card-body p-1">
                       <h6 class="card-title mb-1">Total Sortie</h6>
-                      <p class="card-text text-muted small" style="font-weight: bold; font-size: 15px;">{{ resultatBefice.totalMontantSortieXof | number }} XOF</p>
+                      <p class="card-text text-muted small" style="font-weight: bold; font-size: 15px;">{{
+                        resultatBefice.totalMontantSortieXof | number }} XOF</p>
                     </div>
                   </div>
                 </div>
-            
+
                 <div class="col">
                   <div class="card text-center shadow-sm border-success">
                     <div class="card-body p-1">
                       <h6 class="card-title mb-1">Total Sortie</h6>
-                      <p class="card-text text-muted small" style="font-weight: bold; font-size: 15px;">{{ resultatBefice.totalMontantSortieGnf | number }} GNF</p>
+                      <p class="card-text text-muted small" style="font-weight: bold; font-size: 15px;">{{
+                        resultatBefice.totalMontantSortieGnf | number }} GNF</p>
                     </div>
                   </div>
                 </div>
-            
+
                 <div class="col">
                   <div class="card text-center shadow-sm border-success">
                     <div class="card-body p-1">
                       <h6 class="card-title mb-1">Total Deposit</h6>
-                      <p class="card-text text-muted small" style="font-weight: bold; font-size: 15px;">{{ resultatBefice.totalMontantRembourserXof | number }} XOF</p>
+                      <p class="card-text text-muted small" style="font-weight: bold; font-size: 15px;">{{
+                        resultatBefice.totalMontantRembourserXof | number }} XOF</p>
                     </div>
                   </div>
                 </div>
-            
+
                 <div class="col">
                   <div class="card text-center shadow-sm border-success">
                     <div class="card-body p-1">
                       <h6 class="card-title mb-1">Total Deposit</h6>
-                      <p class="card-text text-muted small" style="font-weight: bold; font-size: 15px;">{{ resultatBefice.totalMontantRembourserGnf | number }} GNF</p>
+                      <p class="card-text text-muted small" style="font-weight: bold; font-size: 15px;">{{
+                        resultatBefice.totalMontantRembourserGnf | number }} GNF</p>
                     </div>
                   </div>
                 </div>
@@ -115,14 +132,17 @@
                   <div class="card text-center shadow-sm border-success">
                     <div class="card-body p-1">
                       <h6 class="card-title mb-1">Total Sortie et Deposit</h6>
-                      <p class="card-text text-muted small" style="font-weight: bold; font-size: 15px;">{{ resultatBefice.totalMontantSortieRembourserXof | number }} XOF</p>
+                      <p class="card-text text-muted small" style="font-weight: bold; font-size: 15px;">{{
+                        resultatBefice.totalMontantSortieRembourserXof | number }} XOF</p>
                     </div>
                   </div>
-                </div> <div class="col">
+                </div>
+                <div class="col">
                   <div class="card text-center shadow-sm border-success">
                     <div class="card-body p-1">
                       <h6 class="card-title mb-1">Total Sortie et Deposit</h6>
-                      <p class="card-text text-muted small" style="font-weight: bold; font-size: 15px;">{{ resultatBefice.totalMontantSortieRembourserGnf | number }} GNF</p>
+                      <p class="card-text text-muted small" style="font-weight: bold; font-size: 15px;">{{
+                        resultatBefice.totalMontantSortieRembourserGnf | number }} GNF</p>
                     </div>
                   </div>
                 </div>
@@ -130,7 +150,8 @@
                   <div class="card text-center shadow-sm border-success">
                     <div class="card-body p-1">
                       <h6 class="card-title text-success mb-1">💰 Bénéfice</h6>
-                      <p class="card-text small text-success" style="font-weight: bold; font-size: 15px;">{{ resultatBefice.benefice | number }} GNF</p>
+                      <p class="card-text small text-success" style="font-weight: bold; font-size: 15px;">{{
+                        resultatBefice.benefice | number }} GNF</p>
                     </div>
                   </div>
                 </div>
@@ -138,7 +159,7 @@
             </div>
           </div>
         </div>
-        
+
         <div class="row justify-content-end">
           <div class="col-auto">
             <button type="button" class="btn btn-secondary" (click)="closeMontantModal()">
@@ -384,7 +405,7 @@
 <!-- Modal Utilisateur -->
 <div *ngIf="showUserModal" class="modal fade show d-block" tabindex="-1" role="dialog">
   <div class="modal-dialog modal-dialog-centered" role="document">
-    <div class="modal-content">
+    <div class="modal-content" style="max-height: 80vh; overflow-y: auto;">
       <form class="p-4 shadow rounded" [formGroup]="verifierCaisse" (ngSubmit)="ajouterCaisse()">
         <div class="modal-header">
           <h5 class="modal-title">Verifier le solde du caisse</h5>
@@ -393,6 +414,8 @@
           </button>
         </div>
         <div class="modal-body">
+
+          <!-- <div class="modal-body"> -->
           <div class="row mb-1">
             <div class="col-lg-6">
               <label for="solde_euro" class="form-label">Euro</label>
@@ -498,12 +521,12 @@
         </div>
       </div>
     </div>
-    <div class="row m-sm-0 px-3"> 
+    <div class="row m-sm-0 px-3">
       <div class="col-lg-3 card-profile">
         <div class="card card-block card-stretch card-height">
           <div class="card-body">
             <div class="top-block d-flex align-items-center justify-content-center">
-              <span style="font-size: 20px">Caisse avec code</span>
+              <span style="font-size: 20px">Solde avec code</span>
             </div>
             <div>
               <span class="d-flex align-items-center justify-content-center" style="font-size: 30px; color: black">
@@ -513,11 +536,11 @@
           </div>
         </div>
       </div>
-       <div class="col-lg-3 card-profile">
+      <!-- <div class="col-lg-3 card-profile">
         <div class="card card-block card-stretch card-height">
           <div class="card-body">
             <div class="top-block d-flex align-items-center justify-content-center">
-              <span style="font-size: 20px">Caisse autre</span>
+              <span style="font-size: 20px">Solde sans code</span>
             </div>
             <div>
               <span class="d-flex align-items-center justify-content-center" style="font-size: 30px; color: black">
@@ -526,21 +549,21 @@
             </div>
           </div>
         </div>
-      </div>
-        <div class="col-lg-3 card-profile">
+      </div> -->
+      <!-- <div class="col-lg-3 card-profile">
         <div class="card card-block card-stretch card-height">
           <div class="card-body">
             <div class="top-block d-flex align-items-center justify-content-center">
-              <span style="font-size: 20px">Total</span>
+              <span style="font-size: 20px">Solde total</span>
             </div>
             <div>
               <span class="d-flex align-items-center justify-content-center" style="font-size: 30px; color: black">
-                {{ (userInfo.autre_solde + userInfo.solde)  | currency : "" : "" : "1.0-0" }} GNF
+                {{ (userInfo.autre_solde + userInfo.solde) | currency : "" : "" : "1.0-0" }} GNF
               </span>
             </div>
           </div>
         </div>
-      </div>
+      </div> -->
       <div class="col-lg-3 card-profile">
         <div class="card card-block card-stretch card-height">
           <div class="card-body">
@@ -584,7 +607,7 @@
         </div>
       </div>
 
-      <div class="col-lg-3 card-profile">
+      <!-- <div class="col-lg-3 card-profile">
         <div class="card card-block card-stretch card-height">
           <div class="card-body">
             <div class="top-block d-flex align-items-center justify-content-center">
@@ -597,8 +620,8 @@
             </div>
           </div>
         </div>
-      </div>
-      <div class="col-lg-3 card-profile">
+      </div> -->
+      <!-- <div class="col-lg-3 card-profile">
         <div class="card card-block card-stretch card-height">
           <div class="card-body">
             <div class="top-block d-flex align-items-center justify-content-center">
@@ -611,7 +634,7 @@
             </div>
           </div>
         </div>
-      </div>
+      </div> -->
       <div class="col-lg-3 card-profile">
         <div class="card card-block card-stretch card-height">
           <div class="card-body">

@@ -45,7 +45,8 @@ export class ListeCreditComponent implements OnInit {
   startDate: Date | null = null;
   endDate: Date | null = null;
 
-  totalMontant: number = 0; // Initialisation
+  totalMontantSortie: number = 0; // Initialisation
+  totalMontantEntre: number = 0; // Initialisation
 
   filtrerEntreDates(): void {
     const startDateInput = (
@@ -58,14 +59,19 @@ export class ListeCreditComponent implements OnInit {
     this.startDate = startDateInput ? new Date(startDateInput) : null;
     this.endDate = endDateInput ? new Date(endDateInput) : null;
 
+
     // Réinitialiser le total
-    this.totalMontant = 0;
+    this.totalMontantSortie = 0;
+
+    // Réinitialiser le total
+    this.totalMontantEntre = 0;
 
     // Filtrer d'abord par date
     let filteredResults = this.allresultat.filter(
-      (result: { date_creation: string }) => {
+      (result: { date_creation: string, type: string }) => {
         const resultDate = new Date(result.date_creation);
         return (
+          result.type !== 'ANNULEE' &&
           (!this.startDate || resultDate >= this.startDate) &&
           (!this.endDate || resultDate <= this.endDate)
         );
@@ -77,23 +83,38 @@ export class ListeCreditComponent implements OnInit {
 
     // Attendre que DataTable applique son propre filtre (search)
     setTimeout(() => {
-      const filteredDataTable: { montant: number }[] = this.dataTable
+      const filteredDataTable = this.dataTable
         .rows({ search: 'applied' })
         .data()
         .toArray();
 
-      // Recalculer le total avec des types explicitement définis
-      this.totalMontant = filteredDataTable.reduce(
-        (sum: number, row: { montant: number }) => {
-          return sum + row.montant;
+  
+      this.totalMontantSortie = filteredDataTable.reduce(
+        (sum: number, row: { type: string, montant: number }) => {
+          if (row.type === "SORTIE") {
+            return sum + row.montant;
+          }
+          return sum;
         },
         0
       );
 
-      console.log(
-        'Total Montant après filtre et recherche :',
-        this.totalMontant
+      // Recalculer le total avec des types explicitement définis
+      this.totalMontantEntre = filteredDataTable.reduce(
+        (sum: number, row: { type: string, montant: number }) => {
+          if (row.type === "ENTRE") {
+            return sum + row.montant;
+          }
+          return sum;
+        },
+        0
       );
+
+
+      // console.log(
+      //   'Total Montant après filtre et recherche :',
+      //   this.totalMontantSortie
+      // );
     }, 200); // Timeout pour attendre la mise à jour de DataTable
   }
 
@@ -104,9 +125,11 @@ export class ListeCreditComponent implements OnInit {
     private creditService: CreditService,
     private cd: ChangeDetectorRef,
     private authService: AuthService
-  ) {}
+  ) { }
 
   ngOnInit(): void {
+    this.initAnnulerCreditForm();
+
     this.creditForm = this.fb.group({
       // Champ pour l'identifiant de l'utilisateur (pré-rempli avec l'ID de l'utilisateur courant)
       utilisateurId: [this.idUser],
@@ -121,6 +144,40 @@ export class ListeCreditComponent implements OnInit {
 
     this.getAllCredit();
     this.getUserInfo(); // Récupération des infos utilisateur
+  }
+
+
+
+  annulerCreditForm!: FormGroup;
+
+  private initAnnulerCreditForm(): void {
+    this.annulerCreditForm = this.fb.group({
+      reference: ['', Validators.required],
+    });
+  }
+
+  isLoadingAnnuler: boolean = false;
+
+  annulerCredit(): void {
+    this.isLoadingAnnuler = true;
+    const { reference } =
+      this.annulerCreditForm.value;
+    this.creditService
+      .annulerCreditParCode(reference)
+      .subscribe({
+        next: (response) => {
+          console.log('Réponse du serveur:', response);
+          this.isLoadingAnnuler = false;
+          this.getAllCredit();
+          this.annulerCreditForm.reset();
+          alert(response.message);
+        },
+        error: (error) => {
+          console.error('Erreur:', error);
+          this.isLoadingAnnuler = false;
+          alert(error.error.message);
+        },
+      });
   }
 
   getUserInfo() {
@@ -267,7 +324,7 @@ export class ListeCreditComponent implements OnInit {
           this.creditForm.patchValue({
             nom: '',
             montant: '',
-            type:''
+            type: ''
           });
           this.loading = false;
           alert('Credit ajouté avec succès!');
